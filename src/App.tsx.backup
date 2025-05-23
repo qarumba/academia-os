@@ -4,17 +4,6 @@ import { Root } from "./Components/Root"
 import { Provider } from "react-redux"
 import store from "./Redux/store"
 import { ThemeProvider, useTheme } from "./Providers/ThemeContext" // import ThemeProvider and useTheme
-import ModelConfigurationGuard from './components/ModelConfigurationGuard';
-
-function App() {
-  return (
-    <Provider store={store}>
-      <ModelConfigurationGuard>
-        {/* Your existing app content */}
-      </ModelConfigurationGuard>
-    </Provider>
-  );
-}
 
 const App: React.FC = () => {
   return (
@@ -40,6 +29,5 @@ const ThemedApp: React.FC = () => {
     </Provider>
   )
 }
-
 
 export default App
