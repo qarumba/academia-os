@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Select, Input, Button, Card, message, Alert, Typography } from 'antd';
 import { SettingOutlined, KeyOutlined } from '@ant-design/icons';
+import { useDispatch } from 'react-redux';
+import { setModelConfig, loadConfigFromStorage } from './modelSlice';
 
 const { Option } = Select;
 const { Title, Paragraph } = Typography;
@@ -21,15 +23,21 @@ interface ModelOption {
 const availableModels: ModelOption[] = [
   {
     provider: 'anthropic',
-    model: 'claude-3-opus-20240229',
-    displayName: 'Claude 3 Opus',
-    description: 'Most powerful model for complex research tasks'
+    model: 'claude-4-opus-20250514',
+    displayName: 'Claude 4 Opus',
+    description: 'Most powerful model for complex academic research and analysis'
   },
   {
     provider: 'anthropic',
-    model: 'claude-3-sonnet-20240229',
-    displayName: 'Claude 3 Sonnet',
-    description: 'Balanced performance and cost for general research'
+    model: 'claude-sonnet-4-20250514',
+    displayName: 'Claude 4 Sonnet',
+    description: 'Smart, efficient model for everyday academic tasks'
+  },
+  {
+    provider: 'anthropic',
+    model: 'claude-3-7-sonnet-20250109',
+    displayName: 'Claude 3.7 Sonnet',
+    description: 'Enhanced Claude 3 with improved reasoning capabilities'
   },
   {
     provider: 'openai',
@@ -47,6 +55,7 @@ const availableModels: ModelOption[] = [
 
 const ModelConfiguration: React.FC = () => {
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
   const [selectedProvider, setSelectedProvider] = useState<'openai' | 'anthropic'>('anthropic');
   const [loading, setLoading] = useState(false);
 
@@ -72,10 +81,13 @@ const ModelConfiguration: React.FC = () => {
       // Save to localStorage
       localStorage.setItem('modelConfig', JSON.stringify(values));
       
-      // You would typically also send this to your backend or update your LangChain configuration
-      // For now, we'll just save locally
+      // Update Redux state
+      dispatch(setModelConfig(values));
       
       message.success('Model configuration saved successfully!');
+      
+      // Reload config to update the guard
+      dispatch(loadConfigFromStorage());
     } catch (error) {
       message.error('Failed to save configuration');
     } finally {
@@ -97,8 +109,8 @@ const ModelConfiguration: React.FC = () => {
       style={{ maxWidth: 800, margin: '0 auto' }}
     >
       <Alert
-        message="Recommended: Use Claude 4 Sonnet or Claude 4 Opus"
-        description="For the best academic research experience, we recommend using Anthropic's Claude models. Claude 4 Opus provides the most powerful capabilities for complex research tasks, while Claude 4 Sonnet offers a great balance of performance and cost."
+        message="Configuration Required"
+        description="Please configure your AI model to continue using Academia OS features."
         type="info"
         showIcon
         style={{ marginBottom: 24 }}
@@ -110,7 +122,7 @@ const ModelConfiguration: React.FC = () => {
         onFinish={handleSave}
         initialValues={{
           provider: 'anthropic',
-          model: 'claude-3-sonnet-20240229'
+          model: 'claude-sonnet-4-20250514'
         }}
       >
         <Form.Item
@@ -159,13 +171,8 @@ const ModelConfiguration: React.FC = () => {
           }
           rules={[
             { required: true, message: 'Please enter your API key' },
-            { min: 20, message: 'API key seems too short' }
+            { min: 10, message: 'API key seems too short' }
           ]}
-          extra={
-            selectedProvider === 'anthropic' 
-              ? <span>Get your API key from <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer">Anthropic Console</a></span>
-              : <span>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">OpenAI Platform</a></span>
-          }
         >
           <Input.Password
             size="large"
@@ -185,18 +192,6 @@ const ModelConfiguration: React.FC = () => {
           </Button>
         </Form.Item>
       </Form>
-
-      <div style={{ marginTop: 24, padding: 16, background: '#f0f2f5', borderRadius: 8 }}>
-        <Title level={5}>Why Claude 4 for Academic Research?</Title>
-        <Paragraph>
-          <ul>
-            <li><strong>Superior Context Understanding:</strong> Claude models excel at understanding complex academic papers and research contexts</li>
-            <li><strong>Nuanced Analysis:</strong> Better at identifying subtle patterns and connections in qualitative research</li>
-            <li><strong>Ethical Reasoning:</strong> Strong capabilities for handling sensitive research topics appropriately</li>
-            <li><strong>Long Context Window:</strong> Can process longer documents and maintain coherence across extensive research materials</li>
-          </ul>
-        </Paragraph>
-      </div>
     </Card>
   );
 };

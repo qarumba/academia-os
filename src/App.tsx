@@ -3,18 +3,8 @@ import React from "react"
 import { Root } from "./Components/Root"
 import { Provider } from "react-redux"
 import store from "./Redux/store"
-import { ThemeProvider, useTheme } from "./Providers/ThemeContext" // import ThemeProvider and useTheme
-import ModelConfigurationGuard from './components/ModelConfigurationGuard';
-
-function App() {
-  return (
-    <Provider store={store}>
-      <ModelConfigurationGuard>
-        {/* Your existing app content */}
-      </ModelConfigurationGuard>
-    </Provider>
-  );
-}
+import { ThemeProvider, useTheme } from "./Providers/ThemeContext"
+import ModelConfigurationGuard from './Components/ModelConfigurationGuard';
 
 const App: React.FC = () => {
   return (
@@ -25,7 +15,7 @@ const App: React.FC = () => {
 }
 
 const ThemedApp: React.FC = () => {
-  const { theme: currentTheme } = useTheme() // use the hook
+  const { theme: currentTheme } = useTheme()
   return (
     <Provider store={store}>
       <ConfigProvider
@@ -35,11 +25,12 @@ const ThemedApp: React.FC = () => {
               ? theme.defaultAlgorithm
               : theme.darkAlgorithm,
         }}>
-        <Root />
+        <ModelConfigurationGuard requireConfiguration={true}>
+          <Root />
+        </ModelConfigurationGuard>
       </ConfigProvider>
     </Provider>
   )
 }
-
 
 export default App
