@@ -1,12 +1,10 @@
 // Import the SemanticScholar library
-import { message } from "antd"
 import { Document } from "langchain/document"
 import { CharacterTextSplitter } from "langchain/text_splitter"
 import { asyncForEach } from "../Helpers/asyncForEach"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
-import { OpenAIEmbeddings } from "langchain/embeddings/openai"
 import { uniqBy } from "../Helpers/uniqBy"
-import { OpenAIService } from "./OpenAIService"
+import { EmbeddingService } from "./EmbeddingService"
 import { AcademicPaper } from "../Types/AcademicPaper"
 
 export class RankingService {
@@ -33,12 +31,7 @@ export class RankingService {
       })
 
       // Create embeddings
-      const embeddings = new OpenAIEmbeddings(
-        {
-          openAIApiKey: OpenAIService.getOpenAIKey(),
-        },
-        OpenAIService.openAIConfiguration()
-      )
+      const embeddings = await EmbeddingService.createEmbeddings()
       // Create the Voy store.
       const store = new MemoryVectorStore(embeddings)
 
@@ -65,8 +58,8 @@ export class RankingService {
         )?.filter((paper) => paper) as AcademicPaper[]) || []
       )
     } catch (error) {
-      console.log(error)
-      message.error((error as any)?.message)
+      console.error('Ranking Service Error:', error)
+      // Return original papers if ranking fails
       return papers || []
     }
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Select, Input, Button, Card, message, Alert, Typography } from 'antd';
+import { Form, Select, Input, Button, Card, message, Alert, Typography, Row, Col, Divider } from 'antd';
 import { SettingOutlined, KeyOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { setModelConfig, loadConfigFromStorage } from './modelSlice';
@@ -11,6 +11,12 @@ interface ModelConfig {
   provider: 'openai' | 'anthropic';
   model: string;
   apiKey: string;
+  openaiEmbeddingsKey?: string;
+  email?: string;
+  heliconeEndpoint?: string;
+  heliconeKey?: string;
+  adobePDFOCR_client_id?: string;
+  adobePDFOCR_client_secret?: string;
 }
 
 interface ModelOption {
@@ -58,6 +64,7 @@ const ModelConfiguration: React.FC = () => {
   const dispatch = useDispatch();
   const [selectedProvider, setSelectedProvider] = useState<'openai' | 'anthropic'>('anthropic');
   const [loading, setLoading] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Load saved configuration from localStorage
   useEffect(() => {
@@ -66,6 +73,10 @@ const ModelConfiguration: React.FC = () => {
       const config: ModelConfig = JSON.parse(savedConfig);
       form.setFieldsValue(config);
       setSelectedProvider(config.provider);
+      // Show advanced options if any advanced fields have values
+      if (config.email || config.heliconeEndpoint || config.heliconeKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
+        setShowAdvanced(true);
+      }
     }
   }, [form]);
 
@@ -179,6 +190,128 @@ const ModelConfiguration: React.FC = () => {
             placeholder={`Enter your ${selectedProvider === 'anthropic' ? 'Anthropic' : 'OpenAI'} API key`}
           />
         </Form.Item>
+
+        <Divider orientation="left">
+          <Button 
+            type="link" 
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            style={{ padding: 0 }}
+          >
+            {showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options'}
+          </Button>
+        </Divider>
+
+        {showAdvanced && (
+          <>
+            {selectedProvider === 'anthropic' && (
+              <Alert
+                message="OpenAI API Key for Embeddings"
+                description="Anthropic doesn't provide embeddings API yet. An OpenAI API key is required for paper ranking and similarity features when using Anthropic models."
+                type="info"
+                showIcon
+                style={{ marginBottom: 16 }}
+              />
+            )}
+            
+            <Form.Item
+              name="email"
+              label="Email Address"
+              extra="We will keep you updated about new features and updates."
+            >
+              <Input
+                size="large"
+                placeholder="john.doe@example.com"
+              />
+            </Form.Item>
+
+            {selectedProvider === 'anthropic' && (
+              <Form.Item
+                name="openaiEmbeddingsKey"
+                label="OpenAI API Key (for Embeddings)"
+                extra="Required for paper ranking and similarity search when using Anthropic models."
+              >
+                <Input.Password
+                  size="large"
+                  placeholder="OpenAI API key for embeddings"
+                />
+              </Form.Item>
+            )}
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="heliconeEndpoint"
+                  label="Helicone Endpoint"
+                  extra={
+                    <span>
+                      Use{' '}
+                      <Typography.Link
+                        target="_blank"
+                        href="https://www.helicone.ai/"
+                      >
+                        Helicone.ai
+                      </Typography.Link>{' '}
+                      to track your usage.
+                    </span>
+                  }
+                >
+                  <Input
+                    size="large"
+                    placeholder="Helicone Endpoint (optional)"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="heliconeKey"
+                  label="Helicone Key"
+                >
+                  <Input.Password
+                    size="large"
+                    placeholder="Helicone Key (optional)"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="adobePDFOCR_client_id"
+                  label="Adobe OCR Client ID"
+                  extra={
+                    <span>
+                      Use{' '}
+                      <Typography.Link
+                        target="_blank"
+                        href="https://developer.adobe.com/document-services/docs/overview/pdf-services-api/gettingstarted/"
+                      >
+                        Adobe PDF Services
+                      </Typography.Link>{' '}
+                      to read scanned PDFs.
+                    </span>
+                  }
+                >
+                  <Input
+                    size="large"
+                    placeholder="Adobe OCR Client ID (optional)"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="adobePDFOCR_client_secret"
+                  label="Adobe OCR Client Secret"
+                >
+                  <Input.Password
+                    size="large"
+                    placeholder="Adobe OCR Client Secret (optional)"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </>
+        )}
 
         <Form.Item>
           <Button 

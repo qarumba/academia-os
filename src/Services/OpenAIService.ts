@@ -1,11 +1,11 @@
 // Import the SemanticScholar library
-import { message } from "antd"
 import { Document } from "langchain/document"
 import { CharacterTextSplitter } from "langchain/text_splitter"
 import { asyncForEach } from "../Helpers/asyncForEach"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
-import { OpenAIEmbeddings } from "langchain/embeddings/openai"
 import { uniqBy } from "../Helpers/uniqBy"
+import { EmbeddingService } from "./EmbeddingService"
+import { ChatService } from "./ChatService"
 import {
   AzureOpenAIInput,
   ChatOpenAI,
@@ -23,11 +23,21 @@ import { BaseLanguageModelParams } from "langchain/dist/base_language"
 
 export class OpenAIService {
   public static getOpenAIKey = () => {
-    return localStorage.getItem("openAIKey") || ""
+    // Try new unified config first
+    const modelConfig = localStorage.getItem("modelConfig");
+    if (modelConfig) {
+      const config = JSON.parse(modelConfig);
+      if (config.provider === 'openai') {
+        return config.apiKey || "";
+      }
+    }
+    // Fallback to legacy key
+    return localStorage.getItem("openAIKey") || "";
   }
 
   public static handleError = (error: any) => {
-    message.error(error.message || error?.response?.data?.message || error)
+    console.error('OpenAI Service Error:', error.message || error?.response?.data?.message || error)
+    throw error; // Re-throw so components can handle with their own message display
   }
 
   static async streamCompletion(prompt: string, callback: any) {
@@ -56,12 +66,10 @@ export class OpenAIService {
 
   static async getDetailAboutPaper(paper: AcademicPaper, detail: string) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 20,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      // Use the unified ChatService instead of hardcoded OpenAI
+      const model = await ChatService.createChatModel({
+        maxTokens: 20,
+      })
 
       let fullText = paper?.fullText
 
@@ -79,12 +87,7 @@ export class OpenAIService {
         documents.push(...(output || []))
 
         // Create embeddings
-        const embeddings = new OpenAIEmbeddings(
-          {
-            openAIApiKey: OpenAIService.getOpenAIKey(),
-          },
-          OpenAIService.openAIConfiguration()
-        )
+        const embeddings = await EmbeddingService.createEmbeddings()
         // Create the Voy store.
         const store = new MemoryVectorStore(embeddings)
 
@@ -129,12 +132,9 @@ export class OpenAIService {
     papers: AcademicPaper[]
   ): Promise<string[]> {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 400,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 400,
+      })
 
       if ((papers?.length || 0) > 0) {
         const result = await model.predictMessages(
@@ -171,12 +171,9 @@ export class OpenAIService {
 
   static async initialCodingOfPaper(paper: AcademicPaper, remarks?: string) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 3000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 3000,
+      })
 
       let fullText = paper?.fullText
       let chunks = []
@@ -241,12 +238,26 @@ export class OpenAIService {
   }
 
   static openAIConfiguration() {
-    const heliconeEndpoint = localStorage.getItem("heliconeEndpoint")
+    // Try new unified config first
+    let heliconeEndpoint = "";
+    let heliconeKey = "";
+    
+    const modelConfig = localStorage.getItem("modelConfig");
+    if (modelConfig) {
+      const config = JSON.parse(modelConfig);
+      heliconeEndpoint = config.heliconeEndpoint || "";
+      heliconeKey = config.heliconeKey || "";
+    } else {
+      // Fallback to legacy keys
+      heliconeEndpoint = localStorage.getItem("heliconeEndpoint") || "";
+      heliconeKey = localStorage.getItem("heliconeKey") || "";
+    }
+
     return {
       basePath: heliconeEndpoint || undefined,
       baseOptions: {
         headers: {
-          "Helicone-Auth": `Bearer ${localStorage.getItem("heliconeKey")}`,
+          "Helicone-Auth": `Bearer ${heliconeKey}`,
         },
       },
       // timeout: 30000,
@@ -257,7 +268,20 @@ export class OpenAIService {
       Partial<AzureOpenAIInput> &
       BaseLanguageModelParams
   ) {
-    const modelName = localStorage.getItem("modelName") || "gpt-4-1106-preview"
+    // Try new unified config first
+    let modelName = "gpt-4-1106-preview";
+    
+    const modelConfig = localStorage.getItem("modelConfig");
+    if (modelConfig) {
+      const config = JSON.parse(modelConfig);
+      if (config.provider === 'openai') {
+        modelName = config.model;
+      }
+    } else {
+      // Fallback to legacy model name
+      modelName = localStorage.getItem("modelName") || "gpt-4-1106-preview";
+    }
+
     return {
       modelName,
       openAIApiKey: OpenAIService.getOpenAIKey(),
@@ -483,12 +507,7 @@ export class OpenAIService {
   > {
     try {
       const documents: Document[] = []
-      const embeddings = new OpenAIEmbeddings(
-        {
-          openAIApiKey: OpenAIService.getOpenAIKey(),
-        },
-        OpenAIService.openAIConfiguration()
-      )
+      const embeddings = await EmbeddingService.createEmbeddings()
 
       // Create MemoryVectorStore for embeddings
       const store = new MemoryVectorStore(embeddings)

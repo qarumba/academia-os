@@ -7,6 +7,7 @@ import {
   Tag,
   Typography,
   theme,
+  message,
 } from "antd"
 import { useDispatch } from "react-redux"
 import { renameTab, addTab } from "../Redux/actionCreators"
@@ -19,6 +20,7 @@ import {
 } from "@ant-design/icons"
 import { useEffect, useState } from "react"
 import { OpenAIService } from "../Services/OpenAIService"
+import { ModelService } from "../Services/ModelService"
 import { CustomColumn } from "./CustomColumn"
 import { AcademicPaper } from "../Types/AcademicPaper"
 import { asyncMap } from "../Helpers/asyncMap"
@@ -152,18 +154,43 @@ export const PaperTable = (props: {
           style={{ width: 200 }}
           value={columnAddSearchQuery}
           onSelect={async (value) => {
+            // Check if we can use OpenAI features
+            const config = ModelService.getModelConfig()
+            if (!config) {
+              message.error("No AI model configured")
+              return
+            }
+
+            if (config.provider === 'anthropic') {
+              const hasOpenAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey");
+              if (!hasOpenAIKey) {
+                message.error("Custom columns require OpenAI models. Please switch to OpenAI or add OpenAI key in advanced settings.")
+                return
+              }
+            }
+
             setCustomColumns([...customColumns, value])
             let newPapers = [...updatedPapers]
-            newPapers = await asyncMap(newPapers, async (paper) => {
-              const newPaper = { ...paper } as AcademicPaper
-              if (newPaper[value]) return newPaper
-              newPaper[value] = await OpenAIService.getDetailAboutPaper(
-                newPaper,
-                value
-              )
-              return newPaper
-            })
-            setUpdatedPapers(newPapers)
+            try {
+              newPapers = await asyncMap(newPapers, async (paper) => {
+                const newPaper = { ...paper } as AcademicPaper
+                if (newPaper[value]) return newPaper
+                try {
+                  newPaper[value] = await OpenAIService.getDetailAboutPaper(
+                    newPaper,
+                    value
+                  )
+                } catch (error) {
+                  console.error(`Failed to get ${value} for paper ${paper.title}:`, error)
+                  newPaper[value] = "Analysis failed"
+                }
+                return newPaper
+              })
+              setUpdatedPapers(newPapers)
+            } catch (error) {
+              console.error("Failed to process custom column:", error)
+              message.error("Failed to analyze papers. Please check your configuration.")
+            }
             setColumnAddSearchQuery("")
           }}
           onSearch={(text) => setColumnAddSearchQuery(text)}

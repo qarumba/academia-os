@@ -1,4 +1,4 @@
-import { message, notification } from "antd"
+import { notification } from "antd"
 import axios from "axios"
 import * as pdfjsLib from "pdfjs-dist/webpack"
 const qs = require("querystring")
@@ -28,8 +28,20 @@ export class PDFService {
       }
     } catch (error) {}
 
-    const clientId = localStorage.getItem("adobePDFOCR_client_id")
-    const clientSecret = localStorage.getItem("adobePDFOCR_client_secret")
+    // Try new unified config first
+    let clientId = "";
+    let clientSecret = "";
+    
+    const modelConfig = localStorage.getItem("modelConfig");
+    if (modelConfig) {
+      const config = JSON.parse(modelConfig);
+      clientId = config.adobePDFOCR_client_id || "";
+      clientSecret = config.adobePDFOCR_client_secret || "";
+    } else {
+      // Fallback to legacy keys
+      clientId = localStorage.getItem("adobePDFOCR_client_id") || "";
+      clientSecret = localStorage.getItem("adobePDFOCR_client_secret") || "";
+    }
     if (!(clientId && clientSecret)) {
       notification.error({
         message:

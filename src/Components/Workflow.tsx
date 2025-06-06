@@ -36,7 +36,7 @@ import { PaperComponent } from "./Paper"
 import { RankingService } from "../Services/RankingService"
 import { PaperTable } from "./PaperTable"
 import { OpenAIService } from "../Services/OpenAIService"
-import ConfigurationForm from "./ConfigurationForm"
+import { ModelService } from "../Services/ModelService"
 import StreamingComponent from "./StreamingComponent"
 
 import { AcademicPaper } from "../Types/AcademicPaper"
@@ -78,13 +78,22 @@ const Workflow = (props: { tabKey?: string }) => {
 
   const evaluate = async (query: string, searchResults: AcademicPaper[]) => {
     setRelevancyLoading(true)
-    const relevantResults = query
-      ? await RankingService.rankPapers(
-          query,
-          searchResults?.filter((paper) => paper?.fullText) || []
-        )
-      : searchResults?.filter((paper) => paper?.fullText)
-    setModelData((prevValue) => ({ ...prevValue, papers: relevantResults }))
+    try {
+      const relevantResults = query
+        ? await RankingService.rankPapers(
+            query,
+            searchResults?.filter((paper) => paper?.fullText) || []
+          )
+        : searchResults?.filter((paper) => paper?.fullText)
+      setModelData((prevValue) => ({ ...prevValue, papers: relevantResults }))
+    } catch (error) {
+      console.error('Paper ranking failed:', error)
+      // Use original results if ranking fails
+      setModelData((prevValue) => ({ 
+        ...prevValue, 
+        papers: searchResults?.filter((paper) => paper?.fullText) || []
+      }))
+    }
     setRelevancyLoading(false)
     setCurrent(2)
   }
@@ -167,7 +176,7 @@ const Workflow = (props: { tabKey?: string }) => {
       }`,
       content: (
         <>
-          {OpenAIService.getOpenAIKey() ? (
+          {ModelService.isModelConfigured() ? (
             (modelData.papers || [])?.length > 0 ? (
               <PaperTable
                 onPapersChange={(papers) => {
@@ -185,14 +194,15 @@ const Workflow = (props: { tabKey?: string }) => {
           ) : (
             <Result
               status='404'
-              title='OpenAI API Key Missing'
-              subTitle='Unlock all features by adding your OpenAI API key.'
+              title='AI Model Configuration Required'
+              subTitle='Please configure your AI model to unlock all features.'
               extra={
-                <ConfigurationForm
-                  onSubmit={() => {
-                    setCurrent(0)
-                  }}
-                />
+                <Button 
+                  type="primary" 
+                  onClick={() => window.location.reload()}
+                >
+                  Configure Model
+                </Button>
               }
             />
           )}
@@ -252,14 +262,15 @@ const Workflow = (props: { tabKey?: string }) => {
                 ) : (
                   <Result
                     status='404'
-                    title='OpenAI API Key Missing'
-                    subTitle='Unlock all features by adding your OpenAI API key.'
+                    title='AI Model Configuration Required'
+                    subTitle='Please configure your AI model to unlock all features.'
                     extra={
-                      <ConfigurationForm
-                        onSubmit={() => {
-                          setCurrent(0)
-                        }}
-                      />
+                      <Button 
+                        type="primary" 
+                        onClick={() => window.location.reload()}
+                      >
+                        Configure Model
+                      </Button>
                     }
                   />
                 )}

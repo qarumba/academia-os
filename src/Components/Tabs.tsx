@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons"
 import { useSelector, useDispatch } from "react-redux"
 import { addTab, removeTab } from "../Redux/actionCreators"
-import ConfigurationModal from "./Configuration"
+import ModelConfiguration from "./ModelConfiguration"
 import { useTheme } from "../Providers/ThemeContext" // import ThemeProvider and useTheme
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string
@@ -114,10 +114,36 @@ const RootTabs: React.FC = () => {
         onEdit={onEdit}
         items={tabs}
       />
-      <ConfigurationModal
-        isVisible={isConfigurationVisible}
-        toggleModal={() => setIsConfigurationVisible(!isConfigurationVisible)}
-      />
+      {isConfigurationVisible && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%', 
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90%',
+            overflow: 'auto'
+          }}>
+            <ModelConfiguration />
+            <div style={{ padding: '16px', textAlign: 'center' }}>
+              <Button onClick={() => setIsConfigurationVisible(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

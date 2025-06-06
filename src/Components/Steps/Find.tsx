@@ -39,9 +39,12 @@ const StepFind = (props: {
     props?.onLoadingChange?.(true)
     let searchResults = [] as AcademicPaper[]
     try {
-      searchResults =
-        (await (await SearchRepository.searchPapers(query))?.nextPage()) || []
-    } catch (error) {}
+      const searchResponse = await SearchRepository.searchPapers(query)
+      searchResults = searchResponse ? (await searchResponse.nextPage()) || [] : []
+    } catch (error) {
+      console.error('Search failed:', error)
+      searchResults = []
+    }
     if (!searchResults?.length) {
       // TODO: Use GPT to create a better search query instead
     }

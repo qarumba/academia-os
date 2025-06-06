@@ -2,6 +2,12 @@ interface ModelConfig {
   provider: 'openai' | 'anthropic';
   model: string;
   apiKey: string;
+  openaiEmbeddingsKey?: string;
+  email?: string;
+  heliconeEndpoint?: string;
+  heliconeKey?: string;
+  adobePDFOCR_client_id?: string;
+  adobePDFOCR_client_secret?: string;
 }
 
 interface ModelState {

@@ -1,5 +1,4 @@
 // Import the SemanticScholar library
-import { message } from "antd"
 import type { PaginatedResults, Paper } from "semanticscholarjs"
 import { SemanticScholar } from "semanticscholarjs"
 
@@ -14,8 +13,7 @@ export class SearchRepository {
       )
       return paginatedResults
     } catch (error) {
-      console.log(error)
-      message.error((error as any)?.message)
+      console.error('Semantic Scholar API Error:', error)
       return null
     }
   }
