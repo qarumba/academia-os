@@ -120,4 +120,24 @@ export class ChatService {
     console.error('Chat Service Error:', error.message || error?.response?.data?.message || error)
     throw error; // Re-throw so components can handle with their own message display
   }
+
+  // Add compatibility method for embeddings (used by existing code)
+  public static getEmbeddings() {
+    // For embeddings, we'll continue using OpenAI as it's the most widely supported
+    // and compatible with existing vector stores
+    const { OpenAIEmbeddings } = require("langchain/embeddings/openai")
+    const config = this.getModelConfig();
+    
+    // Use configured OpenAI key or fallback
+    const openAIKey = config?.provider === 'openai' 
+      ? config.apiKey 
+      : config?.openaiEmbeddingsKey || localStorage.getItem("openAIKey") || "";
+
+    return new OpenAIEmbeddings(
+      {
+        openAIApiKey: openAIKey,
+      },
+      this.getOpenAIClientConfiguration()
+    )
+  }
 }

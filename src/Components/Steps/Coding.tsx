@@ -39,7 +39,7 @@ export const CodingStep = (props: {
       const newPaper = { ...paper } as AcademicPaper
       if (newPaper["Initial Codes"]) return newPaper
       try {
-        const model = ChatService.createChatModel({ maxTokens: 3000 })
+        const model = await ChatService.createChatModel({ maxTokens: 3000 })
         
         // Use the same chunking logic as OpenAIService for consistency
         let fullText = newPaper?.fullText
@@ -128,7 +128,7 @@ export const CodingStep = (props: {
     setSecondOrderLoading(true)
     
     try {
-      const model = ChatService.createChatModel({ maxTokens: 2000 })
+      const model = await ChatService.createChatModel({ maxTokens: 2000 })
       
       // Use the same chunking logic as OpenAIService for consistency
       let chunks = []
@@ -200,7 +200,7 @@ export const CodingStep = (props: {
     setAggregateLoading(true)
     
     try {
-      const model = ChatService.createChatModel({ maxTokens: 2000 })
+      const model = await ChatService.createChatModel({ maxTokens: 2000 })
       
       // Convert the JSON object of 2nd order codes into a JSON string
       const jsonString = JSON.stringify(Object.keys(codes))

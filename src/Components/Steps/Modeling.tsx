@@ -42,7 +42,7 @@ export const ModelingStep = (props: {
     
     try {
       // Model Construction
-      const model = ChatService.createChatModel({ maxTokens: 2000 })
+      const model = await ChatService.createChatModel({ maxTokens: 2000 })
       const jsonString = JSON.stringify(props.modelData?.aggregateDimensions)
 
       const modelConstructionResult = await model.predictMessages([
@@ -94,7 +94,7 @@ export const ModelingStep = (props: {
       
       // Model Visualization
       setVisualizationLoading(true)
-      const visualizationModel = ChatService.createChatModel({ maxTokens: 2000 })
+      const visualizationModel = await ChatService.createChatModel({ maxTokens: 2000 })
       
       const visualizationResult = await visualizationModel.predictMessages([
         new SystemMessage(
@@ -156,7 +156,7 @@ export const ModelingStep = (props: {
       
       // Model Critique
       setIteratingLoading(true)
-      const critiqueModel = ChatService.createChatModel({ maxTokens: 1000 })
+      const critiqueModel = await ChatService.createChatModel({ maxTokens: 1000 })
       
       const critiqueResult = await critiqueModel.predictMessages([
         new SystemMessage(
@@ -193,7 +193,7 @@ export const ModelingStep = (props: {
         setExploreLoading(true)
         
         // Brainstorm Applicable Theories
-        const theoriesModel = ChatService.createChatModel({ maxTokens: 2000 })
+        const theoriesModel = await ChatService.createChatModel({ maxTokens: 2000 })
         const jsonString = JSON.stringify(props?.modelData?.aggregateDimensions)
 
         const theoriesResult = await theoriesModel.predictMessages(
@@ -226,7 +226,7 @@ export const ModelingStep = (props: {
         setInterrelationshipsLoading(true)
         
         // Concept Tuples
-        const tuplesModel = ChatService.createChatModel({ maxTokens: 2000 })
+        const tuplesModel = await ChatService.createChatModel({ maxTokens: 2000 })
         const conceptTuplesResult = await tuplesModel.predictMessages(
           [
             new SystemMessage(
@@ -307,7 +307,7 @@ export const ModelingStep = (props: {
                 ?.join("\n\n")
 
               // Summarize the interrelationship
-              const summaryModel = ChatService.createChatModel({ maxTokens: 200 })
+              const summaryModel = await ChatService.createChatModel({ maxTokens: 200 })
               const summaryResult = await summaryModel.predictMessages([
                 new SystemMessage(
                   `Your task is to summarize the interrelationship between ${concept1} and ${concept2} in one short sentence. If evidence, include information about correlation or causation, direct, mediated or conditional interaction, static or dynamic relationship, feedback loops, uni- or bi-directional, strong or weak.`
