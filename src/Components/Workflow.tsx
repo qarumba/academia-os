@@ -36,7 +36,7 @@ import { renameTab, addTab } from "../Redux/actionCreators"
 import { PaperComponent } from "./Paper"
 import { RankingService } from "../Services/RankingService"
 import { PaperTable } from "./PaperTable"
-import { OpenAIService } from "../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../Services/QualitativeAnalysisService"
 import { ModelService } from "../Services/ModelService"
 import StreamingComponent from "./StreamingComponent"
 
@@ -261,7 +261,7 @@ const Workflow = (props: { tabKey?: string }) => {
             title: "Literature Review",
             content: (
               <>
-                {OpenAIService.getOpenAIKey() ? (
+                {QualitativeAnalysisService.getOpenAIKey() ? (
                   <div>
                     Literature Review
                     <StreamingComponent

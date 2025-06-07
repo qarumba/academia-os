@@ -1,7 +1,7 @@
 // StreamingComponent.js
 import React, { useEffect, useState } from "react"
 import { Button, Typography } from "antd"
-import { OpenAIService } from "../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../Services/QualitativeAnalysisService"
 
 const { Paragraph } = Typography
 
@@ -11,7 +11,7 @@ const StreamingComponent = (props: { prompt: string }) => {
   const handleStream = async () => {
     setRequestStarted(true)
     setOutput("")
-    await OpenAIService.streamCompletion(props?.prompt, (token: string) => {
+    await QualitativeAnalysisService.streamCompletion(props?.prompt, (token: string) => {
       setOutput((prevOutput) => prevOutput + token)
     })
   }

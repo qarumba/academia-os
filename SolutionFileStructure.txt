@@ -27,7 +27,7 @@ src/
 │   │   └── Modeling/    # Modeling sub-components (Interrelationships.tsx)
 │   └── *.tsx            # Core components (ModelConfiguration, PaperTable, etc.)
 ├── Services/            # Business logic layer (LangChain v0.3 compatible)
-│   └── *.ts             # Service classes (ChatService, OpenAIService, etc.)
+│   └── *.ts             # Service classes (ChatService, QualitativeAnalysisService, etc.)
 ├── Redux/               # State management
 │   └── *.ts             # Store, reducers, actions
 ├── Types/               # TypeScript definitions
@@ -79,7 +79,7 @@ Core Components:
 
 Service Classes:
 - ChatService.ts: Multi-provider AI model abstraction (LangChain v0.3)
-- OpenAIService.ts: Gioia methodology implementation (updated imports)
+- QualitativeAnalysisService.ts: Gioia methodology implementation (updated imports)
 - EmbeddingService.ts: Vector embeddings management (@langchain/openai)
 - HeliconeService.ts: API monitoring and cost tracking (server proxy)
 - RankingService.ts: Paper relevance scoring (@langchain/textsplitters)

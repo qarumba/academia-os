@@ -3,7 +3,7 @@ import { AcademicPaper } from "../../Types/AcademicPaper"
 import { PaperTable } from "../PaperTable"
 import { useEffect, useState } from "react"
 import { asyncMap } from "../../Helpers/asyncMap"
-import { OpenAIService } from "../../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../../Services/QualitativeAnalysisService"
 import { ChatService } from "../../Services/ChatService"
 import { ModelService } from "../../Services/ModelService"
 import { HumanMessage, SystemMessage } from "@langchain/core/messages"
@@ -41,7 +41,7 @@ const CodingStep = (props: {
       try {
         const model = await ChatService.createChatModel({ maxTokens: 3000 })
         
-        // Use the same chunking logic as OpenAIService for consistency
+        // Use the same chunking logic as QualitativeAnalysisService for consistency
         let fullText = newPaper?.fullText
         let chunks = []
 
@@ -130,7 +130,7 @@ const CodingStep = (props: {
     try {
       const model = await ChatService.createChatModel({ maxTokens: 2000 })
       
-      // Use the same chunking logic as OpenAIService for consistency
+      // Use the same chunking logic as QualitativeAnalysisService for consistency
       let chunks = []
       const jsonString = JSON.stringify(codes)
 

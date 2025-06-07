@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { Table, Typography } from "antd"
 import { ModelData } from "../../../Types/ModelData"
-import { OpenAIService } from "../../../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../../../Services/QualitativeAnalysisService"
 
 export const Interrelationships = (props: {
   modelData: ModelData
