@@ -6,17 +6,23 @@ import { HeliconeService } from "./HeliconeService"
 let ChatAnthropic: any = null;
 let anthropicAvailable = false;
 
-// Initialize Anthropic support with LangChain v0.3
-try {
-  // Use dynamic import in a way that works with webpack
-  const anthropicModule = require('@langchain/anthropic');
-  ChatAnthropic = anthropicModule.ChatAnthropic;
-  anthropicAvailable = true;
-  console.log('✅ Anthropic integration initialized successfully');
-} catch (error: any) {
-  console.warn('❌ Anthropic package initialization failed:', error?.message || error);
-  anthropicAvailable = false;
-}
+// Initialize Anthropic support with proper async import
+const initializeAnthropic = async () => {
+  try {
+    const { ChatAnthropic: AnthropicClass } = await import('@langchain/anthropic');
+    ChatAnthropic = AnthropicClass;
+    anthropicAvailable = true;
+    console.log('✅ Anthropic integration initialized successfully');
+    return true;
+  } catch (error: any) {
+    console.warn('❌ Anthropic package initialization failed:', error?.message || error);
+    anthropicAvailable = false;
+    return false;
+  }
+};
+
+// Initialize immediately (but async)
+initializeAnthropic();
 
 interface ModelConfig {
   provider: 'openai' | 'anthropic';
@@ -47,6 +53,12 @@ export class ChatService {
     }
 
     if (config.provider === 'anthropic') {
+      // If Anthropic not ready, try to initialize it
+      if (!ChatAnthropic && !anthropicAvailable) {
+        console.log('🔄 Attempting to initialize Anthropic...');
+        await initializeAnthropic();
+      }
+      
       console.log('🔍 Anthropic Debug:', { ChatAnthropic: !!ChatAnthropic, anthropicAvailable, hasClass: ChatAnthropic?.name });
       if (ChatAnthropic && anthropicAvailable) {
         // Use actual Anthropic integration
