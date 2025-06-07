@@ -1,27 +1,28 @@
 <p align="center">
   <img src="./src/favicon.png" alt="AcademiaOS logo" width="50"/>
 </p>
-<h1 align="center">AcademiaOS</h1>
+<h1 align="center">AcademiaOS 2.0</h1>
 
-Welcome to **AcademiaOS**, your one-stop solution for academic information retrieval and reasoning! We've built this on a robust large language model platform equipped with a bouquet of features dedicated to providing the best assistance for researchers possible.
+Welcome to **AcademiaOS**, a solution for academic information retrieval and reasoning! We've built this on a robust large language model platform equipped with a bouquet of features dedicated to providing the best assistance for researchers possible.
 
-For a deeper understanding of the underlying technology and concepts, you can refer to our paper: [AcademiaOS: Automating Grounded Theory Development in Qualitative Research with Large Language Models](https://arxiv.org/abs/2403.08844).
+For a deeper understanding of the underlying technology and concepts, you can refer to Thomas Üllebecker's paper: [AcademiaOS: Automating Grounded Theory Development in Qualitative Research with Large Language Models](https://arxiv.org/abs/2403.08844).
 
 <p align="center">
     <img src="public\overview.gif"  alt="Demo" width="400"/>
 </p>
 
-Live-Demo: [academia-os.org](https://academia-os.org/)
+Live-Demo Version 1.0 ONLY: [academia-os.org](https://academia-os.org/)
 
 Join the [Slack Community](https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ)!
 ## 🌟 Features 
 
+* **Model Chooser**: Choose Anthropic or OpenAI options and enter your own API keys for NLP.
 * **Find Academic Papers**: Building on the SemanticScholar corpus and OpenAI embeddings, AcademiaOS finds and ranks relevant papers to your search queries. 
 * **Upload PDFs**: If you have curated papers or other qualitative documents (such as interview transcripts) as PDFs, you can upload them for downstream tasks. Text-PDFs are handled in-browser while scanned PDFs are OCRd using Adobe PDF Extract API.
 * **Mass Information Extraction**: Structurally extract information (such as a paper's sentiment towards your thesis or information such as the count of study participants) from papers at scale.
-* **Automated Literature Review**: Navigate with a clean and intuitive interface.
-* **Coding of Qualitative Literature**: Let AI code your interviews, social media posts or other qualitative literature.
-* **Automated Theory Construction**: Get a theoretical model explaining your qualitative data in just a few steps.
+* **Structured Literature Review**: Utilise Semantic Scholar to navigate papers with a clean and intuitive interface.
+* **Coding of Qualitative Literature**: AI coding of interviews, social media posts or other qualitative literature.
+* **Automated Theory Construction**: Get a draft theoretical model explaining your qualitative data in just a few steps.
 
 ## 🔧 Getting Started 
 
@@ -30,6 +31,7 @@ Tech Stack:
 - AntDesign (Component Library)
 - LangChainJS (Composability with Large Language Models)
 - SemanticScholarJS (Interaction with Semantic Scholar)
+- Anthropic and/or OpenAI (Extract theoretical propositions via NLP)
 
 To get started with AcademiaOS, you require [Node.js](https://nodejs.org/en/download) installed in your machine.
 
@@ -73,4 +75,4 @@ This endeavor is under the aegis of an open-source License. Refer to the [LICENS
 
 ----------
 
-Crafted with passion and commitment by Thomas Übellacker❣️ Happy coding! ⌨️💡
+Crafted with passion and commitment, based on the foundational research and development of Thomas Übellacker❣️ Happy coding! ⌨️💡

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Select, Input, Button, Card, message, Alert, Typography, Row, Col, Divider } from 'antd';
+import { Form, Select, Input, Button, Card, Alert, Typography, Row, Col, Divider, App } from 'antd';
 import { SettingOutlined, KeyOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { setModelConfig, loadConfigFromStorage } from './modelSlice';
@@ -65,6 +65,7 @@ const ModelConfiguration: React.FC = () => {
   const [selectedProvider, setSelectedProvider] = useState<'openai' | 'anthropic'>('anthropic');
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const { message } = App.useApp();
 
   // Load saved configuration from localStorage
   useEffect(() => {

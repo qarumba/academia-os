@@ -1,4 +1,4 @@
-import { Button, Input, Space, Steps, message } from "antd"
+import { Button, Input, Space, Steps, App } from "antd"
 import { AcademicPaper } from "../../Types/AcademicPaper"
 import { PaperTable } from "../PaperTable"
 import { useEffect, useState } from "react"
@@ -15,6 +15,7 @@ export const CodingStep = (props: {
   modelData: ModelData
   onModelDataChange: (modelData: ModelData) => void
 }) => {
+  const { message } = App.useApp();
   const [initialCodes, setInitialCodes] = useState<string[]>(
     props?.modelData?.firstOrderCodes || []
   )

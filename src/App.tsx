@@ -1,4 +1,4 @@
-import { Button, ConfigProvider, theme } from "antd"
+import { Button, ConfigProvider, theme, App as AntApp } from "antd"
 import React from "react"
 import { Root } from "./Components/Root"
 import { Provider } from "react-redux"
@@ -25,9 +25,11 @@ const ThemedApp: React.FC = () => {
               ? theme.defaultAlgorithm
               : theme.darkAlgorithm,
         }}>
-        <ModelConfigurationGuard requireConfiguration={true}>
-          <Root />
-        </ModelConfigurationGuard>
+        <AntApp>
+          <ModelConfigurationGuard requireConfiguration={true}>
+            <Root />
+          </ModelConfigurationGuard>
+        </AntApp>
       </ConfigProvider>
     </Provider>
   )

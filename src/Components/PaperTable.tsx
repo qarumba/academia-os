@@ -7,7 +7,7 @@ import {
   Tag,
   Typography,
   theme,
-  message,
+  App,
 } from "antd"
 import { useDispatch } from "react-redux"
 import { renameTab, addTab } from "../Redux/actionCreators"
@@ -34,6 +34,7 @@ export const PaperTable = (props: {
 }) => {
   const dispatch = useDispatch()
   const { token } = useToken()
+  const { message } = App.useApp()
   const [columnAddSearchQuery, setColumnAddSearchQuery] = useState("")
   const handleRenameTab = (key: string, newLabel: string) => {
     dispatch(renameTab(key, newLabel))

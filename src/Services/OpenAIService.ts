@@ -249,15 +249,24 @@ export class OpenAIService {
       heliconeKey = localStorage.getItem("heliconeKey") || "";
     }
 
-    return {
-      basePath: heliconeEndpoint || undefined,
-      baseOptions: {
-        headers: {
-          "Helicone-Auth": `Bearer ${heliconeKey}`,
+    // Temporarily disable Helicone proxy due to CORS issues in browser
+    // TODO: Implement server-side Helicone integration or async logging
+    const useHelicone = false; // Set to true when server-side implementation is ready
+
+    if (useHelicone && heliconeEndpoint && heliconeKey) {
+      return {
+        basePath: heliconeEndpoint,
+        baseOptions: {
+          headers: {
+            "Helicone-Auth": `Bearer ${heliconeKey}`,
+          },
         },
-      },
-      // timeout: 30000,
-    } as ClientOptions
+        // timeout: 30000,
+      } as ClientOptions;
+    }
+
+    // Return default OpenAI configuration
+    return {} as ClientOptions;
   }
   static openAIModelConfiguration(
     props?: Partial<OpenAIChatInput> &

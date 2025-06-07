@@ -57,14 +57,23 @@ export class ChatService {
     const heliconeEndpoint = config?.heliconeEndpoint || localStorage.getItem("heliconeEndpoint") || "";
     const heliconeKey = config?.heliconeKey || localStorage.getItem("heliconeKey") || "";
 
-    return {
-      basePath: heliconeEndpoint || undefined,
-      baseOptions: {
-        headers: {
-          "Helicone-Auth": `Bearer ${heliconeKey}`,
+    // Temporarily disable Helicone proxy due to CORS issues in browser
+    // TODO: Implement server-side Helicone integration or async logging
+    const useHelicone = false; // Set to true when server-side implementation is ready
+
+    if (useHelicone && heliconeEndpoint && heliconeKey) {
+      return {
+        basePath: heliconeEndpoint,
+        baseOptions: {
+          headers: {
+            "Helicone-Auth": `Bearer ${heliconeKey}`,
+          },
         },
-      },
-    };
+      };
+    }
+
+    // Return default OpenAI configuration
+    return {};
   }
 
   static async simpleChat(systemMessage: string, userMessage: string, options: { maxTokens?: number } = {}) {
