@@ -19,6 +19,7 @@ import { type ClientOptions } from "openai"
 import { ModelData } from "../Types/ModelData"
 import { asyncMap } from "../Helpers/asyncMap"
 import { HeliconeService } from "./HeliconeService"
+import { LangfuseService } from "./LangfuseService"
 
 import { BaseLanguageModelParams } from "@langchain/core/language_models/base"
 
@@ -167,6 +168,15 @@ export class OpenAIService {
   }
 
   static async initialCodingOfPaper(paper: AcademicPaper, remarks?: string) {
+    // Start Langfuse tracing for the Gioia initial coding workflow
+    const trace = LangfuseService.isLangfuseConfigured() 
+      ? LangfuseService.startTrace("gioia_initial_coding", { 
+          paperId: paper?.id || paper?.corpusId, 
+          paperTitle: paper?.title,
+          remarks 
+        })
+      : null;
+
     try {
       const model = await ChatService.createChatModel({
         maxTokens: 3000,
@@ -200,6 +210,14 @@ export class OpenAIService {
       // Loop through each chunk and apply initial coding
       await asyncForEach(chunks, async (chunk, index) => {
         console.log(`Processing chunk ${index + 1} of ${chunks.length}`)
+        
+        // Start span for this chunk
+        const span = trace ? LangfuseService.startSpan(`chunk_${index + 1}`, { 
+          chunkIndex: index + 1, 
+          totalChunks: chunks.length,
+          chunkSize: chunk.pageContent?.length 
+        }) : null;
+
         const result = await model.predictMessages(
           [
             new SystemMessage(
@@ -222,13 +240,37 @@ export class OpenAIService {
                 ?.codes
             : []
           initialCodesArray.push(...codes)
+          
+          // End span with successful codes
+          if (span) {
+            LangfuseService.endSpan({ codes, codeCount: codes.length });
+          }
         } catch (error) {
           console.log(error, result?.content)
+          
+          // End span with error
+          if (span) {
+            LangfuseService.endSpan(null, { error: error instanceof Error ? error.message : String(error) });
+          }
         }
       })
 
+      // End trace with results
+      if (trace) {
+        LangfuseService.endTrace({ 
+          initialCodes: initialCodesArray, 
+          totalCodes: initialCodesArray.length,
+          chunksProcessed: chunks.length 
+        });
+      }
+
       return initialCodesArray
     } catch (error) {
+      // End trace with error
+      if (trace) {
+        LangfuseService.endTrace(null, { error: error instanceof Error ? error.message : String(error) });
+      }
+      
       OpenAIService.handleError(error)
       return []
     }
@@ -279,6 +321,14 @@ export class OpenAIService {
   }
 
   static async secondOrderCoding(codesArray: string[]) {
+    // Start Langfuse tracing for second order coding
+    const trace = LangfuseService.isLangfuseConfigured() 
+      ? LangfuseService.startTrace("gioia_second_order_coding", { 
+          inputCodesCount: codesArray.length,
+          inputCodes: codesArray 
+        })
+      : null;
+
     try {
       const model = await ChatService.createChatModel({
         maxTokens: 2000,
@@ -335,8 +385,23 @@ export class OpenAIService {
           console.log(error)
         }
       })
+
+      // End trace with results
+      if (trace) {
+        LangfuseService.endTrace({ 
+          secondOrderCodes,
+          categoriesCount: Object.keys(secondOrderCodes).length,
+          chunksProcessed: chunks.length
+        });
+      }
+
       return secondOrderCodes
     } catch (error) {
+      // End trace with error
+      if (trace) {
+        LangfuseService.endTrace(null, { error: error instanceof Error ? error.message : String(error) });
+      }
+      
       OpenAIService.handleError(error)
       return {}
     }

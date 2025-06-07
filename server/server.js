@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const { Langfuse } = require('langfuse');
 require('dotenv').config();
 
 const app = express();
@@ -15,7 +16,7 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', service: 'AcademiaOS Helicone Proxy' });
+  res.json({ status: 'OK', service: 'AcademiaOS API Proxy (Helicone + Langfuse)' });
 });
 
 // Helicone API proxy endpoints
@@ -99,11 +100,100 @@ app.post('/api/helicone/test', async (req, res) => {
   }
 });
 
+// Langfuse API proxy endpoints
+app.post('/api/langfuse/test', async (req, res) => {
+  try {
+    const { publicKey, secretKey, baseUrl } = req.body;
+    
+    if (!publicKey || !secretKey) {
+      return res.json({ 
+        success: false, 
+        message: 'Langfuse public key and secret key are required' 
+      });
+    }
+
+    // Test Langfuse connection by creating a test client
+    const testLangfuse = new Langfuse({
+      publicKey,
+      secretKey,
+      baseUrl: baseUrl || 'https://cloud.langfuse.com',
+    });
+
+    // Create a test event
+    testLangfuse.event({
+      name: "server_connection_test",
+      input: { test: true },
+      metadata: { timestamp: new Date().toISOString() },
+    });
+
+    await testLangfuse.flushAsync();
+    await testLangfuse.shutdownAsync();
+
+    res.json({ 
+      success: true, 
+      message: 'Langfuse connection successful' 
+    });
+  } catch (error) {
+    console.error('Langfuse test error:', error);
+    res.json({ 
+      success: false, 
+      message: `Langfuse connection failed: ${error.message}` 
+    });
+  }
+});
+
+// Langfuse traces endpoint
+app.post('/api/langfuse/traces', async (req, res) => {
+  try {
+    const { publicKey, secretKey, baseUrl, limit = 50 } = req.body;
+    
+    if (!publicKey || !secretKey) {
+      return res.status(400).json({ error: 'Langfuse keys are required' });
+    }
+
+    // For now, return mock data as Langfuse doesn't have a direct API for fetching traces
+    // In a real implementation, you might want to use Langfuse's upcoming REST API
+    res.json({ 
+      data: [],
+      message: 'Langfuse traces endpoint - implement when REST API is available' 
+    });
+  } catch (error) {
+    console.error('Langfuse traces error:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+// Langfuse flush endpoint - for forcing flush of observations
+app.post('/api/langfuse/flush', async (req, res) => {
+  try {
+    const { publicKey, secretKey, baseUrl } = req.body;
+    
+    if (!publicKey || !secretKey) {
+      return res.status(400).json({ error: 'Langfuse keys are required' });
+    }
+
+    const langfuse = new Langfuse({
+      publicKey,
+      secretKey,
+      baseUrl: baseUrl || 'https://cloud.langfuse.com',
+    });
+
+    await langfuse.flushAsync();
+    await langfuse.shutdownAsync();
+
+    res.json({ success: true, message: 'Langfuse observations flushed successfully' });
+  } catch (error) {
+    console.error('Langfuse flush error:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 AcademiaOS Helicone Proxy running on port ${PORT}`);
+  console.log(`🚀 AcademiaOS API Proxy running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔄 Helicone API endpoints ready`);
+  console.log(`🔍 Langfuse API endpoints ready`);
 });
 
 module.exports = app;

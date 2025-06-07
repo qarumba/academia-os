@@ -1,6 +1,7 @@
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai"
 import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { HeliconeService } from "./HeliconeService"
+import { LangfuseService } from "./LangfuseService"
 
 // Anthropic integration with LangChain v0.3
 let ChatAnthropic: any = null;
@@ -31,6 +32,10 @@ interface ModelConfig {
   openaiEmbeddingsKey?: string;
   heliconeEndpoint?: string;
   heliconeKey?: string;
+  langfusePublicKey?: string;
+  langfuseSecretKey?: string;
+  langfuseBaseUrl?: string;
+  langfuseUserId?: string;
 }
 
 export class ChatService {
@@ -134,11 +139,45 @@ export class ChatService {
 
   static async simpleChat(systemMessage: string, userMessage: string, options: { maxTokens?: number } = {}) {
     const model = await this.createChatModel(options);
-    const result = await model.predictMessages([
-      new SystemMessage(systemMessage),
-      new HumanMessage(userMessage),
-    ]);
-    return result?.content as string;
+    
+    // Start Langfuse tracing if configured
+    const trace = LangfuseService.isLangfuseConfigured() 
+      ? LangfuseService.startTrace("simple_chat", { systemMessage, userMessage })
+      : null;
+
+    try {
+      const messages = [
+        new SystemMessage(systemMessage),
+        new HumanMessage(userMessage),
+      ];
+      
+      const result = await model.predictMessages(messages);
+      const response = result?.content as string;
+
+      // Log generation to Langfuse
+      if (trace) {
+        const config = this.getModelConfig();
+        LangfuseService.logGeneration(
+          "chat_completion",
+          { messages: messages.map(m => ({ role: m._getType(), content: m.content })) },
+          { content: response },
+          { 
+            model: config?.model,
+            provider: config?.provider,
+            maxTokens: options.maxTokens 
+          }
+        );
+        LangfuseService.endTrace({ response });
+      }
+
+      return response;
+    } catch (error) {
+      // End trace with error
+      if (trace) {
+        LangfuseService.endTrace(null, { error: error instanceof Error ? error.message : String(error) });
+      }
+      throw error;
+    }
   }
 
   public static handleError = (error: any) => {

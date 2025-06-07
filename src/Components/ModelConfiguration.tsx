@@ -15,6 +15,10 @@ interface ModelConfig {
   openaiEmbeddingsKey?: string;
   email?: string;
   heliconeKey?: string;
+  langfusePublicKey?: string;
+  langfuseSecretKey?: string;
+  langfuseBaseUrl?: string;
+  langfuseUserId?: string;
   adobePDFOCR_client_id?: string;
   adobePDFOCR_client_secret?: string;
 }
@@ -98,7 +102,7 @@ const ModelConfiguration: React.FC = () => {
       setSelectedProvider(config.provider);
       setHasEmbeddingsKey(!!config.openaiEmbeddingsKey);
       // Show advanced options if any advanced fields have values
-      if (config.email || config.heliconeKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
+      if (config.email || config.heliconeKey || config.langfusePublicKey || config.langfuseSecretKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
         setShowAdvanced(true);
       }
     }
@@ -328,6 +332,75 @@ const ModelConfiguration: React.FC = () => {
                 placeholder="Helicone API Key (optional)"
               />
             </Form.Item>
+
+            <Divider orientation="left" style={{ fontSize: '14px', color: '#666' }}>
+              Langfuse Integration
+            </Divider>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="langfusePublicKey"
+                  label="Langfuse Public Key"
+                  extra={
+                    <span>
+                      Use{' '}
+                      <Typography.Link
+                        target="_blank"
+                        href="https://langfuse.com/"
+                      >
+                        Langfuse
+                      </Typography.Link>{' '}
+                      for advanced LLM tracing and evaluation.
+                    </span>
+                  }
+                >
+                  <Input
+                    size="large"
+                    placeholder="Langfuse Public Key (optional)"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="langfuseSecretKey"
+                  label="Langfuse Secret Key"
+                >
+                  <Input.Password
+                    size="large"
+                    placeholder="Langfuse Secret Key (optional)"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="langfuseBaseUrl"
+                  label="Langfuse Base URL"
+                  extra="Leave empty to use cloud.langfuse.com"
+                  initialValue="https://cloud.langfuse.com"
+                >
+                  <Input
+                    size="large"
+                    placeholder="https://cloud.langfuse.com"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="langfuseUserId"
+                  label="User ID (optional)"
+                  extra="For user-specific tracking"
+                >
+                  <Input
+                    size="large"
+                    placeholder="User ID (optional)"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Row gutter={16}>
               <Col span={12}>
