@@ -1,4 +1,4 @@
-import { ChatOpenAI } from "@langchain/openai"
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai"
 import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { HeliconeService } from "./HeliconeService"
 
@@ -136,7 +136,6 @@ export class ChatService {
   public static getEmbeddings() {
     // For embeddings, we'll continue using OpenAI as it's the most widely supported
     // and compatible with existing vector stores
-    const { OpenAIEmbeddings } = require("@langchain/openai")
     const config = this.getModelConfig();
     
     // Use configured OpenAI key or fallback
