@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { CheckCard } from "@ant-design/pro-components"
 
 import {
@@ -28,6 +28,7 @@ import {
   LoadingOutlined,
   PlusOutlined,
   UploadOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons"
 import { SearchRepository } from "../Services/SearchService"
 import { useDispatch } from "react-redux"
@@ -44,6 +45,8 @@ import StepFind from "./Steps/Find"
 import { CodingStep } from "./Steps/Coding"
 import { ModelData } from "../Types/ModelData"
 import { ModelingStep } from "./Steps/Modeling"
+import { HeliconeMonitor } from "./HeliconeMonitor"
+import { HeliconeService } from "../Services/HeliconeService"
 const { useToken } = theme
 
 const Workflow = (props: { tabKey?: string }) => {
@@ -61,6 +64,8 @@ const Workflow = (props: { tabKey?: string }) => {
   const dispatch = useDispatch()
 
   const [isRestoreModalVisible, setIsRestoreModalVisible] = useState(false)
+  const [heliconeVisible, setHeliconeVisible] = useState(false)
+  const [currentOperation, setCurrentOperation] = useState('')
 
   const handleRenameTab = (key: string, newLabel: string) => {
     dispatch(renameTab(key, newLabel))
@@ -75,6 +80,13 @@ const Workflow = (props: { tabKey?: string }) => {
   }
 
   const [modelData, setModelData] = useState<ModelData>({})
+
+  // Initialize Helicone session tracking
+  useEffect(() => {
+    if (HeliconeService.isHeliconeConfigured()) {
+      HeliconeService.startSession();
+    }
+  }, []);
 
   const evaluate = async (query: string, searchResults: AcademicPaper[]) => {
     setRelevancyLoading(true)
@@ -342,6 +354,19 @@ const Workflow = (props: { tabKey?: string }) => {
               size='small'
               items={items}
             />
+            
+            {/* Add Helicone button */}
+            {HeliconeService.isHeliconeConfigured() && (
+              <Button 
+                icon={<BarChartOutlined />}
+                onClick={() => setHeliconeVisible(true)}
+                type={heliconeVisible ? "primary" : "default"}
+                size="small"
+              >
+                API Monitor
+              </Button>
+            )}
+            
             <div>
               <a
                 type='link'
@@ -396,6 +421,14 @@ const Workflow = (props: { tabKey?: string }) => {
           </Card>
         </Col>
       </Row>
+      
+      {/* Add the Helicone monitor component */}
+      <HeliconeMonitor
+        visible={heliconeVisible}
+        onClose={() => setHeliconeVisible(false)}
+        isProcessing={searchLoading || relevancyLoading || (steps[current]?.loading || false)}
+        currentOperation={currentOperation}
+      />
     </>
   )
 }

@@ -249,16 +249,16 @@ export class OpenAIService {
       heliconeKey = localStorage.getItem("heliconeKey") || "";
     }
 
-    // Temporarily disable Helicone proxy due to CORS issues in browser
-    // TODO: Implement server-side Helicone integration or async logging
-    const useHelicone = false; // Set to true when server-side implementation is ready
+    // Use async Helicone integration (headers only, no proxy)
+    // This allows monitoring via Helicone API while avoiding CORS issues
+    const useHelicone = heliconeKey ? true : false;
 
-    if (useHelicone && heliconeEndpoint && heliconeKey) {
+    if (useHelicone) {
       return {
-        basePath: heliconeEndpoint,
         baseOptions: {
           headers: {
             "Helicone-Auth": `Bearer ${heliconeKey}`,
+            "Helicone-Cache-Enabled": "true",
           },
         },
         // timeout: 30000,

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Select, Input, Button, Card, Alert, Typography, Row, Col, Divider, App } from 'antd';
 import { SettingOutlined, KeyOutlined } from '@ant-design/icons';
-import { useDispatch } from 'react-redux';
-import { setModelConfig, loadConfigFromStorage } from './modelSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setModelConfig, loadConfigFromStorage, selectIsModelConfigured } from './modelSlice';
 
 const { Option } = Select;
 const { Title, Paragraph } = Typography;
@@ -65,7 +65,14 @@ const ModelConfiguration: React.FC = () => {
   const [selectedProvider, setSelectedProvider] = useState<'openai' | 'anthropic'>('anthropic');
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [hasEmbeddingsKey, setHasEmbeddingsKey] = useState(false);
   const { message } = App.useApp();
+  const isConfigured = useSelector(selectIsModelConfigured);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('ModelConfiguration: isConfigured =', isConfigured);
+  }, [isConfigured]);
 
   // Load saved configuration from localStorage
   useEffect(() => {
@@ -74,6 +81,7 @@ const ModelConfiguration: React.FC = () => {
       const config: ModelConfig = JSON.parse(savedConfig);
       form.setFieldsValue(config);
       setSelectedProvider(config.provider);
+      setHasEmbeddingsKey(!!config.openaiEmbeddingsKey);
       // Show advanced options if any advanced fields have values
       if (config.email || config.heliconeEndpoint || config.heliconeKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
         setShowAdvanced(true);
@@ -120,13 +128,29 @@ const ModelConfiguration: React.FC = () => {
       }
       style={{ maxWidth: 800, margin: '0 auto' }}
     >
-      <Alert
-        message="Configuration Required"
-        description="Please configure your AI model to continue using Academia OS features."
-        type="info"
-        showIcon
-        style={{ marginBottom: 24 }}
-      />
+      {!isConfigured && (
+        <Alert
+          message="Configuration Required"
+          description="Please configure your AI model to continue using Academia OS features."
+          type="info"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
+      )}
+      
+      {isConfigured && (
+        <Alert
+          message="AI Models Configured Successfully"
+          description={
+            selectedProvider === 'anthropic' 
+              ? "Primary AI Model (Anthropic Claude) and Embeddings AI Model (OpenAI) are configured."
+              : "Primary AI Model (OpenAI) and Embeddings AI Model are configured."
+          }
+          type="success"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
+      )}
 
       <Form
         form={form}
@@ -160,12 +184,26 @@ const ModelConfiguration: React.FC = () => {
           <Select
             size="large"
             placeholder="Select a model"
+            popupMatchSelectWidth={false}
+            styles={{
+              popup: {
+                root: { maxHeight: 400, overflow: 'auto' }
+              }
+            }}
+            optionLabelProp="label"
           >
             {getFilteredModels().map(model => (
-              <Option key={model.model} value={model.model}>
-                <div>
+              <Option key={model.model} value={model.model} label={model.displayName}>
+                <div style={{ lineHeight: '1.4', padding: '4px 0' }}>
                   <strong>{model.displayName}</strong>
-                  <div style={{ fontSize: '12px', color: '#666' }}>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    color: '#666',
+                    marginTop: '2px',
+                    whiteSpace: 'normal',
+                    wordWrap: 'break-word',
+                    lineHeight: '1.3'
+                  }}>
                     {model.description}
                   </div>
                 </div>
@@ -192,6 +230,32 @@ const ModelConfiguration: React.FC = () => {
           />
         </Form.Item>
 
+        {selectedProvider === 'anthropic' && (
+          <>
+            {!hasEmbeddingsKey && (
+              <Alert
+                message="OpenAI API Key for Embeddings"
+                description="Anthropic doesn't provide embeddings API yet. An OpenAI API key is required for paper ranking and similarity features when using Anthropic models."
+                type="info"
+                showIcon
+                style={{ marginBottom: 16 }}
+              />
+            )}
+            
+            <Form.Item
+              name="openaiEmbeddingsKey"
+              label="OpenAI API Key (for Embeddings)"
+              extra="Required for paper ranking and similarity search when using Anthropic models."
+            >
+              <Input.Password
+                size="large"
+                placeholder="OpenAI API key for embeddings"
+                onChange={(e) => setHasEmbeddingsKey(!!e.target.value)}
+              />
+            </Form.Item>
+          </>
+        )}
+
         <Divider orientation="left">
           <Button 
             type="link" 
@@ -204,76 +268,27 @@ const ModelConfiguration: React.FC = () => {
 
         {showAdvanced && (
           <>
-            {selectedProvider === 'anthropic' && (
-              <Alert
-                message="OpenAI API Key for Embeddings"
-                description="Anthropic doesn't provide embeddings API yet. An OpenAI API key is required for paper ranking and similarity features when using Anthropic models."
-                type="info"
-                showIcon
-                style={{ marginBottom: 16 }}
-              />
-            )}
-            
             <Form.Item
-              name="email"
-              label="Email Address"
-              extra="We will keep you updated about new features and updates."
+              name="heliconeKey"
+              label="Helicone API Key"
+              extra={
+                <span>
+                  Use{' '}
+                  <Typography.Link
+                    target="_blank"
+                    href="https://www.helicone.ai/"
+                  >
+                    Helicone.ai
+                  </Typography.Link>{' '}
+                  to track your API usage and costs.
+                </span>
+              }
             >
-              <Input
+              <Input.Password
                 size="large"
-                placeholder="john.doe@example.com"
+                placeholder="Helicone API Key (optional)"
               />
             </Form.Item>
-
-            {selectedProvider === 'anthropic' && (
-              <Form.Item
-                name="openaiEmbeddingsKey"
-                label="OpenAI API Key (for Embeddings)"
-                extra="Required for paper ranking and similarity search when using Anthropic models."
-              >
-                <Input.Password
-                  size="large"
-                  placeholder="OpenAI API key for embeddings"
-                />
-              </Form.Item>
-            )}
-
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
-                  name="heliconeEndpoint"
-                  label="Helicone Endpoint"
-                  extra={
-                    <span>
-                      Use{' '}
-                      <Typography.Link
-                        target="_blank"
-                        href="https://www.helicone.ai/"
-                      >
-                        Helicone.ai
-                      </Typography.Link>{' '}
-                      to track your usage.
-                    </span>
-                  }
-                >
-                  <Input
-                    size="large"
-                    placeholder="Helicone Endpoint (optional)"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="heliconeKey"
-                  label="Helicone Key"
-                >
-                  <Input.Password
-                    size="large"
-                    placeholder="Helicone Key (optional)"
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
 
             <Row gutter={16}>
               <Col span={12}>
@@ -311,6 +326,17 @@ const ModelConfiguration: React.FC = () => {
                 </Form.Item>
               </Col>
             </Row>
+
+            <Form.Item
+              name="email"
+              label="Thomas Üllebecker's Academia-OS Project Updates"
+              extra="Optional: Subscribe to Thomas Üllebecker's updates on original Academia-OS."
+            >
+              <Input
+                size="large"
+                placeholder="your.email@example.com (optional)"
+              />
+            </Form.Item>
           </>
         )}
 

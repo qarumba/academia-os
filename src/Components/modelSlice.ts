@@ -59,10 +59,17 @@ export const loadConfigFromStorage = () => ({
 const modelReducer = (state = initialState, action: any): ModelState => {
   switch (action.type) {
     case SET_MODEL_CONFIG:
+      // Validate that required fields are present
+      const isValidConfig = !!(action.payload.provider && 
+                              action.payload.model && 
+                              action.payload.apiKey &&
+                              // If Anthropic, require OpenAI embeddings key
+                              (action.payload.provider !== 'anthropic' || action.payload.openaiEmbeddingsKey));
+      
       return {
         ...state,
         config: action.payload,
-        isConfigured: true,
+        isConfigured: isValidConfig,
         error: null,
       };
     case CLEAR_MODEL_CONFIG:
@@ -85,11 +92,32 @@ const modelReducer = (state = initialState, action: any): ModelState => {
     case LOAD_CONFIG_FROM_STORAGE:
       const savedConfig = localStorage.getItem('modelConfig');
       if (savedConfig) {
-        return {
-          ...state,
-          config: JSON.parse(savedConfig),
-          isConfigured: true,
-        };
+        try {
+          const parsedConfig = JSON.parse(savedConfig);
+          // Validate that required fields are present
+          const isValidConfig = !!(parsedConfig.provider && 
+                                  parsedConfig.model && 
+                                  parsedConfig.apiKey &&
+                                  // If Anthropic, require OpenAI embeddings key
+                                  (parsedConfig.provider !== 'anthropic' || parsedConfig.openaiEmbeddingsKey));
+          
+          console.log('modelSlice validation:', {
+            provider: parsedConfig.provider,
+            model: parsedConfig.model,
+            hasApiKey: !!parsedConfig.apiKey,
+            hasOpenAIKey: !!parsedConfig.openaiEmbeddingsKey,
+            isValidConfig
+          });
+          
+          return {
+            ...state,
+            config: parsedConfig,
+            isConfigured: isValidConfig,
+          };
+        } catch (error) {
+          console.error('Failed to parse modelConfig from localStorage:', error);
+          return state;
+        }
       }
       return state;
     default:
