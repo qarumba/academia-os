@@ -320,6 +320,28 @@ export const PaperTable = (props: {
               const columnWidth = isTextHeavy ? "400px" : "300px";
               const ellipsisRows = isTextHeavy ? 8 : 5;
               
+              // Clean up keywords by removing common preambles
+              const cleanKeywords = (text: string) => {
+                if (!isKeywords || typeof text !== 'string') return text;
+                
+                // Common patterns to remove
+                const patterns = [
+                  /^Based on the abstract,?\s*(the\s*)?keywords?\s*(would\s*)?(likely\s*)?(include|be):?\s*/i,
+                  /^Keywords?\s*(for this paper\s*)?(would\s*)?(likely\s*)?(include|be):?\s*/i,
+                  /^The\s*keywords?\s*(would\s*)?(likely\s*)?(include|be):?\s*/i,
+                  /^Some\s*keywords?\s*(would\s*)?(likely\s*)?(include|be):?\s*/i,
+                  /^Relevant\s*keywords?\s*(would\s*)?(likely\s*)?(include|be):?\s*/i,
+                  /^Key\s*terms?\s*(would\s*)?(likely\s*)?(include|be):?\s*/i
+                ];
+                
+                let cleaned = text;
+                patterns.forEach(pattern => {
+                  cleaned = cleaned.replace(pattern, '');
+                });
+                
+                return cleaned.trim();
+              };
+              
               return (
                 <Space
                   title={
@@ -337,7 +359,7 @@ export const PaperTable = (props: {
                     style={{ marginBottom: 0 }}>
                     {record[column]
                       ? typeof record[column] === "string"
-                        ? record[column]
+                        ? cleanKeywords(record[column])
                         : Array.isArray(record[column])
                         ? record[column].map((item: any, index: number) => (
                             <Tag key={index} style={{ fontSize: "6pt" }}>{item}</Tag>
