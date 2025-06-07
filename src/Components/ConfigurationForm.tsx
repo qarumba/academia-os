@@ -24,6 +24,7 @@ const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSubmit }) => {
 
   const defaultValues = {
     openAIKey: localStorage.getItem("openAIKey"),
+    anthropicKey: localStorage.getItem("anthropicKey"),
     email: localStorage.getItem("email"),
     heliconeEndpoint: localStorage.getItem("heliconeEndpoint"),
     heliconeKey: localStorage.getItem("heliconeKey"),
@@ -47,6 +48,10 @@ const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSubmit }) => {
       localStorage.setItem(
         "openAIKey",
         values.openAIKey ?? defaultValues.openAIKey ?? ""
+      )
+      localStorage.setItem(
+        "anthropicKey",
+        values.anthropicKey ?? defaultValues.anthropicKey ?? ""
       )
       localStorage.setItem(
         "heliconeEndpoint",
@@ -144,25 +149,56 @@ const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSubmit }) => {
             defaultValue={defaultValues.openAIKey || ""}
           />
         </Form.Item>
+        <Form.Item
+          name='anthropicKey'
+          extra={
+            <span>
+              Optional{" "}
+              <Typography.Link
+                target='_blank'
+                href='https://console.anthropic.com/'>
+                Anthropic key
+              </Typography.Link>{" "}
+              to use Claude models for analysis.
+            </span>
+          }>
+          <Input.Password
+            placeholder='Enter your Anthropic API key (optional)'
+            defaultValue={defaultValues.anthropicKey || ""}
+          />
+        </Form.Item>
         {showMoreOptions && (
           <>
             <Row>
               <Col span={24}>
                 <Form.Item
                   name='modelName'
-                  extra='Select the OpenAI model you want to use'>
+                  extra='Select the AI model you want to use for analysis'>
                   <Select
-                    placeholder='Choose OpenAI Model'
+                    placeholder='Choose AI Model'
                     defaultValue={
                       localStorage.getItem("modelName") || "gpt-4-1106-preview"
                     }>
-                    <Select.Option value='gpt-4-1106-preview'>
-                      GPT-4-1106-Preview (GPT-4 turbo with 128k context window)
-                    </Select.Option>
-                    <Select.Option value='gpt-4'>GPT-4</Select.Option>
-                    <Select.Option value='gpt-3.5-turbo'>
-                      GPT-3.5-Turbo
-                    </Select.Option>
+                    <Select.OptGroup label="OpenAI Models">
+                      <Select.Option value='gpt-4-1106-preview'>
+                        GPT-4-1106-Preview (GPT-4 turbo with 128k context window)
+                      </Select.Option>
+                      <Select.Option value='gpt-4'>GPT-4</Select.Option>
+                      <Select.Option value='gpt-3.5-turbo'>
+                        GPT-3.5-Turbo
+                      </Select.Option>
+                    </Select.OptGroup>
+                    <Select.OptGroup label="Anthropic Models">
+                      <Select.Option value='claude-3-5-sonnet-20241022'>
+                        Claude 3.5 Sonnet (Most capable)
+                      </Select.Option>
+                      <Select.Option value='claude-3-5-haiku-20241022'>
+                        Claude 3.5 Haiku (Fast and efficient)
+                      </Select.Option>
+                      <Select.Option value='claude-3-opus-20240229'>
+                        Claude 3 Opus (Most powerful reasoning)
+                      </Select.Option>
+                    </Select.OptGroup>
                   </Select>
                 </Form.Item>
               </Col>

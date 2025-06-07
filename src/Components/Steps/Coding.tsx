@@ -4,6 +4,8 @@ import { PaperTable } from "../PaperTable"
 import { useEffect, useState } from "react"
 import { asyncMap } from "../../Helpers/asyncMap"
 import { OpenAIService } from "../../Services/OpenAIService"
+import { ChatService } from "../../Services/ChatService"
+import { HumanMessage, SystemMessage } from "langchain/schema"
 import Mermaid from "../Charts/Mermaid"
 import { GioiaCoding } from "../Charts/GioiaCoding"
 import { LoadingOutlined } from "@ant-design/icons"
@@ -34,10 +36,69 @@ export const CodingStep = (props: {
     newPapers = await asyncMap(newPapers, async (paper, index) => {
       const newPaper = { ...paper } as AcademicPaper
       if (newPaper["Initial Codes"]) return newPaper
-      newPaper["Initial Codes"] = await OpenAIService.initialCodingOfPaper(
-        newPaper,
-        props.modelData?.remarks
-      )
+      try {
+        const model = ChatService.createChatModel({ maxTokens: 3000 })
+        
+        // Use the same chunking logic as OpenAIService for consistency
+        let fullText = newPaper?.fullText
+        let chunks = []
+
+        if ((newPaper?.fullText?.length || 0) > 5000) {
+          const { CharacterTextSplitter } = require("langchain/text_splitter")
+          const splitter = new CharacterTextSplitter({
+            separator: " ",
+            chunkSize: 10000,
+            chunkOverlap: 50,
+          })
+          const output = await splitter.createDocuments(
+            [`${newPaper?.title || ""} ${newPaper?.fullText || ""}`],
+            [{ id: newPaper?.id || newPaper?.corpusId }]
+          )
+          chunks.push(...(output || []))
+        } else {
+          chunks.push({
+            id: newPaper?.id || newPaper?.corpusId,
+            pageContent: fullText,
+          })
+        }
+
+        // Process chunks and collect codes
+        let initialCodesArray = [] as string[]
+        const { asyncForEach } = require("../../Helpers/asyncForEach")
+        
+        await asyncForEach(chunks, async (chunk: any, index: number) => {
+          const result = await model.predictMessages(
+            [
+              new SystemMessage(
+                'You are tasked with applying the initial coding phase of the Gioia method to the provided academic paper. In this phase, scrutinize the text to identify emergent themes, concepts, or patterns. Your output should be a JSON object with an array of strings no longer than 7 words, each representing a distinct initial code in the language of the raw source. For example, your output should be in this format: {"codes": string[]}. Ensure to return ONLY a proper JSON array of strings.'
+              ),
+              new HumanMessage(
+                `${newPaper?.title}\n${
+                  chunk.pageContent
+                }\n\nPerform initial coding according to the Gioia method on the given paper.${
+                  props.modelData?.remarks ? ` Remark: ${props.modelData?.remarks}. ` : ""
+                } Return a JSON object.`
+              ),
+            ],
+            { response_format: { type: "json_object" } }
+          )
+
+          try {
+            const codes = result?.content
+              ? JSON.parse((result?.content as string)?.replace(/\\n/g, " "))
+                  ?.codes
+              : []
+            initialCodesArray.push(...codes)
+          } catch (error) {
+            console.log(error, result?.content)
+          }
+        })
+
+        newPaper["Initial Codes"] = initialCodesArray
+      } catch (error) {
+        ChatService.handleError(error)
+        newPaper["Initial Codes"] = []
+      }
       setInitialCodesCount((count) => count + newPaper["Initial Codes"].length)
       return newPaper
     })
@@ -63,22 +124,118 @@ export const CodingStep = (props: {
 
   const loadFocusCodes = async (codes: string[]) => {
     setSecondOrderLoading(true)
-    const secondOrderCodes = await OpenAIService.secondOrderCoding(codes)
-    setFocusCodes(secondOrderCodes)
-    setSecondOrderLoading(false)
-    setCurrent(1)
-    return secondOrderCodes
+    
+    try {
+      const model = ChatService.createChatModel({ maxTokens: 2000 })
+      
+      // Use the same chunking logic as OpenAIService for consistency
+      let chunks = []
+      const jsonString = JSON.stringify(codes)
+
+      if ((jsonString.length || 0) > 5000) {
+        const { CharacterTextSplitter } = require("langchain/text_splitter")
+        const splitter = new CharacterTextSplitter({
+          separator: " ",
+          chunkSize: 5000,
+          chunkOverlap: 50,
+        })
+        const output = await splitter.createDocuments([jsonString], [{}])
+        chunks.push(...(output || []))
+      } else {
+        chunks.push({
+          pageContent: jsonString,
+        })
+      }
+
+      // Initialize array to hold codes for each chunk
+      const secondOrderCodes = {} as any
+      const { asyncForEach } = require("../../Helpers/asyncForEach")
+      const { uniqBy } = require("../../Helpers/uniqBy")
+
+      // Loop through each chunk and apply initial coding
+      await asyncForEach(chunks, async (chunk: any, index: number) => {
+        const result = await model.predictMessages(
+          [
+            new SystemMessage(
+              'You are tasked with applying the 2nd Order Coding phase of the Gioia method. In this phase, identify higher-level themes or categories that aggregate the initial codes. Your output should be a JSON-formatted object mapping each higher-level theme to an array of initial codes that belong to it. As a general example, "employee sentiment" could be a 2nd order code to 1st level codes "Positive feelings toward new policy" and "Sense of control" Your output should look like this, where the keys are the higher-level concepts: {"Some higher-Level theme": ["some initial code", "another initial code"], "Another higher-level theme": ["some initial code"]}.'
+            ),
+            new HumanMessage(
+              `Part of the initial codes are as follows: ${chunk.pageContent}\n\nPerform 2nd Order Coding according to the Gioia method and return a JSON object of 12 focus codes.`
+            ),
+          ],
+          { response_format: { type: "json_object" } }
+        )
+        
+        try {
+          const newSecondOrderCodes = result?.content
+            ? JSON.parse((result?.content as string)?.replace(/\\n/g, " "))
+            : {}
+          Object.keys(newSecondOrderCodes).forEach((key) => {
+            secondOrderCodes[key] = uniqBy(
+              [...(secondOrderCodes[key] || []), ...newSecondOrderCodes[key]],
+              (item: any) => item
+            )
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      })
+      
+      setFocusCodes(secondOrderCodes)
+      setSecondOrderLoading(false)
+      setCurrent(1)
+      return secondOrderCodes
+    } catch (error) {
+      ChatService.handleError(error)
+      setSecondOrderLoading(false)
+      return {}
+    }
   }
 
   const loadAggregateDimensions = async (codes: {
     [code: string]: string[]
   }) => {
     setAggregateLoading(true)
-    const aggregateDimensions = await OpenAIService.aggregateDimensions(codes)
-    setAggregateDimensions(aggregateDimensions)
-    setAggregateLoading(false)
-    setCurrent(2)
-    return aggregateDimensions
+    
+    try {
+      const model = ChatService.createChatModel({ maxTokens: 2000 })
+      
+      // Convert the JSON object of 2nd order codes into a JSON string
+      const jsonString = JSON.stringify(Object.keys(codes))
+
+      // Create a message prompt for the Aggregate Dimensions phase
+      const result = await model.predictMessages(
+        [
+          new SystemMessage(
+            'You are tasked with applying the Aggregate Dimensions phase of the Gioia method. In this phase, identify overarching theoretical dimensions (5-7) that aggregate the 2nd order codes. Your output should be a JSON-formatted object mapping each aggregate dimension to an array of 2nd order codes that belong to it. As a (probably unrelated) general example, "Policy Usability" could make for a good, quantifiable dimension. Your output should look like this, where the keys are the (quantifiable) dimensions: {"some dim": ["theme", "another theme"], "another dim": ["theme123"]}. Ensure that the aggregate dimensions are grounded in the themes and to return ONLY a proper JSON object.'
+          ),
+          new HumanMessage(
+            `The 2nd order codes are as follows: ${jsonString}\n\nPerform aggregation into theoretical dimensions according to the Gioia method and return a JSON object.`
+          ),
+        ],
+        { response_format: { type: "json_object" } }
+      )
+
+      // Parse the output and return
+      try {
+        const aggregateDimensions = result?.content
+          ? JSON.parse((result?.content as string)?.replace(/\\n/g, " "))
+          : {}
+          
+        setAggregateDimensions(aggregateDimensions)
+        setAggregateLoading(false)
+        setCurrent(2)
+        return aggregateDimensions
+      } catch (error) {
+        console.log(error)
+        setAggregateLoading(false)
+        return {}
+      }
+    } catch (error) {
+      ChatService.handleError(error)
+      setAggregateLoading(false)
+      return {}
+    }
   }
 
   const load = async () => {
