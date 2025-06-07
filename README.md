@@ -24,10 +24,10 @@ Join Thomas Üllebecker's [Slack Community](https://join.slack.com/t/academiaos/
 * **Instantly Extract Key Data from Papers**: View the Title and Abstract of papers and add columns for Findings, Variables etc. with a click.
 * **Upload PDFs**: If you have curated papers or other qualitative documents (such as interview transcripts) as PDFs, you can upload them for downstream tasks. Text-PDFs are handled in-browser while scanned PDFs are OCRd using Adobe PDF Extract API.
 * **Information Extraction at Scale**: Structurally extract information (such as a paper's sentiment towards your thesis or information such as the count of study participants) from papers at scale.
-* **Automated Literature Review**: Navigate literature via Semantic Scholar with a clean and intuitive interface.
-* **Coding of Qualitative Literature**: Let AI code your interviews, social media posts or other qualitative literature.
-* **Proposed Theory Construction**: Get a theoretical model as a Mermaid diagram explaining your qualitative data in just a few steps and apply human-in-the-loop critique to theoretical propositions.
-* * **Track Inference with Helicone**: Updated async integration with HeliconeAI's open-source LLM observability platform for developers to monitor, debug, and improve production-ready applications.
+* **Thematic Literature Analysis**: Navigate literature via Semantic Scholar with a clean and intuitive interface, and auto-code themes.
+* **Coding of Qualitative Data**: Let AI preliminarily code your interviews, social media posts or other qualitative literature, and export as .csv for refinement in your CAQDAS software.
+* **Proposed Theory Construction**: Output a proposed theoretical model from your qualitative data, as a Mermaid diagram, in just a few steps and apply your own human-in-the-loop critique to outputs.
+* **Monitor Inference with Helicone**: Updated async integration with HeliconeAI's open-source LLM observability platform for developers to monitor, debug, and improve production-ready applications.
 
 ## 🔧 Getting Started 
 
