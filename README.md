@@ -45,18 +45,43 @@ To get started with AcademiaOS, you require [Node.js](https://nodejs.org/en/down
 
 ## 👨‍💻 Development Mode  
 
-### `npm start`
+### Full Stack Development (Recommended)
 
-Initiates the application in the development mode.\
-Use [http://localhost:3000](http://localhost:3000) to view the application on your browser.
+**Quick Setup:**
+```bash
+npm run setup    # Install all dependencies (client + server)
+npm run dev      # Start both React client and Helicone server
+```
 
-The application reloads automatically if any edits are made.\
-Any lint errors are visible in the console.
+This starts:
+- React client on [http://localhost:3000](http://localhost:3000)
+- Helicone API server on [http://localhost:3001](http://localhost:3001)
 
-### `npm test`
+### Individual Components
 
-Initiates the test runner in the interactive watch mode.\
-Visit the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for further information.
+**Client Only:**
+```bash
+npm start        # React development server only
+npm test         # Test runner in interactive watch mode
+npm run build    # Production build
+```
+
+**Server Only (Helicone API Proxy):**
+```bash
+npm run server:install  # Install server dependencies
+npm run server:dev      # Start server with auto-restart
+npm run server          # Start server (production mode)
+```
+
+### Helicone Integration Requirements
+
+⚠️ **Important**: The Helicone monitoring features require the server to be running due to CORS restrictions. The server proxies API requests to Helicone's endpoints.
+
+- **Real-time cost tracking**: Requires server
+- **API monitoring dashboard**: Requires server  
+- **Connection testing**: Requires server
+
+Without the server, Helicone configuration is still used for AI model requests but monitoring features are disabled.
 
 ## 🏭 Production Build 
 

@@ -91,6 +91,7 @@ const Workflow = (props: { tabKey?: string }) => {
 
   const evaluate = async (query: string, searchResults: AcademicPaper[]) => {
     setRelevancyLoading(true)
+    setCurrentOperation('Ranking papers by relevance...')
     try {
       const relevantResults = query
         ? await RankingService.rankPapers(
@@ -108,6 +109,7 @@ const Workflow = (props: { tabKey?: string }) => {
       }))
     }
     setRelevancyLoading(false)
+    setCurrentOperation('')
     setCurrent(2)
   }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Drawer, 
   Card, 
@@ -37,7 +37,29 @@ export const HeliconeMonitor: React.FC<HeliconeMonitorProps> = ({
 }) => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [connectionTest, setConnectionTest] = useState<{ success: boolean; message: string } | null>(null);
   const [sessionStartTime] = useState(HeliconeService.getSessionStartTime() || new Date());
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const sessionStats = await HeliconeService.safeApiCall(
+        () => HeliconeService.getSessionStats(sessionStartTime),
+        {
+          total_requests: 0,
+          total_cost: 0,
+          total_tokens: 0,
+          average_response_time: 0,
+          success_rate: 0,
+          recent_requests: []
+        }
+      );
+      setStats(sessionStats);
+    } catch (error) {
+      console.error('Failed to fetch Helicone stats:', error);
+    }
+    setLoading(false);
+  }, [sessionStartTime]);
 
   useEffect(() => {
     if (visible && HeliconeService.isHeliconeConfigured()) {
@@ -46,16 +68,12 @@ export const HeliconeMonitor: React.FC<HeliconeMonitorProps> = ({
       const interval = isProcessing ? setInterval(fetchStats, 10000) : null;
       return () => { if (interval) clearInterval(interval); };
     }
-  }, [visible, isProcessing]);
+  }, [visible, isProcessing, fetchStats]);
 
-  const fetchStats = async () => {
+  const testConnection = async () => {
     setLoading(true);
-    try {
-      const sessionStats = await HeliconeService.getSessionStats(sessionStartTime);
-      setStats(sessionStats);
-    } catch (error) {
-      console.error('Failed to fetch Helicone stats:', error);
-    }
+    const result = await HeliconeService.testConnection();
+    setConnectionTest(result);
     setLoading(false);
   };
 
@@ -78,6 +96,9 @@ export const HeliconeMonitor: React.FC<HeliconeMonitorProps> = ({
     );
   }
 
+  // Check if we have CORS issues (development limitation)
+  const hasCorsIssues = stats === null && !loading;
+
   return (
     <Drawer
       title={
@@ -93,6 +114,17 @@ export const HeliconeMonitor: React.FC<HeliconeMonitorProps> = ({
       width={400}
     >
       <Space direction="vertical" style={{ width: '100%' }}>
+        
+        {/* CORS Limitation Notice */}
+        {hasCorsIssues && (
+          <Alert
+            message="Development Limitation"
+            description="Helicone API monitoring is blocked by CORS in development mode. Cost tracking will work when AI models make actual requests. In production, use a proxy server for full monitoring capabilities."
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
         
         {/* Current Operation */}
         {isProcessing && currentOperation && (
@@ -187,15 +219,37 @@ export const HeliconeMonitor: React.FC<HeliconeMonitorProps> = ({
           />
         </Card>
 
+        {/* Connection Test Results */}
+        {connectionTest && (
+          <Card size="small">
+            <Alert
+              message={connectionTest.success ? "Connection Test Passed" : "Connection Test Failed"}
+              description={connectionTest.message}
+              type={connectionTest.success ? "success" : "error"}
+              showIcon
+            />
+          </Card>
+        )}
+
         {/* Controls */}
         <Card size="small">
-          <Space>
-            <Button onClick={fetchStats} loading={loading}>
-              Refresh
-            </Button>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Space>
+              <Button onClick={fetchStats} loading={loading}>
+                Refresh Data
+              </Button>
+              <Button 
+                onClick={testConnection} 
+                loading={loading}
+                type="default"
+              >
+                Test Connection
+              </Button>
+            </Space>
             <Button 
               onClick={() => HeliconeService.startSession()} 
               type="dashed"
+              block
             >
               Reset Session
             </Button>

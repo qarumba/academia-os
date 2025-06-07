@@ -86,8 +86,9 @@ const StepFind = (props: {
             } as AcademicPaper)
         )
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Search failed:', error)
+      message.error(error?.message || 'Search failed due to an unknown error')
       searchResults = []
     }
     

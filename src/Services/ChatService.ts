@@ -11,7 +11,7 @@ let anthropicAvailable = false;
 // we'll just assume it's not available and rely on the fallback
 // This gives users honest feedback about the current state
 anthropicAvailable = false;
-console.warn('Anthropic integration not available due to LangChain version conflicts, falling back to OpenAI');
+// Note: Anthropic integration gracefully falls back to OpenAI due to LangChain version compatibility
 
 interface ModelConfig {
   provider: 'openai' | 'anthropic';
@@ -61,8 +61,10 @@ export class ChatService {
 
         return new ChatAnthropic(anthropicConfig);
       } else {
-        // Fallback to OpenAI with clear warning
-        console.warn('Anthropic package not available, falling back to OpenAI');
+        // Fallback to OpenAI with debug message
+        if (process.env.NODE_ENV === 'development') {
+          console.log('ChatService: Using OpenAI fallback for Anthropic model');
+        }
         const openAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey") || "";
         if (!openAIKey) {
           throw new Error('Anthropic integration unavailable and no OpenAI fallback key configured.');

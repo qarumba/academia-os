@@ -21,6 +21,10 @@ interface HeliconeStats {
 }
 
 export class HeliconeService {
+  private static readonly API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? '/api/helicone' 
+    : 'http://localhost:3001/api/helicone';
+
   private static getHeliconeConfig() {
     const modelConfig = localStorage.getItem("modelConfig");
     if (modelConfig) {
@@ -66,25 +70,41 @@ export class HeliconeService {
   }
 
   /**
-   * Fetch recent requests from Helicone API
+   * Fetch recent requests from Helicone API via server proxy
    */
   static async getRecentRequests(limit: number = 50): Promise<HeliconeRequest[]> {
     const config = this.getHeliconeConfig();
     if (!config?.key) return [];
 
     try {
-      const response = await fetch(`https://api.helicone.ai/v1/request`, {
+      const response = await fetch(`${this.API_BASE_URL}/requests`, {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${config.key}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          apiKey: config.key,
+          limit
+        })
       });
 
-      if (!response.ok) throw new Error('Helicone API request failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        if (response.status === 401) {
+          console.warn('Helicone API: Invalid or missing API key. Please check your Helicone configuration.');
+        } else {
+          console.warn(`Helicone API request failed: ${response.status}`, errorData);
+        }
+        return [];
+      }
       
       const data = await response.json();
       return data.data || [];
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message?.includes('fetch')) {
+        console.error('Helicone server unavailable. Please ensure the server is running on port 3001.');
+        return [];
+      }
       console.error('Failed to fetch Helicone data:', error);
       return [];
     }
@@ -125,5 +145,65 @@ export class HeliconeService {
   static getSessionStartTime(): Date | null {
     const startTime = localStorage.getItem('academia_session_start');
     return startTime ? new Date(startTime) : null;
+  }
+
+  /**
+   * Test Helicone API connectivity via server proxy
+   */
+  static async testConnection(): Promise<{ success: boolean; message: string }> {
+    const config = this.getHeliconeConfig();
+    if (!config?.key) {
+      return { success: false, message: 'No Helicone API key configured' };
+    }
+
+    // Debug logging to see what's being sent
+    console.log('Debug: Testing Helicone with key:', config.key ? `${config.key.substring(0, 15)}...` : 'None');
+    console.log('Debug: Using server proxy at:', this.API_BASE_URL);
+
+    try {
+      const response = await fetch(`${this.API_BASE_URL}/test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          apiKey: config.key
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown server error' }));
+        return { 
+          success: false, 
+          message: errorData.message || `Server error: ${response.status}` 
+        };
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error: any) {
+      if (error?.message?.includes('fetch')) {
+        return { 
+          success: false, 
+          message: 'Cannot connect to Helicone server. Please ensure the server is running on port 3001.' 
+        };
+      }
+      return { 
+        success: false, 
+        message: `Connection failed: ${error instanceof Error ? error.message : String(error)}` 
+      };
+    }
+  }
+
+  /**
+   * Safely handle API requests with graceful fallback
+   */
+  static async safeApiCall<T>(apiCall: () => Promise<T>, fallbackValue: T): Promise<T> {
+    try {
+      return await apiCall();
+    } catch (error) {
+      console.warn('Helicone API call failed, using fallback:', error);
+      return fallbackValue;
+    }
   }
 }

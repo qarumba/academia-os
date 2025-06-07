@@ -101,13 +101,16 @@ const modelReducer = (state = initialState, action: any): ModelState => {
                                   // If Anthropic, require OpenAI embeddings key
                                   (parsedConfig.provider !== 'anthropic' || parsedConfig.openaiEmbeddingsKey));
           
-          console.log('modelSlice validation:', {
-            provider: parsedConfig.provider,
-            model: parsedConfig.model,
-            hasApiKey: !!parsedConfig.apiKey,
-            hasOpenAIKey: !!parsedConfig.openaiEmbeddingsKey,
-            isValidConfig
-          });
+          // Only log validation in development mode and when there are issues
+          if (process.env.NODE_ENV === 'development' && !isValidConfig) {
+            console.log('modelSlice validation:', {
+              provider: parsedConfig.provider,
+              model: parsedConfig.model,
+              hasApiKey: !!parsedConfig.apiKey,
+              hasOpenAIKey: !!parsedConfig.openaiEmbeddingsKey,
+              isValidConfig
+            });
+          }
           
           return {
             ...state,

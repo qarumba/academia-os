@@ -81,10 +81,12 @@ const ModelConfiguration: React.FC = () => {
     ChatService.isAnthropicAvailable().then(setAnthropicAvailable);
   }, []);
 
-  // Debug logging
+  // Debug logging (only in development)
   useEffect(() => {
-    console.log('ModelConfiguration: isConfigured =', isConfigured);
-    console.log('ModelConfiguration: anthropicAvailable =', anthropicAvailable);
+    if (process.env.NODE_ENV === 'development' && !isConfigured) {
+      console.log('ModelConfiguration: isConfigured =', isConfigured);
+      console.log('ModelConfiguration: anthropicAvailable =', anthropicAvailable);
+    }
   }, [isConfigured, anthropicAvailable]);
 
   // Load saved configuration from localStorage
