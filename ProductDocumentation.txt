@@ -1,0 +1,138 @@
+ACADEMIAOS 2.0 - PRODUCT DOCUMENTATION
+
+1. PRODUCT OVERVIEW
+
+AcademiaOS 2.0 is a React/TypeScript application for academic information retrieval and automated qualitative research. This enhanced fork of Thomas Üllebecker's AcademiaOS provides AI-powered tools for literature analysis, theory development, and qualitative coding using the Gioia methodology.
+
+Version 2.0 Enhancements:
+- Multi-provider AI model support (OpenAI, Anthropic Claude)
+- Helicone integration for API monitoring
+- Enhanced user interface with loading states
+- Updated LangChain integration
+- Complete Gioia methodology automation
+
+Academic Foundation:
+Based on Thomas Üllebecker's research: "AcademiaOS: Automating Grounded Theory Development in Qualitative Research with Large Language Models" (arXiv:2403.08844)
+
+2. TARGET AUDIENCE
+
+Primary Users:
+- Academic researchers conducting qualitative studies
+- Graduate students working on dissertations
+- Research teams analyzing large datasets
+- Social scientists using grounded theory methodologies
+- Institutions seeking to enhance research capabilities
+
+Key Use Cases:
+- Literature reviews and paper analysis
+- Qualitative data coding (interviews, transcripts, documents)
+- Theory construction and validation
+- Academic paper information extraction
+- Multi-document thematic analysis
+- Research methodology education and training
+
+3. TECHNICAL ARCHITECTURE
+
+Frontend Stack:
+- React 18.2.0 with TypeScript 4.9.5
+- Ant Design 5.9.0 (UI components)
+- Redux 4.2.1 (state management)
+- Mermaid 10.4.0 (visualization)
+- PDF.js 3.10.111 (document processing)
+
+Backend Services:
+- Node.js server for Helicone API proxy
+- Express.js for API endpoints
+
+AI Integration:
+- LangChain 0.0.190 (scheduled for v0.3.27 upgrade)
+- @langchain/anthropic 0.3.21
+- OpenAI API integration
+- Anthropic API integration (@anthropic-ai/sdk 0.9.1)
+
+External APIs:
+- Semantic Scholar API (academic paper search)
+- Helicone (AI model monitoring)
+- Adobe PDF Extract API (OCR processing)
+
+Architecture Patterns:
+- Model Configuration System with ModelConfigurationGuard
+- Redux state management for configuration persistence
+- Service Layer Pattern for business logic separation
+- Workflow-based UI with step components
+
+4. CORE FEATURES
+
+Academic Literature Management:
+- Semantic Scholar corpus integration
+- Automated paper search and ranking
+- PDF upload and text extraction
+- Custom column extraction for metadata
+
+Qualitative Analysis Workflow:
+- Complete Gioia methodology automation
+- First-order coding (initial themes)
+- Second-order coding (theme aggregation)
+- Aggregate dimensions (theoretical constructs)
+- Theory construction and model development
+- Interactive theory visualization
+- Human-in-the-loop critique and iteration
+
+AI Model Configuration:
+- Unified interface for OpenAI and Anthropic models
+- Automatic fallback handling
+- OpenAI embeddings support for all providers
+- API key management with validation
+
+Monitoring and Analytics:
+- Helicone integration for AI inference monitoring
+- Cost tracking and budget management
+- API usage analytics
+- Performance metrics
+
+5. DEVELOPMENT COMMANDS
+
+Local Development:
+- npm start: Development server (http://localhost:3000)
+- npm test: Test runner in interactive watch mode
+- npm run build: Production bundle
+- npm install: Install dependencies
+
+Full Stack Development:
+- npm run setup: Install all dependencies (client + server)
+- npm run dev: Start both React client and Helicone server
+- npm run server: Start Helicone API server only
+
+6. DEPLOYMENT
+
+Build Process:
+- npm run build creates optimized production bundle
+- Minified React bundle with hash-based filenames
+- Docker support with included Dockerfile and docker-compose.yml
+
+Requirements:
+- Node.js (latest LTS)
+- OpenAI API key (required for embeddings)
+- Optional: Anthropic API key, Helicone API key, Adobe PDF Extract API credentials
+
+7. LICENSING
+
+License: MIT License (2023 Thomas Übellacker)
+- Commercial use permitted
+- Modification and distribution permitted
+- Include copyright notice in distributions
+
+Attribution:
+- Original work by Thomas Üllebecker
+- AcademiaOS 2.0 enhancements by A Helme and Claude 4 Sonnet
+- Commercial services under academia-os.org domain reserved for Thomas Üllebecker
+
+8. COMMUNITY RESOURCES
+
+Repository: https://github.com/qarumba/academia-os
+Original Project: https://github.com/thomasuebi/academia-os
+Live Demo (v1.0): https://academia-os.org
+Slack Community: https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ
+
+Last Updated: June 8, 2025
+Version: 2.0

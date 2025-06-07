@@ -1,0 +1,194 @@
+ACADEMIAOS 2.0 - DOMAIN MODELS & ENTITIES
+
+1. CORE ENTITIES
+
+AcademicPaper
+- Extends Semantic Scholar Paper interface
+- Properties: fullText, id, title, abstract, authors, year, venue, citationCount
+- Purpose: Represents research papers from Semantic Scholar API
+
+ModelData
+- Central entity for qualitative research workflow
+- Properties: query, firstOrderCodes, secondOrderCodes, aggregateDimensions
+- Properties: modelDescription, modelName, modelVisualization, remarks
+- Properties: papers, interrelationships, applicableTheories, critique
+- Purpose: Contains complete Gioia methodology analysis results
+
+2. CONFIGURATION MODELS
+
+ModelConfig
+- Properties: provider ('openai' | 'anthropic'), model, apiKey
+- Properties: openaiEmbeddingsKey, email, heliconeEndpoint, heliconeKey
+- Properties: adobePDFOCR_client_id, adobePDFOCR_client_secret
+- Purpose: AI model configuration and credentials
+
+ModelState (Redux)
+- Properties: config (ModelConfig), isConfigured, isLoading, error
+- Purpose: Redux state for model configuration management
+
+3. MONITORING ENTITIES
+
+HeliconeRequest
+- Properties: id, model, prompt_tokens, completion_tokens, total_tokens
+- Properties: cost, status ('success' | 'error' | 'pending'), created_at
+- Properties: provider, user_id
+- Purpose: Individual AI API request tracking
+
+HeliconeStats
+- Properties: total_requests, total_cost, total_tokens
+- Properties: average_response_time, success_rate, recent_requests
+- Purpose: Aggregated usage statistics
+
+4. UI MODELS
+
+Theme
+- Type: "light" | "dark"
+- Purpose: Application theme configuration
+
+Tab
+- Properties: label, children (React.ReactNode), key
+- Purpose: Workflow tab representation
+
+SearchLoadingState
+- Properties: isSearching, isProcessing, isRanking
+- Properties: currentPhase, progress
+- Purpose: Search operation progress tracking
+
+5. COMPONENT PROPS INTERFACES
+
+CodingStepProps
+- Properties: modelData (ModelData), onModelDataChange (callback)
+- Purpose: Qualitative coding component interface
+
+FindStepProps
+- Properties: onFinish (callback), onLoadingChange (optional callback)
+- Purpose: Literature search component interface
+
+ModelingStepProps
+- Properties: modelData (ModelData), onModelDataChange (callback)
+- Purpose: Theory construction component interface
+
+PaperTableProps
+- Properties: papers (AcademicPaper[]), loading, onPapersChange (optional)
+- Purpose: Academic paper table component interface
+
+6. SERVICE INTERFACES
+
+ChatServiceConfig
+- Properties: maxTokens, temperature, model (all optional)
+- Purpose: Configuration for AI chat models
+
+EmbeddingConfig
+- Properties: openAIApiKey, baseOptions (optional headers)
+- Purpose: Vector embedding configuration
+
+SearchResult
+- Properties: papers (AcademicPaper[]), total, hasMore
+- Purpose: Academic paper search result structure
+
+7. GIOIA METHODOLOGY MODELS
+
+GioiaMethodologyStep
+- Type: 'initial_coding' | 'second_order_coding' | 'aggregate_dimensions'
+       | 'theory_construction' | 'critique_iteration'
+- Purpose: Enumeration of coding phases
+
+CodingResult
+- Properties: codes (string[]), confidence, rationale, processedChunks
+- Purpose: Results from qualitative coding operation
+
+TheoryConstructionResult
+- Properties: modelName, description, visualization
+- Properties: concepts, relationships, evidence
+- Purpose: Theory development output
+
+8. VALIDATION MODELS
+
+ValidationResult
+- Properties: isValid, errors (string[]), warnings (string[])
+- Purpose: Configuration validation result
+
+APIErrorResponse
+- Properties: error, code, details, timestamp
+- Purpose: Standardized API error format
+
+ProcessingStatus
+- Properties: phase, progress (0-100), message, estimatedTimeRemaining
+- Purpose: Long-running operation status
+
+9. REDUX ACTION TYPES
+
+Model Configuration Actions:
+- SET_MODEL_CONFIG, CLEAR_MODEL_CONFIG, SET_LOADING
+- SET_ERROR, LOAD_CONFIG_FROM_STORAGE
+
+Tab Management Actions:
+- ADD_TAB, REMOVE_TAB, RENAME_TAB
+
+10. EXTERNAL INTEGRATION MODELS
+
+SemanticScholarMetadata
+- Properties: paperId, externalIds (DOI, ArXiv, PubMed), url
+- Properties: venue, year, referenceCount, citationCount
+- Properties: isOpenAccess, fieldsOfStudy
+- Purpose: Extended paper metadata from Semantic Scholar
+
+HeliconeConfiguration
+- Properties: endpoint, apiKey, headers, provider
+- Purpose: Helicone monitoring setup
+
+11. UTILITY TYPES
+
+AsyncOperationResult<T>
+- Properties: success, data (T), error, duration
+- Purpose: Generic async operation wrapper
+
+Pagination
+- Properties: page, limit, total, hasNext
+- Purpose: Generic pagination parameters
+
+LoadingState
+- Type: 'idle' | 'loading' | 'success' | 'error'
+- Purpose: Generic loading state management
+
+12. RESEARCH QUALITY MODELS
+
+QualityMetrics
+- Properties: codeConsistency, theoreticalNovelty, evidenceSupport
+- Properties: methodologicalRigor, overallQuality
+- Purpose: Research quality assessment
+
+ResearchAuditTrail
+- Properties: sessionId, startTime, endTime, steps
+- Properties: qualityMetrics, userInterventions
+- Purpose: Complete research process documentation
+
+13. STORAGE MODELS
+
+LocalStorageKeys
+- Constants: MODEL_CONFIG, OPENAI_KEY, MODEL_NAME, THEME_PREFERENCE
+- Constants: RESEARCH_SESSION, USER_PREFERENCES
+- Purpose: Standardized storage key enumeration
+
+UserPreferences
+- Properties: theme, defaultModel, autoSave, maxTokens
+- Properties: showAdvanced, notifications
+- Purpose: Personalization settings
+
+14. ENTITY RELATIONSHIPS
+
+Core Flow:
+AcademicPaper[] → ModelData → GioiaMethodologyStep → TheoryConstructionResult
+
+Configuration:
+ModelConfig → ModelState → LocalStorage → Service Layer
+
+Monitoring:
+HeliconeRequest[] → HeliconeStats → HeliconeMonitor Component
+
+UI State:
+Theme → ThemeContext → Component Props → Rendered UI
+
+This domain model supports complete AI-powered qualitative research workflows with multi-provider model management, comprehensive monitoring, and robust state management.
+
+Last Updated: June 8, 2025

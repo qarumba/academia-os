@@ -1,0 +1,215 @@
+ACADEMIAOS 2.0 - SERVICES LAYER ARCHITECTURE
+
+1. SERVICE OVERVIEW
+
+The services layer implements business logic for AI-powered qualitative research using the Service Layer Pattern. All services are static classes providing global accessibility with centralized configuration management through localStorage.
+
+Core Services:
+- ChatService: Multi-provider AI chat model management
+- EmbeddingService: Vector embeddings and similarity search
+- OpenAIService: Gioia methodology implementation and qualitative analysis
+- ModelService: Model configuration validation and management
+- HeliconeService: AI API monitoring and cost tracking
+- LangChainService: LangChain framework integration
+- PDFService: Document processing and text extraction
+- SearchService: Academic paper search via Semantic Scholar
+- RankingService: Paper relevance scoring and ordering
+
+2. CHATSERVICE - MULTI-PROVIDER AI ABSTRACTION
+
+Purpose: Unified interface for OpenAI and Anthropic models with graceful fallbacks
+
+Key Methods:
+- getModelConfig(): Retrieve configuration from localStorage
+- createChatModel(options): Create configured chat model instance
+- isAnthropicAvailable(): Check Anthropic integration status
+- simpleChat(system, user, options): Execute simple chat interaction
+- getEmbeddings(): Get OpenAI embeddings instance
+
+Configuration Handling:
+- Reads provider, model, and API keys from localStorage
+- Automatic fallback from Anthropic to OpenAI when needed
+- Helicone integration for both providers
+- Transparent error messaging for unsupported configurations
+
+Architectural Pattern:
+- Static factory methods for model creation
+- Provider abstraction with fallback handling
+- Configuration-driven behavior
+- Centralized error handling
+
+3. EMBEDDINGSERVICE - VECTOR EMBEDDINGS MANAGEMENT
+
+Purpose: Unified interface for creating vector embeddings using OpenAI
+
+Key Methods:
+- createEmbeddings(): Create configured embeddings instance
+- embedQuery(text): Generate embedding for single text
+- embedDocuments(texts): Generate embeddings for multiple texts
+
+Implementation Details:
+- Always uses OpenAI embeddings for compatibility
+- Supports both OpenAI and Anthropic primary models
+- Requires OpenAI key for embeddings when using Anthropic
+- Helicone integration for cost tracking
+
+4. OPENAISERVICE - GIOIA METHODOLOGY IMPLEMENTATION
+
+Purpose: Complete qualitative analysis using Gioia methodology
+
+Core Gioia Methods:
+- initialCodingOfPaper(paper, remarks): First-order coding
+- secondOrderCoding(codes): Theme aggregation  
+- aggregateDimensions(secondOrderCodes): Theoretical dimensions
+- modelConstruction(modelData, remarks): Theory construction
+- modelVisualization(modelData): Mermaid diagram generation
+- critiqueModel(modelData): AI model critique
+
+Supporting Methods:
+- streamCompletion(prompt, callback): Real-time streaming
+- getDetailAboutPaper(paper, detail): Information extraction
+- findTentativeResearchQuestions(papers): Research question generation
+- brainstormApplicableTheories(dimensions): Theory identification
+- conceptTuples(modelData): Concept relationship generation
+- findRelevantParagraphsAndSummarize(modelData, tuples): Evidence analysis
+
+Implementation Features:
+- Document chunking for large texts (10,000 character chunks)
+- Vector similarity search for evidence gathering
+- JSON response formatting for structured data
+- Comprehensive error handling with user feedback
+- Integration with ChatService for model selection
+
+5. MODELSERVICE - CONFIGURATION VALIDATION
+
+Purpose: Validate and manage AI model configurations
+
+Key Methods:
+- isModelConfigured(): Check if valid configuration exists
+- getModelConfig(): Retrieve current configuration
+- hasOpenAIKey(): Verify OpenAI key availability
+
+Validation Logic:
+- Checks required fields (provider, model, apiKey)
+- Validates Anthropic configurations require OpenAI embeddings key
+- Supports legacy OpenAI key fallback
+- JSON parsing with error handling
+
+6. HELICONESERVICE - API MONITORING & COST TRACKING
+
+Purpose: Monitor AI API usage, track costs, and provide analytics
+
+Key Methods:
+- isHeliconeConfigured(): Check configuration status
+- getHeliconeConfigForProvider(provider): Get provider-specific config
+- testConnection(): Validate API connectivity
+- getStats(): Fetch usage statistics
+- getRecentRequests(limit): Retrieve recent API calls
+
+Analytics Methods:
+- calculateTotalCost(requests): Sum costs from request array
+- calculateTotalTokens(requests): Sum token usage
+- getCostBreakdownByModel(requests): Cost analysis by model
+- formatCost(cost): Currency formatting
+- formatTokens(tokens): Number formatting with separators
+
+Implementation Details:
+- Provider-specific endpoints (OpenAI: oai.helicone.ai, Anthropic: anthropic.helicone.ai)
+- Server-side proxy for CORS handling
+- Real-time statistics with session tracking
+- Comprehensive error handling for network issues
+
+7. LANGCHAINSERVICE - FRAMEWORK INTEGRATION
+
+Purpose: Manage LangChain framework integration using singleton pattern
+
+Key Methods:
+- getInstance(): Get singleton instance
+- getModel(modelKey): Retrieve cached model or create new
+- clearCache(): Clear model cache for configuration changes
+
+Implementation Details:
+- Singleton pattern for framework management
+- Model caching for performance optimization
+- Configuration-driven model creation
+- Future extensibility for additional providers
+
+8. SEARCHSERVICE - ACADEMIC PAPER SEARCH
+
+Purpose: Search and retrieve academic papers from Semantic Scholar API
+
+Key Methods:
+- searchPapers(query, limit): Search papers by query
+- getPaperById(paperId): Retrieve specific paper details
+- getRecommendations(paperId, limit): Get related papers
+- searchByAuthor(authorName, limit): Find papers by author
+
+Implementation Details:
+- Semantic Scholar API integration
+- Mock data fallback for development
+- Error handling with graceful degradation
+- Pagination support for large result sets
+
+9. RANKINGSERVICE - PAPER RELEVANCE SCORING
+
+Purpose: Rank academic papers by relevance using vector similarity
+
+Key Methods:
+- rankPapers(queryString, papers): Rank papers by relevance
+
+Implementation Process:
+- Document chunking (1,000 characters with 50 character overlap)
+- Vector embedding creation for papers and query
+- Similarity search using MemoryVectorStore
+- Relevance scoring and ordering
+- Duplicate removal based on paper ID
+
+Performance Features:
+- Graceful error handling returns original order on failure
+- Efficient vector operations using LangChain utilities
+- Memory-based vector store for fast similarity search
+
+10. PDFSERVICE - DOCUMENT PROCESSING
+
+Purpose: Extract text content from PDF documents
+
+Key Methods:
+- extractTextFromPDF(file): Browser-based text extraction using PDF.js
+- extractTextWithOCR(file): OCR processing using Adobe PDF Extract API
+- validatePDFFile(file): File validation (type, size limits)
+- getPDFMetadata(file): Extract document metadata
+
+Implementation Details:
+- PDF.js integration for client-side processing
+- Adobe PDF Extract API for scanned documents
+- File validation (50MB size limit, PDF type checking)
+- Comprehensive error handling for corrupted files
+- Base64 encoding for API submissions
+
+11. ARCHITECTURAL PATTERNS
+
+Service Layer Benefits:
+- Separation of concerns between UI and business logic
+- Centralized configuration management
+- Multi-provider abstraction with graceful fallbacks
+- Comprehensive monitoring and analytics
+- Consistent error handling patterns
+- Future extensibility for additional AI providers
+
+Technology Integration:
+- LangChain framework for AI model orchestration
+- Vector embeddings for semantic search
+- LocalStorage for configuration persistence
+- External API integration (Semantic Scholar, Helicone, Adobe)
+- Real-time streaming for AI responses
+
+Error Handling Strategy:
+- Centralized error logging and reporting
+- Graceful degradation for network failures
+- User-friendly error messages
+- Fallback mechanisms for service unavailability
+- Development mode mock data support
+
+This architecture enables enterprise-grade AI-powered qualitative research capabilities while maintaining code quality, extensibility, and research methodology accuracy.
+
+Last Updated: June 8, 2025

@@ -1,0 +1,129 @@
+ACADEMIAOS 2.0 - SOLUTION FILE STRUCTURE
+
+1. PROJECT ORGANIZATION
+
+Root Directory: academia-os-2.0/
+Primary Language: TypeScript/React
+Build System: Create React App
+Package Manager: npm
+
+2. DIRECTORY STRUCTURE
+
+public/
+- Static assets (favicon.ico, index.html, manifest.json, overview.gif)
+- Entry point for React application
+
+server/
+- Node.js API server for Helicone proxy
+- server.js: Express server with CORS handling
+- package.json: Server-specific dependencies
+
+src/
+├── Components/           # React UI components
+│   ├── Charts/          # Data visualization (GioiaCoding.tsx, Mermaid.tsx)
+│   ├── Steps/           # Workflow components (Find.tsx, Coding.tsx, Modeling.tsx)
+│   └── *.tsx            # Core components (ModelConfiguration, PaperTable, etc.)
+├── Services/            # Business logic layer
+│   └── *.ts             # Service classes (ChatService, OpenAIService, etc.)
+├── Redux/               # State management
+│   └── *.ts             # Store, reducers, actions
+├── Types/               # TypeScript definitions
+│   └── *.ts             # Interface definitions (AcademicPaper, ModelData)
+├── Helpers/             # Utility functions
+│   └── *.ts             # Async utilities (asyncForEach, asyncMap, uniqBy)
+├── Providers/           # React context providers
+│   └── ThemeContext.tsx # Theme management
+└── __mocks__/           # Test mocking utilities
+
+3. KEY FILES
+
+Configuration:
+- package.json: Project dependencies and scripts
+- tsconfig.json: TypeScript configuration
+- docker-compose.yml: Multi-container orchestration
+
+Documentation:
+- README.md: Setup and development guide
+- LICENSE.md: MIT license terms
+- CONTRIBUTING.MD: Contribution guidelines
+
+Build:
+- Dockerfile: Container configuration
+- npm_output.log: Build logs
+
+4. FILE STATISTICS
+
+Total Files: ~85 (excluding node_modules)
+TypeScript Files: ~45 (.ts/.tsx)
+JavaScript Files: ~6 (.js)
+JSON Configuration: ~4 (.json)
+Markdown Documentation: ~8 (.md)
+CSS Styling: ~2 (.css)
+
+5. COMPONENT ORGANIZATION
+
+Workflow Components:
+- Find.tsx: Literature search and paper upload
+- Coding.tsx: Qualitative analysis and theme identification  
+- Modeling.tsx: Theory construction and visualization
+
+Core Components:
+- ModelConfiguration.tsx: AI model setup interface
+- PaperTable.tsx: Academic paper display and management
+- HeliconeMonitor.tsx: API usage monitoring
+- SearchLoadingState.tsx: Progressive loading interface
+
+Service Classes:
+- ChatService.ts: Multi-provider AI model abstraction
+- OpenAIService.ts: Gioia methodology implementation
+- EmbeddingService.ts: Vector embeddings management
+- HeliconeService.ts: API monitoring and cost tracking
+
+6. ARCHITECTURE PATTERNS
+
+Frontend:
+- Component-based React architecture
+- Redux state management for global configuration
+- Context API for theme management
+- Service layer pattern for business logic
+
+Backend:
+- Express.js API server
+- Proxy pattern for Helicone integration
+- CORS handling for browser compatibility
+
+Build System:
+- Create React App configuration
+- TypeScript compilation
+- Docker containerization support
+
+7. POWERSHELL AUTOMATION
+
+File Structure Generation Script:
+Location: Utilities/Generate-FileStructure.ps1
+Purpose: Automated project analysis and documentation
+Features: 
+- Recursive directory traversal
+- File type categorization
+- Size and statistics calculation
+- Customizable output formatting
+
+Usage:
+./Utilities/Generate-FileStructure.ps1 -OutputFile "structure.txt"
+
+8. DEVELOPMENT WORKFLOW
+
+Local Development:
+1. npm install (install dependencies)
+2. npm start (development server)
+3. npm run server (API server for Helicone)
+
+Full Stack:
+1. npm run setup (install all dependencies)
+2. npm run dev (start client and server)
+
+Production:
+1. npm run build (create production bundle)
+2. Docker deployment with docker-compose
+
+Last Updated: June 8, 2025
