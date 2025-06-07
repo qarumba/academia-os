@@ -14,7 +14,7 @@ import { useEffect, useState } from "react"
 import { asyncMap } from "../../Helpers/asyncMap"
 import { OpenAIService } from "../../Services/OpenAIService"
 import { ChatService } from "../../Services/ChatService"
-import { HumanMessage, SystemMessage } from "langchain/schema"
+import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import Mermaid from "../Charts/Mermaid"
 import { GioiaCoding } from "../Charts/GioiaCoding"
 import { LoadingOutlined } from "@ant-design/icons"
@@ -262,7 +262,7 @@ const ModelingStep = (props: {
 
         // Find Relevant Paragraphs and Summarize
         if (tuples.length > 0) {
-          const { MemoryVectorStore } = require("langchain/vectorstores/memory")
+          const { MemoryVectorStore } = await import("langchain/vectorstores/memory")
           const embeddings = ChatService.getEmbeddings()
           const store = new MemoryVectorStore(embeddings)
           const documents: any[] = []
@@ -271,7 +271,7 @@ const ModelingStep = (props: {
 
           // Split text and prepare documents
           await asyncForEach(props.modelData?.papers || [], async (paper: any) => {
-            const { CharacterTextSplitter } = require("langchain/text_splitter")
+            const { CharacterTextSplitter } = await import("@langchain/textsplitters")
             const splitter = new CharacterTextSplitter({
               separator: " ",
               chunkSize: 1000,

@@ -1,17 +1,20 @@
-import { ChatOpenAI } from "langchain/chat_models/openai"
-import { HumanMessage, SystemMessage } from "langchain/schema"
+import { ChatOpenAI } from "@langchain/openai"
+import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { HeliconeService } from "./HeliconeService"
 
-// Anthropic integration with graceful fallback
+// Anthropic integration with LangChain v0.3
 let ChatAnthropic: any = null;
 let anthropicAvailable = false;
 
-// Browser-compatible way to check for Anthropic package
-// Since we can't use require() or dynamic imports reliably with version conflicts,
-// we'll just assume it's not available and rely on the fallback
-// This gives users honest feedback about the current state
-anthropicAvailable = false;
-// Note: Anthropic integration gracefully falls back to OpenAI due to LangChain version compatibility
+// Initialize Anthropic support with LangChain v0.3
+try {
+  const { ChatAnthropic: AnthropicClass } = require('@langchain/anthropic');
+  ChatAnthropic = AnthropicClass;
+  anthropicAvailable = true;
+} catch (error) {
+  console.warn('Anthropic package not available, using OpenAI fallback');
+  anthropicAvailable = false;
+}
 
 interface ModelConfig {
   provider: 'openai' | 'anthropic';
@@ -70,19 +73,23 @@ export class ChatService {
           throw new Error('Anthropic integration unavailable and no OpenAI fallback key configured.');
         }
         
+        const clientConfig = this.getOpenAIClientConfiguration();
         return new ChatOpenAI({
           modelName: 'gpt-3.5-turbo',
           openAIApiKey: openAIKey,
           maxTokens: options.maxTokens || 100,
-        }, this.getOpenAIClientConfiguration());
+          ...clientConfig,
+        });
       }
     } else {
       // OpenAI provider
+      const clientConfig = this.getOpenAIClientConfiguration();
       return new ChatOpenAI({
         modelName: config.model,
         openAIApiKey: config.apiKey,
         maxTokens: options.maxTokens || 100,
-      }, this.getOpenAIClientConfiguration());
+        ...clientConfig,
+      });
     }
   }
 
@@ -127,7 +134,7 @@ export class ChatService {
   public static getEmbeddings() {
     // For embeddings, we'll continue using OpenAI as it's the most widely supported
     // and compatible with existing vector stores
-    const { OpenAIEmbeddings } = require("langchain/embeddings/openai")
+    const { OpenAIEmbeddings } = require("@langchain/openai")
     const config = this.getModelConfig();
     
     // Use configured OpenAI key or fallback
@@ -135,11 +142,10 @@ export class ChatService {
       ? config.apiKey 
       : config?.openaiEmbeddingsKey || localStorage.getItem("openAIKey") || "";
 
-    return new OpenAIEmbeddings(
-      {
-        openAIApiKey: openAIKey,
-      },
-      this.getOpenAIClientConfiguration()
-    )
+    const clientConfig = this.getOpenAIClientConfiguration();
+    return new OpenAIEmbeddings({
+      openAIApiKey: openAIKey,
+      ...clientConfig,
+    })
   }
 }

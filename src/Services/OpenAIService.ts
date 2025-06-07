@@ -1,6 +1,6 @@
 // Import the SemanticScholar library
-import { Document } from "langchain/document"
-import { CharacterTextSplitter } from "langchain/text_splitter"
+import { Document } from "@langchain/core/documents"
+import { CharacterTextSplitter } from "@langchain/textsplitters"
 import { asyncForEach } from "../Helpers/asyncForEach"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
 import { uniqBy } from "../Helpers/uniqBy"
@@ -11,16 +11,16 @@ import {
   ChatOpenAI,
   ChatOpenAICallOptions,
   OpenAIChatInput,
-} from "langchain/chat_models/openai"
-import { HumanMessage, SystemMessage } from "langchain/schema"
-import { OpenAI } from "langchain/llms/openai"
+} from "@langchain/openai"
+import { HumanMessage, SystemMessage } from "@langchain/core/messages"
+import { OpenAI } from "@langchain/openai"
 import { AcademicPaper } from "../Types/AcademicPaper"
 import { type ClientOptions } from "openai"
 import { ModelData } from "../Types/ModelData"
 import { asyncMap } from "../Helpers/asyncMap"
 import { HeliconeService } from "./HeliconeService"
 
-import { BaseLanguageModelParams } from "langchain/dist/base_language"
+import { BaseLanguageModelParams } from "@langchain/core/language_models/base"
 
 export class OpenAIService {
   public static getOpenAIKey = () => {

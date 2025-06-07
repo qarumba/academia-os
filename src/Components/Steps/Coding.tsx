@@ -6,7 +6,7 @@ import { asyncMap } from "../../Helpers/asyncMap"
 import { OpenAIService } from "../../Services/OpenAIService"
 import { ChatService } from "../../Services/ChatService"
 import { ModelService } from "../../Services/ModelService"
-import { HumanMessage, SystemMessage } from "langchain/schema"
+import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import Mermaid from "../Charts/Mermaid"
 import { GioiaCoding } from "../Charts/GioiaCoding"
 import { LoadingOutlined } from "@ant-design/icons"
@@ -46,7 +46,7 @@ const CodingStep = (props: {
         let chunks = []
 
         if ((newPaper?.fullText?.length || 0) > 5000) {
-          const { CharacterTextSplitter } = require("langchain/text_splitter")
+          const { CharacterTextSplitter } = await import("@langchain/textsplitters")
           const splitter = new CharacterTextSplitter({
             separator: " ",
             chunkSize: 10000,
@@ -135,7 +135,7 @@ const CodingStep = (props: {
       const jsonString = JSON.stringify(codes)
 
       if ((jsonString.length || 0) > 5000) {
-        const { CharacterTextSplitter } = require("langchain/text_splitter")
+        const { CharacterTextSplitter } = await import("@langchain/textsplitters")
         const splitter = new CharacterTextSplitter({
           separator: " ",
           chunkSize: 5000,

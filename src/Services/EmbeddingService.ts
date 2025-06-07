@@ -1,4 +1,4 @@
-import { OpenAIEmbeddings } from "langchain/embeddings/openai"
+import { OpenAIEmbeddings } from "@langchain/openai"
 import { HeliconeService } from "./HeliconeService"
 
 interface ModelConfig {
@@ -35,14 +35,18 @@ export class EmbeddingService {
         throw new Error('OpenAI API key required for embeddings when using Anthropic models. Please add an OpenAI key in advanced settings or use OpenAI models for full functionality.');
       }
       
+      const clientConfig = this.getOpenAIConfiguration();
       return new OpenAIEmbeddings({
         openAIApiKey: openAIKey,
-      }, this.getOpenAIConfiguration());
+        ...clientConfig,
+      });
     } else {
       // OpenAI provider
+      const clientConfig = this.getOpenAIConfiguration();
       return new OpenAIEmbeddings({
         openAIApiKey: config.apiKey,
-      }, this.getOpenAIConfiguration());
+        ...clientConfig,
+      });
     }
   }
 

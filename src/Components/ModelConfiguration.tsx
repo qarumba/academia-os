@@ -31,19 +31,19 @@ const availableModels: ModelOption[] = [
     provider: 'anthropic',
     model: 'claude-4-opus-20250514',
     displayName: 'Claude 4 Opus',
-    description: 'Most powerful Claude model - requires LangChain core update for full compatibility'
+    description: 'Most powerful Claude model for complex reasoning and analysis'
   },
   {
     provider: 'anthropic',
     model: 'claude-sonnet-4-20250514',
     displayName: 'Claude 4 Sonnet',
-    description: 'Smart, efficient Claude model - requires LangChain core update for full compatibility'
+    description: 'Smart, efficient Claude model with excellent performance and speed'
   },
   {
     provider: 'anthropic',
     model: 'claude-3-7-sonnet-20250109',
     displayName: 'Claude 3.7 Sonnet',
-    description: 'Enhanced Claude 3 - requires LangChain core update for full compatibility'
+    description: 'Enhanced Claude 3 with improved reasoning and capabilities'
   },
   {
     provider: 'openai',
@@ -170,7 +170,7 @@ const ModelConfiguration: React.FC = () => {
                   {!anthropicAvailable && (
                     <>
                       <br />
-                      <em>Note: For optimal performance, consider updating LangChain to v0.3.x in the future for direct Anthropic integration.</em>
+                      <em>Note: Using compatibility layer. Restart the application to enable native Anthropic integration.</em>
                     </>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 // Import the SemanticScholar library
-import { Document } from "langchain/document"
-import { CharacterTextSplitter } from "langchain/text_splitter"
+import { Document } from "@langchain/core/documents"
+import { CharacterTextSplitter } from "@langchain/textsplitters"
 import { asyncForEach } from "../Helpers/asyncForEach"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
 import { uniqBy } from "../Helpers/uniqBy"
