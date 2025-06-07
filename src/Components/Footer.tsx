@@ -1,17 +1,19 @@
 import React from 'react';
-import { Space, Typography, Divider } from 'antd';
+import { Space, Typography, Divider, theme } from 'antd';
 import { SlackOutlined, GithubOutlined } from '@ant-design/icons';
 
 const { Text, Link } = Typography;
 
 const Footer: React.FC = () => {
+  const { token } = theme.useToken();
+  
   return (
     <footer style={{ 
       padding: '24px 0', 
       textAlign: 'center',
-      borderTop: '1px solid #f0f0f0',
+      borderTop: `1px solid ${token.colorBorderSecondary}`,
       marginTop: '40px',
-      backgroundColor: '#fafafa'
+      backgroundColor: token.colorBgLayout
     }}>
       <Space split={<Divider type="vertical" />} size="large">
         <Link
