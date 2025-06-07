@@ -77,4 +77,5 @@ This endeavor is under the aegis of an open-source License. Refer to the [LICENS
 
 ----------
 
-Crafted with passion and commitment by Thomas Übellacker, A Helme and Claude 4 Sonnet❣️ Happy coding! ⌨️💡
+Crafted with passion and commitment by Thomas Übellacker, A Helme and Claude 4 Sonnet❣️ 
+Happy coding! ⌨️💡
