@@ -38,7 +38,7 @@ export class ChatService {
     message.error(error.message || error?.response?.data?.message || error)
   }
 
-  private static openAIConfiguration(): ClientOptions {
+  private static openAIConfiguration() {
     const heliconeEndpoint = localStorage.getItem("heliconeEndpoint")
     return {
       basePath: heliconeEndpoint || undefined,
@@ -47,7 +47,7 @@ export class ChatService {
           "Helicone-Auth": `Bearer ${localStorage.getItem("heliconeKey")}`,
         },
       },
-    }
+    } as ClientOptions
   }
 
   private static openAIModelConfiguration(
