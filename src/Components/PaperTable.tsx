@@ -112,7 +112,11 @@ export const PaperTable = (props: {
     <Space direction='vertical' style={{ width: "100%" }}>
       <Space direction='horizontal'>
         <AutoComplete
-          dropdownStyle={{ width: 300 }}
+          styles={{
+            popup: {
+              root: { width: 300 }
+            }
+          }}
           options={[
             ...(columnAddSearchQuery
               ? [
@@ -211,6 +215,7 @@ export const PaperTable = (props: {
         style={{ maxHeight: "calc(100vh - 270px)", overflowY: "auto" }}
         size='small'
         pagination={false}
+        rowKey={(record) => record.id || record.paperId || `row-${Math.random()}`}
         dataSource={updatedPapers || []}
         columns={[
           {
