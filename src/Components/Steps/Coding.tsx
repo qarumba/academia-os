@@ -13,7 +13,7 @@ import { LoadingOutlined } from "@ant-design/icons"
 import { ModelData } from "../../Types/ModelData"
 import { RemarkComponent } from "../RemarkComponent"
 
-export const CodingStep = (props: {
+const CodingStep = (props: {
   modelData: ModelData
   onModelDataChange: (modelData: ModelData) => void
 }) => {
@@ -386,3 +386,5 @@ export const CodingStep = (props: {
     </Space>
   )
 }
+
+export default CodingStep

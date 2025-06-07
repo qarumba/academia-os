@@ -22,7 +22,7 @@ import { ModelData } from "../../Types/ModelData"
 import { RemarkComponent } from "../RemarkComponent"
 import { Interrelationships } from "./Modeling/Interrelationships"
 
-export const ModelingStep = (props: {
+const ModelingStep = (props: {
   modelData: ModelData
   onModelDataChange: (modelData: ModelData) => void
 }) => {
@@ -519,3 +519,5 @@ export const ModelingStep = (props: {
     </Space>
   )
 }
+
+export default ModelingStep
