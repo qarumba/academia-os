@@ -22,6 +22,12 @@ Thank you for your interest in contributing to AcademiaOS! Your contribution wil
 
 We aim to maintain a respectful and collaborative environment. All contributors are expected to adhere to the project's [Code of Conduct](CODE_OF_CONDUCT.md).
 
+## Decide Where to Contribute
+
+The AcademiaOS project was originally written and developed by Thomas Üllebecker whereas this is a fork designed to update and extend core functionality and improve the UI experience to have more control over the research process. If you would like to build on the technnologies implemented in this "2.0" version you are most welcome! 
+
+But you may also prefer to contribute directly to the AcademiaOS main project available here (and see below for Slack channel): https://github.com/thomasuebi/academia-os
+
 ## Getting Started
 
 If you are new to the project and wish to contribute, here's how you can start:
