@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
-import { Typography, Space } from "antd"
+import { Typography, Space, Alert } from "antd"
 import { OpenAIService } from "../Services/OpenAIService"
+import { ModelService } from "../Services/ModelService"
 import { AcademicPaper } from "../Types/AcademicPaper"
 
 export const CustomColumn = (props: {
@@ -12,6 +13,8 @@ export const CustomColumn = (props: {
   const [detail, setDetail] = useState(
     (props?.record?.[props?.detail || ""] as string) || ""
   )
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   // Use useEffect to call the async function and update the state
   useEffect(() => {
@@ -25,10 +28,27 @@ export const CustomColumn = (props: {
       return
     }
 
+    // Check if we have proper model configuration
+    const config = ModelService.getModelConfig()
+    if (!config) {
+      setError("No AI model configured")
+      return
+    }
+
+    if (config.provider === 'anthropic') {
+      const hasOpenAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey");
+      if (!hasOpenAIKey) {
+        setError("Custom columns require OpenAI models. Please switch to OpenAI or add OpenAI key in advanced settings.")
+        return
+      }
+    }
+
+    setLoading(true)
     OpenAIService.getDetailAboutPaper(props?.record, props?.detail)
       .then((result) => {
         if (isMounted) {
           setDetail(result)
+          setError(null)
           // Update the table data directly
           props.updatePaperDetail(
             props.record.id?.toString() || "",
@@ -39,6 +59,14 @@ export const CustomColumn = (props: {
       })
       .catch((error) => {
         console.error("Failed to get details:", error)
+        if (isMounted) {
+          setError("Failed to analyze paper")
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false)
+        }
       })
 
     return () => {
@@ -46,10 +74,18 @@ export const CustomColumn = (props: {
     }
   }, [props?.detail])
 
+  if (error) {
+    return (
+      <Space size={0} direction={"vertical"} style={{ width: "300px" }}>
+        <Alert message={error} type="warning" />
+      </Space>
+    )
+  }
+
   return (
     <Space size={0} direction={"vertical"} style={{ width: "300px" }}>
       <Typography.Paragraph ellipsis={{ rows: 5 }} style={{ marginBottom: 0 }}>
-        {detail} {/* Render the detail from state */}
+        {loading ? "Analyzing..." : detail}
       </Typography.Paragraph>
     </Space>
   )

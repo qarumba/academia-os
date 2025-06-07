@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { Button, Slider, Space, Switch, Tabs, Typography, message } from "antd"
+import { Button, Slider, Space, Switch, Tabs, Typography, message, theme as antdTheme } from "antd"
 import Workflow from "./Workflow"
 import {
   BookOutlined,
@@ -10,13 +10,14 @@ import {
 } from "@ant-design/icons"
 import { useSelector, useDispatch } from "react-redux"
 import { addTab, removeTab } from "../Redux/actionCreators"
-import ConfigurationModal from "./Configuration"
+import ModelConfiguration from "./ModelConfiguration"
 import { useTheme } from "../Providers/ThemeContext" // import ThemeProvider and useTheme
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string
 
 const RootTabs: React.FC = () => {
   const { theme, toggleTheme } = useTheme()
+  const { token } = antdTheme.useToken()
   const newTabIndex = useRef(0)
   const [isConfigurationVisible, setIsConfigurationVisible] = useState(false)
 
@@ -82,23 +83,6 @@ const RootTabs: React.FC = () => {
         tabBarExtraContent={
           <Space direction='horizontal'>
             <Button
-              className='hide-on-small-screen'
-              target='_blank'
-              href='https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ'
-              type='text'
-              icon={<SlackOutlined />}>
-              Slack Community
-            </Button>
-            <Button
-              type='text'
-              target='_blank'
-              href='https://github.com/thomasuebi/academia-os'
-              className='hide-on-small-screen'
-              icon={<GithubOutlined />}>
-              GitHub
-            </Button>
-            {/* <Button type='text' icon={<BookOutlined />}></Button> */}
-            <Button
               type='text'
               icon={<FormatPainterFilled />}
               onClick={() => toggleTheme()}></Button>
@@ -114,10 +98,43 @@ const RootTabs: React.FC = () => {
         onEdit={onEdit}
         items={tabs}
       />
-      <ConfigurationModal
-        isVisible={isConfigurationVisible}
-        toggleModal={() => setIsConfigurationVisible(!isConfigurationVisible)}
-      />
+      {isConfigurationVisible && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '100%', 
+          height: '100%', 
+          backgroundColor: 'rgba(0,0,0,0.5)', 
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ 
+            backgroundColor: token.colorBgContainer, 
+            borderRadius: token.borderRadius,
+            border: `1px solid ${token.colorBorder}`,
+            boxShadow: token.boxShadowSecondary,
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90%',
+            overflow: 'auto'
+          }}>
+            <ModelConfiguration />
+            <div style={{ 
+              padding: '16px', 
+              textAlign: 'center',
+              borderTop: `1px solid ${token.colorBorderSecondary}`,
+              backgroundColor: token.colorBgContainer
+            }}>
+              <Button onClick={() => setIsConfigurationVisible(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

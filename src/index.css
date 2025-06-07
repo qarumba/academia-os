@@ -26,3 +26,14 @@ code {
     display: initial;
   }
 }
+
+/* Mermaid.js font size adjustment to prevent text cutoff */
+.mermaid text {
+  font-size-adjust: 0.5 !important;
+}
+
+.mermaid .node text,
+.mermaid .label text,
+.mermaid .edgeLabel text {
+  font-size-adjust: 0.5 !important;
+}
