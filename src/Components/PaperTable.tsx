@@ -326,8 +326,8 @@ export const PaperTable = (props: {
                       ? typeof record[column] === "string"
                         ? record[column]
                         : Array.isArray(record[column])
-                        ? record[column].map((item: any) => (
-                            <Tag style={{ fontSize: "6pt" }}>{item}</Tag>
+                        ? record[column].map((item: any, index: number) => (
+                            <Tag key={index} style={{ fontSize: "6pt" }}>{item}</Tag>
                           ))
                         : JSON.stringify(record[column])
                       : "Loading..."}
