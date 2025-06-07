@@ -8,11 +8,13 @@ let anthropicAvailable = false;
 
 // Initialize Anthropic support with LangChain v0.3
 try {
-  const { ChatAnthropic: AnthropicClass } = require('@langchain/anthropic');
-  ChatAnthropic = AnthropicClass;
+  // Use dynamic import in a way that works with webpack
+  const anthropicModule = require('@langchain/anthropic');
+  ChatAnthropic = anthropicModule.ChatAnthropic;
   anthropicAvailable = true;
-} catch (error) {
-  console.warn('Anthropic package not available, using OpenAI fallback');
+  console.log('✅ Anthropic integration initialized successfully');
+} catch (error: any) {
+  console.warn('❌ Anthropic package initialization failed:', error?.message || error);
   anthropicAvailable = false;
 }
 
