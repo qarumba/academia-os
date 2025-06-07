@@ -302,6 +302,7 @@ export const PaperTable = (props: {
             title: column,
             dataIndex: column,
             key: column,
+            width: column.includes('Question') || column.includes('Argument') || column.includes('Abstract') ? 400 : 300,
             render: (text: string, record: AcademicPaper, index: number) => {
               let isArray = false
               try {
@@ -312,6 +313,13 @@ export const PaperTable = (props: {
                   isArray = true
                 }
               } catch (error) {}
+              
+              // Determine display settings based on column type
+              const isTextHeavy = column.includes('Question') || column.includes('Argument') || column.includes('Abstract');
+              const isKeywords = column.toLowerCase().includes('keyword');
+              const columnWidth = isTextHeavy ? "400px" : "300px";
+              const ellipsisRows = isTextHeavy ? 8 : 5;
+              
               return (
                 <Space
                   title={
@@ -319,13 +327,13 @@ export const PaperTable = (props: {
                       ? typeof record[column] === "string"
                         ? record[column]
                         : JSON.stringify(record[column])
-                      : "Loading..."
+                      : "No data available"
                   }
                   size={0}
                   direction={"vertical"}
-                  style={{ width: "300px" }}>
+                  style={{ width: columnWidth }}>
                   <Typography.Paragraph
-                    ellipsis={{ rows: 5 }}
+                    ellipsis={{ rows: ellipsisRows, expandable: true, symbol: 'more' }}
                     style={{ marginBottom: 0 }}>
                     {record[column]
                       ? typeof record[column] === "string"
@@ -335,7 +343,7 @@ export const PaperTable = (props: {
                             <Tag key={index} style={{ fontSize: "6pt" }}>{item}</Tag>
                           ))
                         : JSON.stringify(record[column])
-                      : "Loading..."}
+                      : (isKeywords ? "Keywords not extracted" : "Processing...")}
                   </Typography.Paragraph>
                 </Space>
               )
