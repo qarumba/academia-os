@@ -95,8 +95,7 @@ const StepFind = (props: {
         style={{
           width: "100%",
           textAlign: "center",
-          paddingLeft: "20px",
-          paddingRight: "20px",
+          padding: "40px 20px",
         }}>
         <img
           alt='AcademiaOS'
@@ -109,8 +108,19 @@ const StepFind = (props: {
           }}
         />
         <Typography.Title>AcademiaOS</Typography.Title>
-        <p style={{ marginTop: "-10px" }}>
-          <Tag>Open Source</Tag> <Tag>OpenAI-Powered</Tag>
+        <Typography.Text 
+          type="secondary" 
+          style={{ 
+            display: "block", 
+            marginTop: "-10px", 
+            marginBottom: "10px",
+            fontSize: "14px"
+          }}
+        >
+          AI Powered Grounded Theory Development with Human-in-the-Loop Processing
+        </Typography.Text>
+        <p style={{ marginTop: "0px", marginBottom: "20px" }}>
+          <Tag>Open Source</Tag> <Tag>Powered by Foundation Models</Tag>
         </p>
       </div>
       <Row>
@@ -229,7 +239,7 @@ const StepFind = (props: {
           href='https://arxiv.org/abs/2403.08844'
           target='_blank'
           rel='noopener noreferrer'>
-          Read our paper
+          Read Thomas Üllebecker's paper
         </a>
       </p>
       <p>

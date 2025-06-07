@@ -82,23 +82,6 @@ const RootTabs: React.FC = () => {
         tabBarExtraContent={
           <Space direction='horizontal'>
             <Button
-              className='hide-on-small-screen'
-              target='_blank'
-              href='https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ'
-              type='text'
-              icon={<SlackOutlined />}>
-              Slack Community
-            </Button>
-            <Button
-              type='text'
-              target='_blank'
-              href='https://github.com/thomasuebi/academia-os'
-              className='hide-on-small-screen'
-              icon={<GithubOutlined />}>
-              GitHub
-            </Button>
-            {/* <Button type='text' icon={<BookOutlined />}></Button> */}
-            <Button
               type='text'
               icon={<FormatPainterFilled />}
               onClick={() => toggleTheme()}></Button>

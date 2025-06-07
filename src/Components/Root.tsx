@@ -9,6 +9,7 @@ import {
 import type { MenuProps } from "antd"
 import { Breadcrumb, Layout, Menu, theme, Input } from "antd"
 import RootTabs from "./Tabs"
+import CustomFooter from "./Footer"
 
 const { Header, Content, Footer, Sider } = Layout
 
@@ -67,6 +68,9 @@ export const Root: React.FC = () => {
             <RootTabs />
           </div>
         </Content>
+        <Footer style={{ padding: 0 }}>
+          <CustomFooter />
+        </Footer>
       </Layout>
     </Layout>
   )
