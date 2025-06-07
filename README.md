@@ -3,19 +3,23 @@
 </p>
 <h1 align="center">AcademiaOS</h1>
 
-Welcome to **AcademiaOS**, your one-stop solution for academic information retrieval and reasoning! We've built this on a robust large language model platform equipped with a bouquet of features dedicated to providing the best assistance for researchers possible.
+Welcome to **AcademiaOS 2.0**, your solution for academic information retrieval and reasoning! We've built this modernised fork of AcademiaOS on Thomas Üllebecker's [AcademiaOS](https://github.com/thomasuebi/academia-os), a robust large language model platform equipped with a bouquet of features dedicated to providing the best assistance for researchers possible.
 
-For a deeper understanding of the underlying technology and concepts, you can refer to our paper: [AcademiaOS: Automating Grounded Theory Development in Qualitative Research with Large Language Models](https://arxiv.org/abs/2403.08844).
+**AcademiaOS 2.0** includes the ability to choose your main AI model for inference from Anthropic or OpenAI as well as a number of UI improvements and other updates under the hood.
+
+For a deeper understanding of the underlying technology and concepts, you can refer to Thomas Üllebecker's ground-breaking paper: [AcademiaOS: Automating Grounded Theory Development in Qualitative Research with Large Language Models](https://arxiv.org/abs/2403.08844).
 
 <p align="center">
     <img src="public\overview.gif"  alt="Demo" width="400"/>
 </p>
 
-Live-Demo: [academia-os.org](https://academia-os.org/)
+Live-Demo of AcademiaOS 1.0: [academia-os.org](https://academia-os.org/)
 
-Join the [Slack Community](https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ)!
+Join Thomas Üllebecker's [Slack Community](https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ)!
+
 ## 🌟 Features 
 
+* **Choose your AI Model**: From Anthropic or OpenAI by adding your API Keys (an OpenAI key is always required for embeddings)
 * **Find Academic Papers**: Building on the SemanticScholar corpus and OpenAI embeddings, AcademiaOS finds and ranks relevant papers to your search queries. 
 * **Upload PDFs**: If you have curated papers or other qualitative documents (such as interview transcripts) as PDFs, you can upload them for downstream tasks. Text-PDFs are handled in-browser while scanned PDFs are OCRd using Adobe PDF Extract API.
 * **Mass Information Extraction**: Structurally extract information (such as a paper's sentiment towards your thesis or information such as the count of study participants) from papers at scale.
@@ -65,7 +69,7 @@ Visit the section about [deployment](https://facebook.github.io/create-react-app
 
 ## 💡 Contributing 
 
-We eagerly look forward to your valuable contributions to the AcademiaOS project! Feel free to brainstorm ideas, recommend suggestions, or report bugs. You're always invited to open an issue or submit a pull request.
+Thomas Üllebecker eagerly awaits your valuable contributions to the core AcademiaOS project, and we do too! Feel free to brainstorm ideas, recommend suggestions, or report bugs. You're always invited to open an issue or submit a pull request over at [AcademiaOS 1.0](https://github.com/thomasuebi/academia-os) or here on our fork!
 
 ## ⚖️ License 
 
@@ -73,4 +77,4 @@ This endeavor is under the aegis of an open-source License. Refer to the [LICENS
 
 ----------
 
-Crafted with passion and commitment by Thomas Übellacker❣️ Happy coding! ⌨️💡
+Crafted with passion and commitment by Thomas Übellacker, A Helme and Claude 4 Sonnet❣️ Happy coding! ⌨️💡
