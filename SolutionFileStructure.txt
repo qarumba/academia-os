@@ -24,7 +24,7 @@ src/
 │   ├── Steps/           # Workflow components (Find.tsx, Coding.tsx, Modeling.tsx)
 │   └── *.tsx            # Core components (ModelConfiguration, PaperTable, etc.)
 ├── Services/            # Business logic layer
-│   └── *.ts             # Service classes (ChatService, OpenAIService, etc.)
+│   └── *.ts             # Service classes (ChatService, QualitativeAnalysisService, etc.)
 ├── Redux/               # State management
 │   └── *.ts             # Store, reducers, actions
 ├── Types/               # TypeScript definitions
@@ -75,7 +75,7 @@ Core Components:
 
 Service Classes:
 - ChatService.ts: Multi-provider AI model abstraction
-- OpenAIService.ts: Gioia methodology implementation
+- QualitativeAnalysisService.ts: Gioia methodology implementation
 - EmbeddingService.ts: Vector embeddings management
 - HeliconeService.ts: API monitoring and cost tracking
 

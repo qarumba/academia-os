@@ -19,7 +19,7 @@ import {
   PlusOutlined,
 } from "@ant-design/icons"
 import { useEffect, useState } from "react"
-import { OpenAIService } from "../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../Services/QualitativeAnalysisService"
 import { ModelService } from "../Services/ModelService"
 import { CustomColumn } from "./CustomColumn"
 import { AcademicPaper } from "../Types/AcademicPaper"
@@ -181,7 +181,7 @@ export const PaperTable = (props: {
                 const newPaper = { ...paper } as AcademicPaper
                 if (newPaper[value]) return newPaper
                 try {
-                  newPaper[value] = await OpenAIService.getDetailAboutPaper(
+                  newPaper[value] = await QualitativeAnalysisService.getDetailAboutPaper(
                     newPaper,
                     value
                   )
