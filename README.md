@@ -3,7 +3,7 @@
 </p>
 <h1 align="center">AcademiaOS</h1>
 
-Welcome to **AcademiaOS 2.0**, your solution for academic information retrieval and reasoning! We've built this modernised fork of AcademiaOS on Thomas Üllebecker's [AcademiaOS](https://github.com/thomasuebi/academia-os), a robust large language model platform equipped with a bouquet of features dedicated to providing the best assistance for researchers possible.
+Welcome to **AcademiaOS 2.0**, your solution for academic information retrieval and reasoning! We've built this modernised fork of AcademiaOS on Thomas Üllebecker's [AcademiaOS](https://github.com/thomasuebi/academia-os), a robust large language model platform equipped with a bouquet of features dedicated to providing unrivalled assistance for researchers.
 
 **AcademiaOS 2.0** includes the ability to choose your main AI model for inference from Anthropic or OpenAI as well as a number of UI improvements such as better transparency to user regarding processes as they are invoked, better Helicone integration including a sidebar to view Helicone monitoring of inference, and other updates under the hood such as critical updates to LangChain and its associated OpenAI module, and addition of LangChain's Anthropic module.
 
