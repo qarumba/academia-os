@@ -47,8 +47,10 @@ export class ChatService {
     }
 
     if (config.provider === 'anthropic') {
+      console.log('🔍 Anthropic Debug:', { ChatAnthropic: !!ChatAnthropic, anthropicAvailable, hasClass: ChatAnthropic?.name });
       if (ChatAnthropic && anthropicAvailable) {
         // Use actual Anthropic integration
+        console.log('✅ Using native Anthropic model:', config.model);
         const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('anthropic');
         
         const anthropicConfig: any = {
