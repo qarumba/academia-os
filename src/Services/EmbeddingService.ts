@@ -1,11 +1,11 @@
 import { OpenAIEmbeddings } from "langchain/embeddings/openai"
+import { HeliconeService } from "./HeliconeService"
 
 interface ModelConfig {
   provider: 'openai' | 'anthropic';
   model: string;
   apiKey: string;
   openaiEmbeddingsKey?: string;
-  heliconeEndpoint?: string;
   heliconeKey?: string;
 }
 
@@ -47,21 +47,13 @@ export class EmbeddingService {
   }
 
   private static getOpenAIConfiguration() {
-    const config = this.getModelConfig();
-    const heliconeEndpoint = config?.heliconeEndpoint || localStorage.getItem("heliconeEndpoint") || "";
-    const heliconeKey = config?.heliconeKey || localStorage.getItem("heliconeKey") || "";
+    // Get Helicone configuration for OpenAI (embeddings always use OpenAI)
+    const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('openai');
 
-    // Use async Helicone integration (headers only, no proxy)
-    // This allows monitoring via Helicone API while avoiding CORS issues
-    const useHelicone = heliconeKey ? true : false;
-
-    if (useHelicone) {
+    if (heliconeConfig) {
       return {
         baseOptions: {
-          headers: {
-            "Helicone-Auth": `Bearer ${heliconeKey}`,
-            "Helicone-Cache-Enabled": "true",
-          },
+          headers: heliconeConfig.headers,
         },
       };
     }

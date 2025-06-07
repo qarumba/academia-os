@@ -3,6 +3,7 @@ import { Form, Select, Input, Button, Card, Alert, Typography, Row, Col, Divider
 import { SettingOutlined, KeyOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { setModelConfig, loadConfigFromStorage, selectIsModelConfigured } from './modelSlice';
+import { ChatService } from '../Services/ChatService';
 
 const { Option } = Select;
 const { Title, Paragraph } = Typography;
@@ -13,7 +14,6 @@ interface ModelConfig {
   apiKey: string;
   openaiEmbeddingsKey?: string;
   email?: string;
-  heliconeEndpoint?: string;
   heliconeKey?: string;
   adobePDFOCR_client_id?: string;
   adobePDFOCR_client_secret?: string;
@@ -31,31 +31,37 @@ const availableModels: ModelOption[] = [
     provider: 'anthropic',
     model: 'claude-4-opus-20250514',
     displayName: 'Claude 4 Opus',
-    description: 'Most powerful model for complex academic research and analysis'
+    description: 'Most powerful Claude model - requires LangChain core update for full compatibility'
   },
   {
     provider: 'anthropic',
     model: 'claude-sonnet-4-20250514',
     displayName: 'Claude 4 Sonnet',
-    description: 'Smart, efficient model for everyday academic tasks'
+    description: 'Smart, efficient Claude model - requires LangChain core update for full compatibility'
   },
   {
     provider: 'anthropic',
     model: 'claude-3-7-sonnet-20250109',
     displayName: 'Claude 3.7 Sonnet',
-    description: 'Enhanced Claude 3 with improved reasoning capabilities'
+    description: 'Enhanced Claude 3 - requires LangChain core update for full compatibility'
+  },
+  {
+    provider: 'openai',
+    model: 'gpt-4o',
+    displayName: 'GPT-4o',
+    description: 'Latest and most capable multimodal model (auto-updates to newest version)'
+  },
+  {
+    provider: 'openai',
+    model: 'gpt-4-turbo',
+    displayName: 'GPT-4 Turbo',
+    description: 'High-performance model with 128k context (auto-updates to latest)'
   },
   {
     provider: 'openai',
     model: 'gpt-4',
     displayName: 'GPT-4',
-    description: 'OpenAI\'s most capable model'
-  },
-  {
-    provider: 'openai',
-    model: 'gpt-3.5-turbo',
-    displayName: 'GPT-3.5 Turbo',
-    description: 'Fast and cost-effective for simpler tasks'
+    description: 'Reliable and capable model (auto-updates to latest version)'
   }
 ];
 
@@ -66,13 +72,20 @@ const ModelConfiguration: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [hasEmbeddingsKey, setHasEmbeddingsKey] = useState(false);
+  const [anthropicAvailable, setAnthropicAvailable] = useState<boolean | null>(null);
   const { message } = App.useApp();
   const isConfigured = useSelector(selectIsModelConfigured);
+
+  // Check Anthropic availability
+  useEffect(() => {
+    ChatService.isAnthropicAvailable().then(setAnthropicAvailable);
+  }, []);
 
   // Debug logging
   useEffect(() => {
     console.log('ModelConfiguration: isConfigured =', isConfigured);
-  }, [isConfigured]);
+    console.log('ModelConfiguration: anthropicAvailable =', anthropicAvailable);
+  }, [isConfigured, anthropicAvailable]);
 
   // Load saved configuration from localStorage
   useEffect(() => {
@@ -83,7 +96,7 @@ const ModelConfiguration: React.FC = () => {
       setSelectedProvider(config.provider);
       setHasEmbeddingsKey(!!config.openaiEmbeddingsKey);
       // Show advanced options if any advanced fields have values
-      if (config.email || config.heliconeEndpoint || config.heliconeKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
+      if (config.email || config.heliconeKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
         setShowAdvanced(true);
       }
     }
@@ -139,17 +152,45 @@ const ModelConfiguration: React.FC = () => {
       )}
       
       {isConfigured && (
-        <Alert
-          message="AI Models Configured Successfully"
-          description={
-            selectedProvider === 'anthropic' 
-              ? "Primary AI Model (Anthropic Claude) and Embeddings AI Model (OpenAI) are configured."
-              : "Primary AI Model (OpenAI) and Embeddings AI Model are configured."
-          }
-          type="success"
-          showIcon
-          style={{ marginBottom: 24 }}
-        />
+        <>
+          {selectedProvider === 'anthropic' ? (
+            <Alert
+              message={anthropicAvailable ? "🎉 Anthropic Integration Available" : "⚠️ Model Configuration with Limitations"}
+              description={
+                <div>
+                  {anthropicAvailable ? (
+                    <>
+                      <strong>Status:</strong> Anthropic Claude models are properly integrated via @langchain/anthropic package. 
+                      <br />
+                      <strong>What this means:</strong> You'll use genuine Claude 4/3.7 models directly from Anthropic.
+                      <br />
+                      <strong>Note:</strong> For optimal performance, consider updating LangChain core from v0.0.190 to latest v0.3.x.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Configuration Status:</strong> API keys are configured but Anthropic integration has version conflicts.
+                      <br />
+                      <strong>Current behavior:</strong> Falling back to OpenAI GPT-3.5-turbo for all operations.
+                      <br />
+                      <strong>To fix:</strong> Update LangChain core from v0.0.190 to v0.3.x for full Anthropic support.
+                    </>
+                  )}
+                </div>
+              }
+              type={anthropicAvailable ? "success" : "warning"}
+              showIcon
+              style={{ marginBottom: 24 }}
+            />
+          ) : (
+            <Alert
+              message="AI Models Configured Successfully"
+              description="Primary AI Model (OpenAI) and Embeddings AI Model are configured."
+              type="success"
+              showIcon
+              style={{ marginBottom: 24 }}
+            />
+          )}
+        </>
       )}
 
       <Form
@@ -157,8 +198,8 @@ const ModelConfiguration: React.FC = () => {
         layout="vertical"
         onFinish={handleSave}
         initialValues={{
-          provider: 'anthropic',
-          model: 'claude-sonnet-4-20250514'
+          provider: 'openai',
+          model: 'gpt-4o'
         }}
       >
         <Form.Item

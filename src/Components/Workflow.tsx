@@ -47,6 +47,7 @@ import { ModelData } from "../Types/ModelData"
 import { ModelingStep } from "./Steps/Modeling"
 import { HeliconeMonitor } from "./HeliconeMonitor"
 import { HeliconeService } from "../Services/HeliconeService"
+import SearchLoadingState from "./SearchLoadingState"
 const { useToken } = theme
 
 const Workflow = (props: { tabKey?: string }) => {
@@ -188,35 +189,41 @@ const Workflow = (props: { tabKey?: string }) => {
       }`,
       content: (
         <>
-          {ModelService.isModelConfigured() ? (
-            (modelData.papers || [])?.length > 0 ? (
-              <PaperTable
-                onPapersChange={(papers) => {
-                  setModelData((prevValue) => ({ ...prevValue, papers }))
-                }}
-                papers={modelData.papers || []}
-              />
-            ) : (
-              <Alert
-                message={
-                  "No results found. Try another search query. Try to be less specific or to write in keywords."
-                }
-              />
-            )
+          {relevancyLoading ? (
+            <SearchLoadingState searchQuery={searchQuery} stage="ranking" />
           ) : (
-            <Result
-              status='404'
-              title='AI Model Configuration Required'
-              subTitle='Please configure your AI model to unlock all features.'
-              extra={
-                <Button 
-                  type="primary" 
-                  onClick={() => window.location.reload()}
-                >
-                  Configure Model
-                </Button>
-              }
-            />
+            <>
+              {ModelService.isModelConfigured() ? (
+                (modelData.papers || [])?.length > 0 ? (
+                  <PaperTable
+                    onPapersChange={(papers) => {
+                      setModelData((prevValue) => ({ ...prevValue, papers }))
+                    }}
+                    papers={modelData.papers || []}
+                  />
+                ) : (
+                  <Alert
+                    message={
+                      "No results found. Try another search query. Try to be less specific or to write in keywords."
+                    }
+                  />
+                )
+              ) : (
+                <Result
+                  status='404'
+                  title='AI Model Configuration Required'
+                  subTitle='Please configure your AI model to unlock all features.'
+                  extra={
+                    <Button 
+                      type="primary" 
+                      onClick={() => window.location.reload()}
+                    >
+                      Configure Model
+                    </Button>
+                  }
+                />
+              )}
+            </>
           )}
         </>
       ),

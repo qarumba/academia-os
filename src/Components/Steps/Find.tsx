@@ -18,6 +18,7 @@ import { PDFUpload } from "../PDFUpload"
 import { AcademicPaper } from "../../Types/AcademicPaper"
 import { SearchRepository } from "../../Services/SearchService"
 import { GioiaCoding } from "../Charts/GioiaCoding"
+import SearchLoadingState from "../SearchLoadingState"
 
 const StepFind = (props: {
   onFinish: (payload: {
@@ -30,63 +31,84 @@ const StepFind = (props: {
   const [searchQuery, setSearchQuery] = useState("")
   const [results, setResults] = useState<AcademicPaper[]>([])
   const [uploadTourOpen, setUploadTourOpen] = useState<boolean>(false)
+  const [loadingStage, setLoadingStage] = useState<'searching' | 'processing' | 'ranking'>('searching')
 
   const refUpload = useRef(null)
 
   const search = async (query: string) => {
     setSearchQuery(query)
     setSearchLoading(true)
+    setLoadingStage('searching')
     props?.onLoadingChange?.(true)
+    
     let searchResults = [] as AcademicPaper[]
     try {
+      // Stage 1: Searching Semantic Scholar
+      setLoadingStage('searching')
       const searchResponse = await SearchRepository.searchPapers(query)
       searchResults = searchResponse ? (await searchResponse.nextPage()) || [] : []
+      
+      // Stage 2: Processing results
+      if (searchResults?.length > 0) {
+        setLoadingStage('processing')
+        // Add a small delay to show the processing stage
+        await new Promise(resolve => setTimeout(resolve, 800))
+        
+        searchResults = searchResults?.map(
+          (paper) =>
+            ({
+              fullText: paper?.fullText || paper?.abstract,
+              id: paper?.corpusId,
+              title: paper?.title,
+              abstract: paper?.abstract,
+              authors: paper?.authors,
+              citationCount: paper?.citationCount,
+              citations: paper?.citations,
+              corpusId: paper?.corpusId,
+              embedding: paper?.embedding,
+              externalIds: paper?.externalIds,
+              fieldsOfStudy: paper?.fieldsOfStudy,
+              influentialCitationCount: paper?.influentialCitationCount,
+              isOpenAccess: paper?.isOpenAccess,
+              journal: paper?.journal,
+              openAccessPdf: paper?.openAccessPdf,
+              paperId: paper?.paperId,
+              publicationDate: paper?.publicationDate,
+              publicationTypes: paper?.publicationTypes,
+              publicationVenue: paper?.publicationVenue,
+              referenceCount: paper?.referenceCount,
+              references: paper?.references,
+              s2FieldsOfStudy: paper?.s2FieldsOfStudy,
+              tldr: paper?.tldr,
+              url: paper?.url,
+              venue: paper?.venue,
+              year: paper?.year,
+            } as AcademicPaper)
+        )
+      }
     } catch (error) {
       console.error('Search failed:', error)
       searchResults = []
     }
+    
     if (!searchResults?.length) {
       // TODO: Use GPT to create a better search query instead
     }
-    searchResults = searchResults?.map(
-      (paper) =>
-        ({
-          fullText: paper?.fullText || paper?.abstract,
-          id: paper?.corpusId,
-          title: paper?.title,
-          abstract: paper?.abstract,
-          authors: paper?.authors,
-          citationCount: paper?.citationCount,
-          citations: paper?.citations,
-          corpusId: paper?.corpusId,
-          embedding: paper?.embedding,
-          externalIds: paper?.externalIds,
-          fieldsOfStudy: paper?.fieldsOfStudy,
-          influentialCitationCount: paper?.influentialCitationCount,
-          isOpenAccess: paper?.isOpenAccess,
-          journal: paper?.journal,
-          openAccessPdf: paper?.openAccessPdf,
-          paperId: paper?.paperId,
-          publicationDate: paper?.publicationDate,
-          publicationTypes: paper?.publicationTypes,
-          publicationVenue: paper?.publicationVenue,
-          referenceCount: paper?.referenceCount,
-          references: paper?.references,
-          s2FieldsOfStudy: paper?.s2FieldsOfStudy,
-          tldr: paper?.tldr,
-          url: paper?.url,
-          venue: paper?.venue,
-          year: paper?.year,
-        } as AcademicPaper)
-    )
+    
     setResults(searchResults)
+    setSearchLoading(false)
     props?.onLoadingChange?.(false)
+    
     if (searchResults.length > 0) {
       props?.onFinish?.({ searchQuery: query, searchResults })
     } else {
       message.info("No results found. Try a different search query.")
-      setSearchLoading(false)
     }
+  }
+
+  // Show loading state when searching
+  if (searchLoading) {
+    return <SearchLoadingState searchQuery={searchQuery} stage={loadingStage} />;
   }
 
   return (

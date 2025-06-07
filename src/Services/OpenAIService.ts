@@ -18,6 +18,7 @@ import { AcademicPaper } from "../Types/AcademicPaper"
 import { type ClientOptions } from "openai"
 import { ModelData } from "../Types/ModelData"
 import { asyncMap } from "../Helpers/asyncMap"
+import { HeliconeService } from "./HeliconeService"
 
 import { BaseLanguageModelParams } from "langchain/dist/base_language"
 
@@ -49,7 +50,7 @@ export class OpenAIService {
       await chat.call([new HumanMessage(prompt)], {
         callbacks: [
           {
-            handleLLMNewToken(token) {
+            handleLLMNewToken(token: string) {
               callback(token)
             },
           },
@@ -234,32 +235,13 @@ export class OpenAIService {
   }
 
   static openAIConfiguration() {
-    // Try new unified config first
-    let heliconeEndpoint = "";
-    let heliconeKey = "";
-    
-    const modelConfig = localStorage.getItem("modelConfig");
-    if (modelConfig) {
-      const config = JSON.parse(modelConfig);
-      heliconeEndpoint = config.heliconeEndpoint || "";
-      heliconeKey = config.heliconeKey || "";
-    } else {
-      // Fallback to legacy keys
-      heliconeEndpoint = localStorage.getItem("heliconeEndpoint") || "";
-      heliconeKey = localStorage.getItem("heliconeKey") || "";
-    }
+    // Get Helicone configuration for OpenAI
+    const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('openai');
 
-    // Use async Helicone integration (headers only, no proxy)
-    // This allows monitoring via Helicone API while avoiding CORS issues
-    const useHelicone = heliconeKey ? true : false;
-
-    if (useHelicone) {
+    if (heliconeConfig) {
       return {
         baseOptions: {
-          headers: {
-            "Helicone-Auth": `Bearer ${heliconeKey}`,
-            "Helicone-Cache-Enabled": "true",
-          },
+          headers: heliconeConfig.headers,
         },
         // timeout: 30000,
       } as ClientOptions;

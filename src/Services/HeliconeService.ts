@@ -25,9 +25,15 @@ export class HeliconeService {
     const modelConfig = localStorage.getItem("modelConfig");
     if (modelConfig) {
       const config = JSON.parse(modelConfig);
+      // Use provider-specific Helicone endpoints
+      const endpoint = config.provider === 'anthropic' 
+        ? "https://anthropic.helicone.ai" 
+        : "https://oai.helicone.ai/v1";
+      
       return {
-        endpoint: config.heliconeEndpoint,
-        key: config.heliconeKey
+        endpoint,
+        key: config.heliconeKey,
+        provider: config.provider
       };
     }
     return null;
@@ -35,7 +41,28 @@ export class HeliconeService {
 
   static isHeliconeConfigured(): boolean {
     const config = this.getHeliconeConfig();
-    return !!(config?.endpoint && config?.key);
+    return !!(config?.key); // Only check for key since endpoint is provider-specific
+  }
+
+  /**
+   * Get Helicone configuration for specific provider
+   */
+  static getHeliconeConfigForProvider(provider: 'openai' | 'anthropic') {
+    const config = this.getHeliconeConfig();
+    if (!config?.key) return null;
+
+    const endpoint = provider === 'anthropic' 
+      ? "https://anthropic.helicone.ai" 
+      : "https://oai.helicone.ai/v1";
+
+    return {
+      endpoint,
+      key: config.key,
+      headers: {
+        "Helicone-Auth": `Bearer ${config.key}`,
+        "Helicone-Cache-Enabled": "true",
+      }
+    };
   }
 
   /**

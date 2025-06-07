@@ -1,5 +1,17 @@
 import { ChatOpenAI } from "langchain/chat_models/openai"
 import { HumanMessage, SystemMessage } from "langchain/schema"
+import { HeliconeService } from "./HeliconeService"
+
+// Anthropic integration with graceful fallback
+let ChatAnthropic: any = null;
+let anthropicAvailable = false;
+
+// Browser-compatible way to check for Anthropic package
+// Since we can't use require() or dynamic imports reliably with version conflicts,
+// we'll just assume it's not available and rely on the fallback
+// This gives users honest feedback about the current state
+anthropicAvailable = false;
+console.warn('Anthropic integration not available due to LangChain version conflicts, falling back to OpenAI');
 
 interface ModelConfig {
   provider: 'openai' | 'anthropic';
@@ -30,18 +42,38 @@ export class ChatService {
     }
 
     if (config.provider === 'anthropic') {
-      // Check if user has OpenAI embeddings key for chat operations
-      const openAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey") || "";
-      if (!openAIKey) {
-        throw new Error('Custom columns require OpenAI models. Please switch to OpenAI or add an OpenAI key for advanced features.');
+      if (ChatAnthropic && anthropicAvailable) {
+        // Use actual Anthropic integration
+        const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('anthropic');
+        
+        const anthropicConfig: any = {
+          model: config.model,
+          anthropicApiKey: config.apiKey,
+          maxTokens: options.maxTokens || 1000,
+        };
+
+        // Add Helicone headers if configured
+        if (heliconeConfig) {
+          anthropicConfig.clientOptions = {
+            defaultHeaders: heliconeConfig.headers,
+          };
+        }
+
+        return new ChatAnthropic(anthropicConfig);
+      } else {
+        // Fallback to OpenAI with clear warning
+        console.warn('Anthropic package not available, falling back to OpenAI');
+        const openAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey") || "";
+        if (!openAIKey) {
+          throw new Error('Anthropic integration unavailable and no OpenAI fallback key configured.');
+        }
+        
+        return new ChatOpenAI({
+          modelName: 'gpt-3.5-turbo',
+          openAIApiKey: openAIKey,
+          maxTokens: options.maxTokens || 100,
+        }, this.getOpenAIClientConfiguration());
       }
-      
-      // Use OpenAI key for chat operations when using Anthropic
-      return new ChatOpenAI({
-        modelName: 'gpt-3.5-turbo', // Use a simple OpenAI model for custom columns
-        openAIApiKey: openAIKey,
-        maxTokens: options.maxTokens || 100,
-      }, this.getOpenAIClientConfiguration());
     } else {
       // OpenAI provider
       return new ChatOpenAI({
@@ -52,22 +84,21 @@ export class ChatService {
     }
   }
 
+  // Add method to check if Anthropic is actually available
+  static async isAnthropicAvailable(): Promise<boolean> {
+    return anthropicAvailable;
+  }
+
   private static getOpenAIClientConfiguration() {
     const config = this.getModelConfig();
-    const heliconeEndpoint = config?.heliconeEndpoint || localStorage.getItem("heliconeEndpoint") || "";
-    const heliconeKey = config?.heliconeKey || localStorage.getItem("heliconeKey") || "";
+    
+    // Get Helicone configuration for OpenAI (even when using Anthropic primary, OpenAI is used for embeddings)
+    const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('openai');
 
-    // Use async Helicone integration (headers only, no proxy)
-    // This allows monitoring via Helicone API while avoiding CORS issues
-    const useHelicone = heliconeKey ? true : false;
-
-    if (useHelicone) {
+    if (heliconeConfig) {
       return {
         baseOptions: {
-          headers: {
-            "Helicone-Auth": `Bearer ${heliconeKey}`,
-            "Helicone-Cache-Enabled": "true",
-          },
+          headers: heliconeConfig.headers,
         },
       };
     }
