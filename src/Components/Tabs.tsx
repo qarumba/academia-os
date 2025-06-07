@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { Button, Slider, Space, Switch, Tabs, Typography, message } from "antd"
+import { Button, Slider, Space, Switch, Tabs, Typography, message, theme as antdTheme } from "antd"
 import Workflow from "./Workflow"
 import {
   BookOutlined,
@@ -17,6 +17,7 @@ type TargetKey = React.MouseEvent | React.KeyboardEvent | string
 
 const RootTabs: React.FC = () => {
   const { theme, toggleTheme } = useTheme()
+  const { token } = antdTheme.useToken()
   const newTabIndex = useRef(0)
   const [isConfigurationVisible, setIsConfigurationVisible] = useState(false)
 
@@ -111,15 +112,22 @@ const RootTabs: React.FC = () => {
           justifyContent: 'center'
         }}>
           <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '8px',
+            backgroundColor: token.colorBgContainer, 
+            borderRadius: token.borderRadius,
+            border: `1px solid ${token.colorBorder}`,
+            boxShadow: token.boxShadowSecondary,
             maxWidth: '800px',
             width: '90%',
             maxHeight: '90%',
             overflow: 'auto'
           }}>
             <ModelConfiguration />
-            <div style={{ padding: '16px', textAlign: 'center' }}>
+            <div style={{ 
+              padding: '16px', 
+              textAlign: 'center',
+              borderTop: `1px solid ${token.colorBorderSecondary}`,
+              backgroundColor: token.colorBgContainer
+            }}>
               <Button onClick={() => setIsConfigurationVisible(false)}>
                 Close
               </Button>
