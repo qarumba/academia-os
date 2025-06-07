@@ -18,9 +18,10 @@ ModelData
 
 ModelConfig
 - Properties: provider ('openai' | 'anthropic'), model, apiKey
-- Properties: openaiEmbeddingsKey, email, heliconeEndpoint, heliconeKey
+- Properties: openaiEmbeddingsKey, heliconeKey
 - Properties: adobePDFOCR_client_id, adobePDFOCR_client_secret
 - Purpose: AI model configuration and credentials
+- LangChain v0.3: Enhanced validation for multi-provider support
 
 ModelState (Redux)
 - Properties: config (ModelConfig), isConfigured, isLoading, error
@@ -59,6 +60,7 @@ SearchLoadingState
 CodingStepProps
 - Properties: modelData (ModelData), onModelDataChange (callback)
 - Purpose: Qualitative coding component interface
+- LangChain v0.3: Enhanced with async import patterns for CharacterTextSplitter
 
 FindStepProps
 - Properties: onFinish (callback), onLoadingChange (optional callback)
@@ -67,24 +69,29 @@ FindStepProps
 ModelingStepProps
 - Properties: modelData (ModelData), onModelDataChange (callback)
 - Purpose: Theory construction component interface
+- LangChain v0.3: Updated with modern MemoryVectorStore integration
 
 PaperTableProps
 - Properties: papers (AcademicPaper[]), loading, onPapersChange (optional)
 - Purpose: Academic paper table component interface
+- Enhanced: Improved column display and keyword cleaning features
 
 6. SERVICE INTERFACES
 
 ChatServiceConfig
 - Properties: maxTokens, temperature, model (all optional)
 - Purpose: Configuration for AI chat models
+- LangChain v0.3: Enhanced with provider-specific constructor patterns
 
 EmbeddingConfig
-- Properties: openAIApiKey, baseOptions (optional headers)
+- Properties: openAIApiKey, clientOptions (merged configuration)
 - Purpose: Vector embedding configuration
+- LangChain v0.3: Updated for modern OpenAIEmbeddings constructor
 
 SearchResult
 - Properties: papers (AcademicPaper[]), total, hasMore
 - Purpose: Academic paper search result structure
+- Enhanced: Rate limiting and improved error handling
 
 7. GIOIA METHODOLOGY MODELS
 
@@ -132,10 +139,12 @@ SemanticScholarMetadata
 - Properties: venue, year, referenceCount, citationCount
 - Properties: isOpenAccess, fieldsOfStudy
 - Purpose: Extended paper metadata from Semantic Scholar
+- Enhanced: Rate limiting and CORS error handling
 
 HeliconeConfiguration
 - Properties: endpoint, apiKey, headers, provider
 - Purpose: Helicone monitoring setup
+- Enhanced: Server proxy integration with CORS-free API access
 
 11. UTILITY TYPES
 
@@ -181,14 +190,18 @@ Core Flow:
 AcademicPaper[] → ModelData → GioiaMethodologyStep → TheoryConstructionResult
 
 Configuration:
-ModelConfig → ModelState → LocalStorage → Service Layer
+ModelConfig → ModelState → LocalStorage → Service Layer → LangChain v0.3
 
 Monitoring:
-HeliconeRequest[] → HeliconeStats → HeliconeMonitor Component
+HeliconeRequest[] → HeliconeStats → HeliconeMonitor Component → Server Proxy
 
 UI State:
 Theme → ThemeContext → Component Props → Rendered UI
 
-This domain model supports complete AI-powered qualitative research workflows with multi-provider model management, comprehensive monitoring, and robust state management.
+LangChain Integration:
+@langchain/core → @langchain/openai/@langchain/anthropic → ChatService → Components
+
+This domain model supports complete AI-powered qualitative research workflows with multi-provider model management, comprehensive monitoring, robust state management, and modern LangChain v0.3.27 architecture.
 
 Last Updated: June 8, 2025
+LangChain v0.3.27 Migration: Complete

@@ -10,20 +10,23 @@ Package Manager: npm
 2. DIRECTORY STRUCTURE
 
 public/
-- Static assets (favicon.ico, index.html, manifest.json, overview.gif)
+- Static assets (favicon.png, index.html, manifest.json, overview.gif)
 - Entry point for React application
+- Enhanced branding for AcademiaOS 2.0
 
 server/
 - Node.js API server for Helicone proxy
 - server.js: Express server with CORS handling
 - package.json: Server-specific dependencies
+- README.md: Server setup and deployment guide
 
 src/
 ├── Components/           # React UI components
 │   ├── Charts/          # Data visualization (GioiaCoding.tsx, Mermaid.tsx)
 │   ├── Steps/           # Workflow components (Find.tsx, Coding.tsx, Modeling.tsx)
+│   │   └── Modeling/    # Modeling sub-components (Interrelationships.tsx)
 │   └── *.tsx            # Core components (ModelConfiguration, PaperTable, etc.)
-├── Services/            # Business logic layer
+├── Services/            # Business logic layer (LangChain v0.3 compatible)
 │   └── *.ts             # Service classes (ChatService, OpenAIService, etc.)
 ├── Redux/               # State management
 │   └── *.ts             # Store, reducers, actions
@@ -34,6 +37,7 @@ src/
 ├── Providers/           # React context providers
 │   └── ThemeContext.tsx # Theme management
 └── __mocks__/           # Test mocking utilities
+    └── langchain/       # LangChain v0.3 mocks
 
 3. KEY FILES
 
@@ -74,10 +78,12 @@ Core Components:
 - SearchLoadingState.tsx: Progressive loading interface
 
 Service Classes:
-- ChatService.ts: Multi-provider AI model abstraction
-- OpenAIService.ts: Gioia methodology implementation
-- EmbeddingService.ts: Vector embeddings management
-- HeliconeService.ts: API monitoring and cost tracking
+- ChatService.ts: Multi-provider AI model abstraction (LangChain v0.3)
+- OpenAIService.ts: Gioia methodology implementation (updated imports)
+- EmbeddingService.ts: Vector embeddings management (@langchain/openai)
+- HeliconeService.ts: API monitoring and cost tracking (server proxy)
+- RankingService.ts: Paper relevance scoring (@langchain/textsplitters)
+- SearchService.ts: Academic paper search (rate limiting)
 
 6. ARCHITECTURE PATTERNS
 
@@ -86,16 +92,19 @@ Frontend:
 - Redux state management for global configuration
 - Context API for theme management
 - Service layer pattern for business logic
+- LangChain v0.3 integration with async imports
 
 Backend:
 - Express.js API server
 - Proxy pattern for Helicone integration
 - CORS handling for browser compatibility
+- Production-ready server configuration
 
 Build System:
 - Create React App configuration
 - TypeScript compilation
 - Docker containerization support
+- LangChain v0.3 package overrides
 
 7. POWERSHELL AUTOMATION
 
@@ -116,14 +125,22 @@ Usage:
 Local Development:
 1. npm install (install dependencies)
 2. npm start (development server)
-3. npm run server (API server for Helicone)
+3. npm run server:dev (API server for Helicone with auto-restart)
 
 Full Stack:
-1. npm run setup (install all dependencies)
-2. npm run dev (start client and server)
+1. npm run setup (install all dependencies - client + server)
+2. npm run dev (start both React client and Helicone server)
 
 Production:
 1. npm run build (create production bundle)
 2. Docker deployment with docker-compose
+3. Server deployment with npm run server
+
+LangChain v0.3 Migration Notes:
+- All @langchain/* packages are properly configured
+- Package overrides ensure consistent @langchain/core version
+- Async imports used for optimal performance
+- Backward compatibility maintained
 
 Last Updated: June 8, 2025
+LangChain v0.3.27 Migration: Complete

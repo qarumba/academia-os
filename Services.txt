@@ -22,21 +22,28 @@ Purpose: Unified interface for OpenAI and Anthropic models with graceful fallbac
 Key Methods:
 - getModelConfig(): Retrieve configuration from localStorage
 - createChatModel(options): Create configured chat model instance
-- isAnthropicAvailable(): Check Anthropic integration status
-- simpleChat(system, user, options): Execute simple chat interaction
-- getEmbeddings(): Get OpenAI embeddings instance
+- isAnthropicAvailable(): Check native Anthropic integration status
+- handleError(): Centralized error handling with user feedback
+- getEmbeddings(): Get OpenAI embeddings instance (compatibility)
+
+LangChain v0.3 Integration:
+- Dynamic Anthropic package loading with async import
+- Native @langchain/anthropic support with initialization detection
+- Updated import paths: @langchain/openai, @langchain/core/messages
+- Improved constructor patterns for LangChain v0.3 API
 
 Configuration Handling:
 - Reads provider, model, and API keys from localStorage
 - Automatic fallback from Anthropic to OpenAI when needed
-- Helicone integration for both providers
+- Helicone integration for both providers with provider-specific endpoints
 - Transparent error messaging for unsupported configurations
+- Advanced debugging with development mode logging
 
 Architectural Pattern:
 - Static factory methods for model creation
-- Provider abstraction with fallback handling
-- Configuration-driven behavior
-- Centralized error handling
+- Provider abstraction with runtime capability detection
+- Configuration-driven behavior with validation
+- Centralized error handling with user-friendly messages
 
 3. EMBEDDINGSERVICE - VECTOR EMBEDDINGS MANAGEMENT
 
@@ -47,15 +54,21 @@ Key Methods:
 - embedQuery(text): Generate embedding for single text
 - embedDocuments(texts): Generate embeddings for multiple texts
 
+LangChain v0.3 Integration:
+- Updated import: @langchain/openai for OpenAIEmbeddings
+- Modern constructor pattern with merged configuration objects
+- Enhanced error handling for missing API keys
+
 Implementation Details:
 - Always uses OpenAI embeddings for compatibility
 - Supports both OpenAI and Anthropic primary models
 - Requires OpenAI key for embeddings when using Anthropic
 - Helicone integration for cost tracking
+- Provider-agnostic design with clear error messaging
 
 4. OPENAISERVICE - GIOIA METHODOLOGY IMPLEMENTATION
 
-Purpose: Complete qualitative analysis using Gioia methodology
+Purpose: Complete qualitative analysis using Gioia methodology with LangChain v0.3
 
 Core Gioia Methods:
 - initialCodingOfPaper(paper, remarks): First-order coding
@@ -73,12 +86,18 @@ Supporting Methods:
 - conceptTuples(modelData): Concept relationship generation
 - findRelevantParagraphsAndSummarize(modelData, tuples): Evidence analysis
 
+LangChain v0.3 Migration Features:
+- Updated imports: @langchain/core/documents, @langchain/textsplitters
+- Modern CharacterTextSplitter from dedicated package
+- Compatible with both OpenAI and Anthropic via ChatService
+- Enhanced error handling with model-agnostic approach
+
 Implementation Features:
 - Document chunking for large texts (10,000 character chunks)
 - Vector similarity search for evidence gathering
 - JSON response formatting for structured data
 - Comprehensive error handling with user feedback
-- Integration with ChatService for model selection
+- Multi-provider model support via unified ChatService
 
 5. MODELSERVICE - CONFIGURATION VALIDATION
 
@@ -102,22 +121,23 @@ Purpose: Monitor AI API usage, track costs, and provide analytics
 Key Methods:
 - isHeliconeConfigured(): Check configuration status
 - getHeliconeConfigForProvider(provider): Get provider-specific config
-- testConnection(): Validate API connectivity
-- getStats(): Fetch usage statistics
+- testConnection(): Validate API connectivity via server proxy
+- getSessionStats(startTime): Fetch session-based statistics
 - getRecentRequests(limit): Retrieve recent API calls
+- safeApiCall(apiCall, fallback): Graceful API call handling
 
-Analytics Methods:
-- calculateTotalCost(requests): Sum costs from request array
-- calculateTotalTokens(requests): Sum token usage
-- getCostBreakdownByModel(requests): Cost analysis by model
-- formatCost(cost): Currency formatting
-- formatTokens(tokens): Number formatting with separators
+Server Integration Methods:
+- Uses dedicated Node.js server for CORS-free API access
+- API_BASE_URL: http://localhost:3001/api/helicone (dev) or /api/helicone (prod)
+- POST endpoints for requests and connection testing
+- Enhanced error handling with specific CORS messaging
 
 Implementation Details:
 - Provider-specific endpoints (OpenAI: oai.helicone.ai, Anthropic: anthropic.helicone.ai)
-- Server-side proxy for CORS handling
-- Real-time statistics with session tracking
-- Comprehensive error handling for network issues
+- Production-ready server-side proxy for CORS handling
+- Real-time statistics with session tracking and reset capabilities
+- Comprehensive error handling for network and server issues
+- Development mode fallbacks for offline usage
 
 7. LANGCHAINSERVICE - FRAMEWORK INTEGRATION
 
@@ -157,6 +177,12 @@ Purpose: Rank academic papers by relevance using vector similarity
 Key Methods:
 - rankPapers(queryString, papers): Rank papers by relevance
 
+LangChain v0.3 Implementation:
+- Updated imports: @langchain/core/documents, @langchain/textsplitters
+- Modern CharacterTextSplitter with proper constructor
+- MemoryVectorStore integration (remains in main langchain package)
+- EmbeddingService integration for multi-provider support
+
 Implementation Process:
 - Document chunking (1,000 characters with 50 character overlap)
 - Vector embedding creation for papers and query
@@ -166,8 +192,9 @@ Implementation Process:
 
 Performance Features:
 - Graceful error handling returns original order on failure
-- Efficient vector operations using LangChain utilities
+- Efficient vector operations using LangChain v0.3 utilities
 - Memory-based vector store for fast similarity search
+- Compatible with both OpenAI and Anthropic models
 
 10. PDFSERVICE - DOCUMENT PROCESSING
 
@@ -185,6 +212,7 @@ Implementation Details:
 - File validation (50MB size limit, PDF type checking)
 - Comprehensive error handling for corrupted files
 - Base64 encoding for API submissions
+- Compatible with modern LangChain text processing pipeline
 
 11. ARCHITECTURAL PATTERNS
 
@@ -213,3 +241,4 @@ Error Handling Strategy:
 This architecture enables enterprise-grade AI-powered qualitative research capabilities while maintaining code quality, extensibility, and research methodology accuracy.
 
 Last Updated: June 8, 2025
+LangChain v0.3.27 Migration: Complete

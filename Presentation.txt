@@ -8,6 +8,7 @@ Technology Stack:
 - Redux 4.2.1 (state management)
 - React Context API (theme management)
 - CSS-in-JS with inline styles
+- LangChain v0.3.27 (AI model orchestration)
 
 Key Architectural Patterns:
 - Context Provider Pattern (global state management)
@@ -98,10 +99,12 @@ Implementation:
 - Redirect to configuration screen when unconfigured
 
 Configuration Component Features:
-- Multi-provider model selection
+- Multi-provider model selection (OpenAI, Anthropic)
 - Dynamic form behavior based on provider
 - Validation with real-time feedback
 - Provider-specific requirements handling
+- LangChain v0.3 compatibility checking
+- Native Anthropic integration status detection
 
 Key Files:
 - src/Components/ModelConfigurationGuard.tsx
@@ -109,9 +112,10 @@ Key Files:
 
 Benefits:
 - Prevents app usage without proper setup
-- Clear user guidance
+- Clear user guidance for LangChain migration
 - Type-safe configuration validation
 - Seamless Redux integration
+- Dynamic capability detection
 
 6. COMPONENT COMPOSITION PATTERN
 
@@ -122,24 +126,27 @@ Workflow Component Architecture:
 - Step components: Find, Coding, Modeling
 - Conditional loading state rendering
 - Floating action bars for additional functionality
+- LangChain v0.3 async import patterns
 
 Component Prop Patterns:
 - Typed interfaces for all component props
 - Callback props for parent-child communication
 - Optional props with default values
 - Consistent naming conventions
+- Enhanced error handling for LangChain operations
 
 Key Files:
 - src/Components/Workflow.tsx
 - src/Components/Steps/Find.tsx
-- src/Components/Steps/Coding.tsx
-- src/Components/Steps/Modeling.tsx
+- src/Components/Steps/Coding.tsx (async CharacterTextSplitter imports)
+- src/Components/Steps/Modeling.tsx (MemoryVectorStore integration)
 
 Benefits:
 - Clear separation of concerns
 - Type-safe component interfaces
 - Flexible composition
 - Maintainable component hierarchy
+- Modern async LangChain integration
 
 7. MONITORING DRAWER PATTERN
 
@@ -201,18 +208,27 @@ Implementation:
 - Error handling with user feedback
 - Loading states during service operations
 - Configuration validation before service calls
+- LangChain v0.3 compatibility layer
 
 Integration Examples:
-- ChatService for AI model interactions
-- SearchService for paper discovery
-- HeliconeService for monitoring
+- ChatService for AI model interactions (multi-provider)
+- SearchService for paper discovery (rate limiting)
+- HeliconeService for monitoring (server proxy)
 - PDFService for document processing
+- EmbeddingService for vector operations
+
+LangChain v0.3 Features:
+- Async dynamic imports for modular loading
+- Modern constructor patterns
+- Enhanced error handling
+- Provider-agnostic abstractions
 
 Benefits:
 - Separation of concerns
 - Centralized business logic
 - Consistent error handling
 - Testable components
+- Future-proof LangChain integration
 
 10. FORM VALIDATION PATTERN
 
@@ -301,3 +317,4 @@ Benefits:
 This presentation layer architecture demonstrates modern React patterns with TypeScript, providing a robust foundation for complex academic research workflows while maintaining excellent user experience and code maintainability.
 
 Last Updated: June 8, 2025
+LangChain v0.3.27 Migration: Complete
