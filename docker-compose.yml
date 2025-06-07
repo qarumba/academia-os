@@ -1,0 +1,20 @@
+services:
+  academia-os:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: academia-os-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the source code for hot reloading
+      - ./src:/app/src
+      - ./public:/app/public
+      # Prevent node_modules from being overwritten
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Enable hot reload in Docker
+      - WATCHPACK_POLLING=true    # For webpack file watching
+    stdin_open: true  # Keep STDIN open (equivalent to -i)
+    tty: true         # Allocate a pseudo-TTY (equivalent to -t)

@@ -1,10 +1,11 @@
-import { Button, Input, Space, Steps, message } from "antd"
+import { Button, Input, Space, Steps, App } from "antd"
 import { AcademicPaper } from "../../Types/AcademicPaper"
 import { PaperTable } from "../PaperTable"
 import { useEffect, useState } from "react"
 import { asyncMap } from "../../Helpers/asyncMap"
 import { OpenAIService } from "../../Services/OpenAIService"
 import { ChatService } from "../../Services/ChatService"
+import { ModelService } from "../../Services/ModelService"
 import { HumanMessage, SystemMessage } from "langchain/schema"
 import Mermaid from "../Charts/Mermaid"
 import { GioiaCoding } from "../Charts/GioiaCoding"
@@ -16,6 +17,7 @@ export const CodingStep = (props: {
   modelData: ModelData
   onModelDataChange: (modelData: ModelData) => void
 }) => {
+  const { message } = App.useApp();
   const [initialCodes, setInitialCodes] = useState<string[]>(
     props?.modelData?.firstOrderCodes || []
   )
@@ -240,19 +242,44 @@ export const CodingStep = (props: {
 
   const load = async () => {
     console.log("Loading started")
-    const codes = await loadInitialCodes()
-    if (codes.length > 0) {
-      const focusCodes = await loadFocusCodes(codes)
-      if (Object.keys(focusCodes).length > 0) {
-        const aggregateDimensionCodes = await loadAggregateDimensions(
-          focusCodes
-        )
-        props?.onModelDataChange?.({
-          firstOrderCodes: codes,
-          secondOrderCodes: focusCodes,
-          aggregateDimensions: aggregateDimensionCodes,
-        })
+    
+    // Check if we have proper model configuration
+    const config = ModelService.getModelConfig()
+    if (!config) {
+      message.error("No AI model configured")
+      return
+    }
+
+    if (config.provider === 'anthropic') {
+      const hasOpenAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey");
+      if (!hasOpenAIKey) {
+        message.error("Coding analysis requires OpenAI models. Please switch to OpenAI or add OpenAI key in advanced settings.")
+        return
       }
+    }
+
+    try {
+      const codes = await loadInitialCodes()
+      if (codes.length > 0) {
+        const focusCodes = await loadFocusCodes(codes)
+        if (Object.keys(focusCodes).length > 0) {
+          const aggregateDimensionCodes = await loadAggregateDimensions(
+            focusCodes
+          )
+          props?.onModelDataChange?.({
+            firstOrderCodes: codes,
+            secondOrderCodes: focusCodes,
+            aggregateDimensions: aggregateDimensionCodes,
+          })
+        }
+      }
+    } catch (error) {
+      console.error("Coding analysis failed:", error)
+      message.error("Failed to analyze papers. Please check your configuration.")
+      // Reset loading states
+      setFirstOrderLoading(false)
+      setSecondOrderLoading(false)
+      setAggregateLoading(false)
     }
   }
 

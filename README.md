@@ -1,7 +1,7 @@
 <p align="center">
   <img src="./src/favicon.png" alt="AcademiaOS logo" width="50"/>
 </p>
-<h1 align="center">AcademiaOS</h1>
+<h1 align="center">AcademiaOS 2.0</h1>
 
 Welcome to **AcademiaOS 2.0**, your solution for academic information retrieval and reasoning! We've built this modernised fork of AcademiaOS on Thomas Üllebecker's [AcademiaOS](https://github.com/thomasuebi/academia-os), a robust large language model platform equipped with a bouquet of features dedicated to providing unrivalled assistance for researchers.
 
@@ -36,6 +36,7 @@ Tech Stack:
 - AntDesign (Component Library)
 - LangChainJS (Composability with Large Language Models)
 - SemanticScholarJS (Interaction with Semantic Scholar)
+- Anthropic and/or OpenAI (Extract theoretical propositions via NLP)
 
 To get started with AcademiaOS, you require [Node.js](https://nodejs.org/en/download) installed in your machine.
 

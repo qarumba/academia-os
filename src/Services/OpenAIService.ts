@@ -1,11 +1,11 @@
 // Import the SemanticScholar library
-import { message } from "antd"
 import { Document } from "langchain/document"
 import { CharacterTextSplitter } from "langchain/text_splitter"
 import { asyncForEach } from "../Helpers/asyncForEach"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
-import { OpenAIEmbeddings } from "langchain/embeddings/openai"
 import { uniqBy } from "../Helpers/uniqBy"
+import { EmbeddingService } from "./EmbeddingService"
+import { ChatService } from "./ChatService"
 import {
   AzureOpenAIInput,
   ChatOpenAI,
@@ -18,32 +18,39 @@ import { AcademicPaper } from "../Types/AcademicPaper"
 import { type ClientOptions } from "openai"
 import { ModelData } from "../Types/ModelData"
 import { asyncMap } from "../Helpers/asyncMap"
+import { HeliconeService } from "./HeliconeService"
 
 import { BaseLanguageModelParams } from "langchain/dist/base_language"
 
 export class OpenAIService {
   public static getOpenAIKey = () => {
-    return localStorage.getItem("openAIKey") || ""
+    // Try new unified config first
+    const modelConfig = localStorage.getItem("modelConfig");
+    if (modelConfig) {
+      const config = JSON.parse(modelConfig);
+      if (config.provider === 'openai') {
+        return config.apiKey || "";
+      }
+    }
+    // Fallback to legacy key
+    return localStorage.getItem("openAIKey") || "";
   }
 
   public static handleError = (error: any) => {
-    message.error(error.message || error?.response?.data?.message || error)
+    console.error('OpenAI Service Error:', error.message || error?.response?.data?.message || error)
+    throw error; // Re-throw so components can handle with their own message display
   }
 
   static async streamCompletion(prompt: string, callback: any) {
     try {
-      const chat = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 800,
-          streaming: true,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const chat = await ChatService.createChatModel({
+        maxTokens: 800,
+      })
 
       await chat.call([new HumanMessage(prompt)], {
         callbacks: [
           {
-            handleLLMNewToken(token) {
+            handleLLMNewToken(token: string) {
               callback(token)
             },
           },
@@ -56,12 +63,10 @@ export class OpenAIService {
 
   static async getDetailAboutPaper(paper: AcademicPaper, detail: string) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 20,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      // Use the unified ChatService instead of hardcoded OpenAI
+      const model = await ChatService.createChatModel({
+        maxTokens: 20,
+      })
 
       let fullText = paper?.fullText
 
@@ -79,12 +84,7 @@ export class OpenAIService {
         documents.push(...(output || []))
 
         // Create embeddings
-        const embeddings = new OpenAIEmbeddings(
-          {
-            openAIApiKey: OpenAIService.getOpenAIKey(),
-          },
-          OpenAIService.openAIConfiguration()
-        )
+        const embeddings = await EmbeddingService.createEmbeddings()
         // Create the Voy store.
         const store = new MemoryVectorStore(embeddings)
 
@@ -129,12 +129,9 @@ export class OpenAIService {
     papers: AcademicPaper[]
   ): Promise<string[]> {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 400,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 400,
+      })
 
       if ((papers?.length || 0) > 0) {
         const result = await model.predictMessages(
@@ -171,12 +168,9 @@ export class OpenAIService {
 
   static async initialCodingOfPaper(paper: AcademicPaper, remarks?: string) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 3000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 3000,
+      })
 
       let fullText = paper?.fullText
       let chunks = []
@@ -241,23 +235,40 @@ export class OpenAIService {
   }
 
   static openAIConfiguration() {
-    const heliconeEndpoint = localStorage.getItem("heliconeEndpoint")
-    return {
-      basePath: heliconeEndpoint || undefined,
-      baseOptions: {
-        headers: {
-          "Helicone-Auth": `Bearer ${localStorage.getItem("heliconeKey")}`,
+    // Get Helicone configuration for OpenAI
+    const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('openai');
+
+    if (heliconeConfig) {
+      return {
+        baseOptions: {
+          headers: heliconeConfig.headers,
         },
-      },
-      // timeout: 30000,
-    } as ClientOptions
+        // timeout: 30000,
+      } as ClientOptions;
+    }
+
+    // Return default OpenAI configuration
+    return {} as ClientOptions;
   }
   static openAIModelConfiguration(
     props?: Partial<OpenAIChatInput> &
       Partial<AzureOpenAIInput> &
       BaseLanguageModelParams
   ) {
-    const modelName = localStorage.getItem("modelName") || "gpt-4-1106-preview"
+    // Try new unified config first
+    let modelName = "gpt-4-1106-preview";
+    
+    const modelConfig = localStorage.getItem("modelConfig");
+    if (modelConfig) {
+      const config = JSON.parse(modelConfig);
+      if (config.provider === 'openai') {
+        modelName = config.model;
+      }
+    } else {
+      // Fallback to legacy model name
+      modelName = localStorage.getItem("modelName") || "gpt-4-1106-preview";
+    }
+
     return {
       modelName,
       openAIApiKey: OpenAIService.getOpenAIKey(),
@@ -269,12 +280,9 @@ export class OpenAIService {
 
   static async secondOrderCoding(codesArray: string[]) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       let chunks = []
 
@@ -336,12 +344,9 @@ export class OpenAIService {
 
   static async aggregateDimensions(secondOrderCodes: Record<string, string[]>) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of 2nd order codes into a JSON string
       const jsonString = JSON.stringify(Object.keys(secondOrderCodes))
@@ -379,12 +384,9 @@ export class OpenAIService {
     aggregateDimensions: Record<string, string[]>
   ) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of aggregate dimensions into a JSON string
       const jsonString = JSON.stringify(aggregateDimensions)
@@ -425,12 +427,9 @@ export class OpenAIService {
     modelData: ModelData
   ): Promise<[string, string][]> {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of aggregate dimensions into a JSON string
       const jsonString = JSON.stringify(modelData?.aggregateDimensions)
@@ -483,12 +482,7 @@ export class OpenAIService {
   > {
     try {
       const documents: Document[] = []
-      const embeddings = new OpenAIEmbeddings(
-        {
-          openAIApiKey: OpenAIService.getOpenAIKey(),
-        },
-        OpenAIService.openAIConfiguration()
-      )
+      const embeddings = await EmbeddingService.createEmbeddings()
 
       // Create MemoryVectorStore for embeddings
       const store = new MemoryVectorStore(embeddings)
@@ -530,12 +524,9 @@ export class OpenAIService {
             ?.join("\n\n")
 
           // Now, summarize the interrelationship between the two concepts using GPT-3.5
-          const model = new ChatOpenAI(
-            OpenAIService.openAIModelConfiguration({
-              maxTokens: 200,
-            }),
-            OpenAIService.openAIConfiguration()
-          )
+          const model = await ChatService.createChatModel({
+            maxTokens: 200,
+          })
 
           const summaryResult = await model.predictMessages([
             new SystemMessage(
@@ -567,12 +558,9 @@ export class OpenAIService {
     modelingRemarks: string
   ) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of aggregate dimensions into a JSON string
       const jsonString = JSON.stringify(modelData.aggregateDimensions)
@@ -615,12 +603,9 @@ export class OpenAIService {
 
   static async extractModelName(modelDescription: string) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Create a message prompt for brainstorming applicable theories
       const result = await model.predictMessages([
@@ -643,12 +628,9 @@ export class OpenAIService {
 
   static async critiqueModel(modelData: ModelData) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 1000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 1000,
+      })
 
       // Create a message prompt for brainstorming applicable theories
       const result = await model.predictMessages([
@@ -678,12 +660,9 @@ export class OpenAIService {
 
   static async modelVisualization(modelData: ModelData) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Create a message prompt for brainstorming applicable theories
       const result = await model.predictMessages([

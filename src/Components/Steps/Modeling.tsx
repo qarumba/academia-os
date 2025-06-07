@@ -6,7 +6,7 @@ import {
   Steps,
   Table,
   Typography,
-  message,
+  App,
 } from "antd"
 import { AcademicPaper } from "../../Types/AcademicPaper"
 import { PaperTable } from "../PaperTable"
@@ -26,6 +26,7 @@ export const ModelingStep = (props: {
   modelData: ModelData
   onModelDataChange: (modelData: ModelData) => void
 }) => {
+  const { message } = App.useApp();
   const [exploreLoading, setExploreLoading] = useState(false)
   const [interrelationshipsLoading, setInterrelationshipsLoading] =
     useState(false)
