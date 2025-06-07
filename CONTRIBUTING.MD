@@ -55,11 +55,11 @@ Before submitting a new issue, please make sure to check if a similar issue alre
 
 ## Community
 
-Join our [Slack Community](https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ) for real-time discussion and collaboration with fellow contributors.
+Join our Thomas Üllebecker's AcademiaOS [Slack Community](https://join.slack.com/t/academiaos/shared_invite/zt-23730lsp0-Qlkv_0Bs3hgMY2FGTC~HnQ) for real-time discussion and collaboration with fellow contributors.
 
 ## License
 
-AcademiaOS is distributed under the terms of the MIT License. For more details, see the [LICENSE](./LICENSE) file in the project repository.
+AcademiaOS 2.0 is distributed under the terms of the MIT License. For more details, see the [LICENSE](./LICENSE) file in the project repository.
 
 ## Ownership
 
