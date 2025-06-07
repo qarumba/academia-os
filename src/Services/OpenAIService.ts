@@ -42,13 +42,9 @@ export class OpenAIService {
 
   static async streamCompletion(prompt: string, callback: any) {
     try {
-      const chat = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 800,
-          streaming: true,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const chat = await ChatService.createChatModel({
+        maxTokens: 800,
+      })
 
       await chat.call([new HumanMessage(prompt)], {
         callbacks: [
@@ -293,12 +289,9 @@ export class OpenAIService {
 
   static async secondOrderCoding(codesArray: string[]) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       let chunks = []
 
@@ -360,12 +353,9 @@ export class OpenAIService {
 
   static async aggregateDimensions(secondOrderCodes: Record<string, string[]>) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of 2nd order codes into a JSON string
       const jsonString = JSON.stringify(Object.keys(secondOrderCodes))
@@ -403,12 +393,9 @@ export class OpenAIService {
     aggregateDimensions: Record<string, string[]>
   ) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of aggregate dimensions into a JSON string
       const jsonString = JSON.stringify(aggregateDimensions)
@@ -449,12 +436,9 @@ export class OpenAIService {
     modelData: ModelData
   ): Promise<[string, string][]> {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of aggregate dimensions into a JSON string
       const jsonString = JSON.stringify(modelData?.aggregateDimensions)
@@ -549,12 +533,9 @@ export class OpenAIService {
             ?.join("\n\n")
 
           // Now, summarize the interrelationship between the two concepts using GPT-3.5
-          const model = new ChatOpenAI(
-            OpenAIService.openAIModelConfiguration({
-              maxTokens: 200,
-            }),
-            OpenAIService.openAIConfiguration()
-          )
+          const model = await ChatService.createChatModel({
+            maxTokens: 200,
+          })
 
           const summaryResult = await model.predictMessages([
             new SystemMessage(
@@ -586,12 +567,9 @@ export class OpenAIService {
     modelingRemarks: string
   ) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Convert the JSON object of aggregate dimensions into a JSON string
       const jsonString = JSON.stringify(modelData.aggregateDimensions)
@@ -634,12 +612,9 @@ export class OpenAIService {
 
   static async extractModelName(modelDescription: string) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Create a message prompt for brainstorming applicable theories
       const result = await model.predictMessages([
@@ -662,12 +637,9 @@ export class OpenAIService {
 
   static async critiqueModel(modelData: ModelData) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 1000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 1000,
+      })
 
       // Create a message prompt for brainstorming applicable theories
       const result = await model.predictMessages([
@@ -697,12 +669,9 @@ export class OpenAIService {
 
   static async modelVisualization(modelData: ModelData) {
     try {
-      const model = new ChatOpenAI(
-        OpenAIService.openAIModelConfiguration({
-          maxTokens: 2000,
-        }),
-        OpenAIService.openAIConfiguration()
-      )
+      const model = await ChatService.createChatModel({
+        maxTokens: 2000,
+      })
 
       // Create a message prompt for brainstorming applicable theories
       const result = await model.predictMessages([
