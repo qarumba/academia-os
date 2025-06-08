@@ -60,5 +60,5 @@ export const GioiaCoding = ({
     return str
   }
 
-  return <Mermaid chart={generateMermaidString()} />
+  return <Mermaid chart={generateMermaidString()} id="gioia-coding" />
 }

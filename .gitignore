@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/server/node_modules
 /.pnp
 .pnp.js
 
@@ -14,6 +15,11 @@
 # Environment variables
 .env
 .env.example
+
+# Test API keys (DO NOT COMMIT)
+test_keys.md
+*_keys.md
+*.key
 
 # misc
 .DS_Store

@@ -45,8 +45,8 @@ import StepFind from "./Steps/Find"
 import CodingStep from "./Steps/Coding"
 import { ModelData } from "../Types/ModelData"
 import ModelingStep from "./Steps/Modeling"
-import { HeliconeMonitor } from "./HeliconeMonitor"
-import { HeliconeService } from "../Services/HeliconeService"
+import { LangFuseMonitor } from "./LangFuseMonitor"
+import { ChatService } from "../Services/ChatService"
 import SearchLoadingState from "./SearchLoadingState"
 const { useToken } = theme
 
@@ -65,7 +65,7 @@ const Workflow = (props: { tabKey?: string }) => {
   const dispatch = useDispatch()
 
   const [isRestoreModalVisible, setIsRestoreModalVisible] = useState(false)
-  const [heliconeVisible, setHeliconeVisible] = useState(false)
+  const [langFuseVisible, setLangFuseVisible] = useState(false)
   const [currentOperation, setCurrentOperation] = useState('')
 
   const handleRenameTab = (key: string, newLabel: string) => {
@@ -82,12 +82,6 @@ const Workflow = (props: { tabKey?: string }) => {
 
   const [modelData, setModelData] = useState<ModelData>({})
 
-  // Initialize Helicone session tracking
-  useEffect(() => {
-    if (HeliconeService.isHeliconeConfigured()) {
-      HeliconeService.startSession();
-    }
-  }, []);
 
   const evaluate = async (query: string, searchResults: AcademicPaper[]) => {
     setRelevancyLoading(true)
@@ -110,6 +104,9 @@ const Workflow = (props: { tabKey?: string }) => {
     }
     setRelevancyLoading(false)
     setCurrentOperation('')
+    
+    // Add a 3-second pause before moving to Evaluate step to avoid disorientation
+    await new Promise(resolve => setTimeout(resolve, 3000))
     setCurrent(2)
   }
 
@@ -353,9 +350,50 @@ const Workflow = (props: { tabKey?: string }) => {
 
   return (
     <>
-      <Row>
+      <Row gutter={10}>
         <Col xs={0} sm={0} md={6} lg={4} xl={3}>
           <Space direction='vertical'>
+            {/* Previous/Next navigation in clean white box */}
+            <div style={{ 
+              backgroundColor: "white", 
+              padding: "8px", 
+              borderRadius: "6px",
+              border: "1px solid #d9d9d9",
+              textAlign: "center"
+            }}>
+              {current === 0 ? (
+                // Show greyed out buttons on Find step
+                <>
+                  <Button size="small" disabled style={{ margin: "0 4px", color: "#ccc" }}>
+                    Prev
+                  </Button>
+                  <Button size="small" disabled style={{ margin: "0 4px", color: "#ccc" }}>
+                    Next
+                  </Button>
+                </>
+              ) : (
+                // Show functional buttons on other steps
+                <>
+                  {current > 0 && (
+                    <Button size="small" style={{ margin: "0 4px" }} onClick={() => prev()}>
+                      Prev
+                    </Button>
+                  )}
+                  {current < steps.length - 1 && current !== 0 && (
+                    <Button 
+                      type={(current === 3 && (!modelData?.aggregateDimensions || Object.keys(modelData?.aggregateDimensions || {}).length === 0)) ? 'default' : 'primary'}
+                      disabled={current === 3 && (!modelData?.aggregateDimensions || Object.keys(modelData?.aggregateDimensions || {}).length === 0)}
+                      size="small"
+                      onClick={() => next()}
+                      style={{ margin: "0 4px" }}
+                    >
+                      Next
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+            
             <Steps
               current={current}
               onChange={onChange}
@@ -364,15 +402,15 @@ const Workflow = (props: { tabKey?: string }) => {
               items={items}
             />
             
-            {/* Add Helicone button */}
-            {HeliconeService.isHeliconeConfigured() && (
+            {/* Add monitoring buttons */}
+            {ChatService.isLangFuseAvailable() && (
               <Button 
                 icon={<BarChartOutlined />}
-                onClick={() => setHeliconeVisible(true)}
-                type={heliconeVisible ? "primary" : "default"}
+                onClick={() => setLangFuseVisible(true)}
+                type={langFuseVisible ? "primary" : "default"}
                 size="small"
               >
-                API Monitor
+                AI Observatory
               </Button>
             )}
             
@@ -406,35 +444,17 @@ const Workflow = (props: { tabKey?: string }) => {
               width: "100%",
               maxHeight: "calc(100vh - 120px)",
               overflowY: "auto",
-            }}
-            actions={[
-              <>
-                {current > 0 && (
-                  <Button style={{ margin: "0 8px" }} onClick={() => prev()}>
-                    Previous
-                  </Button>
-                )}
-                {current < steps.length - 1 && current !== 0 && (
-                  <Button type='primary' onClick={() => next()}>
-                    Next
-                  </Button>
-                )}
-                {/* {current === steps.length - 1 && (
-                  <Button type='primary' onClick={() => {}}>
-                    Done
-                  </Button>
-                )} */}
-              </>,
-            ]}>
+            }}>
+            
             <div key={steps[current].key}>{steps[current].content}</div>
           </Card>
         </Col>
       </Row>
       
-      {/* Add the Helicone monitor component */}
-      <HeliconeMonitor
-        visible={heliconeVisible}
-        onClose={() => setHeliconeVisible(false)}
+      {/* Add the monitoring components */}
+      <LangFuseMonitor
+        visible={langFuseVisible}
+        onClose={() => setLangFuseVisible(false)}
         isProcessing={searchLoading || relevancyLoading || (steps[current]?.loading || false)}
         currentOperation={currentOperation}
       />

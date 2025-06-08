@@ -92,6 +92,7 @@ const RootTabs: React.FC = () => {
               icon={<SettingOutlined />}></Button>
           </Space>
         }
+        className="workflow-tabs"
         type='editable-card'
         onChange={onChange}
         activeKey={activeKey}

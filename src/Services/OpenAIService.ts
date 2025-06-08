@@ -18,7 +18,6 @@ import { AcademicPaper } from "../Types/AcademicPaper"
 import { type ClientOptions } from "openai"
 import { ModelData } from "../Types/ModelData"
 import { asyncMap } from "../Helpers/asyncMap"
-import { HeliconeService } from "./HeliconeService"
 
 import { BaseLanguageModelParams } from "@langchain/core/language_models/base"
 
@@ -235,18 +234,6 @@ export class OpenAIService {
   }
 
   static openAIConfiguration() {
-    // Get Helicone configuration for OpenAI
-    const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('openai');
-
-    if (heliconeConfig) {
-      return {
-        baseOptions: {
-          headers: heliconeConfig.headers,
-        },
-        // timeout: 30000,
-      } as ClientOptions;
-    }
-
     // Return default OpenAI configuration
     return {} as ClientOptions;
   }

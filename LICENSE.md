@@ -1,4 +1,6 @@
-Copyright 2023 Thomas Übellacker
+AcademiaOS Application, Usecase, Product Innovation and Design, Architecture, Software Engineering, UI/UX Design etc. etc. Copyright 2023 Thomas Übellacker
+
+AcademiaOS 2.0 Stack and Package Upgrades and UI Improvements Copyright 2025 A Helme
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

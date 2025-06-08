@@ -23,7 +23,7 @@ import { OpenAIService } from "../Services/OpenAIService"
 import { ModelService } from "../Services/ModelService"
 import { CustomColumn } from "./CustomColumn"
 import { AcademicPaper } from "../Types/AcademicPaper"
-import { asyncMap } from "../Helpers/asyncMap"
+import { asyncForEach } from "../Helpers/asyncForEach"
 const { useToken } = theme
 
 export const PaperTable = (props: {
@@ -117,6 +117,7 @@ export const PaperTable = (props: {
               root: { width: 300 }
             }
           }}
+          className="custom-autocomplete"
           options={[
             ...(columnAddSearchQuery
               ? [
@@ -156,7 +157,13 @@ export const PaperTable = (props: {
           filterOption={(inputValue, option) =>
             option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
           }
-          style={{ width: 200 }}
+          style={{ 
+            width: 200, 
+            border: '2px solid #1890ff',
+            borderRadius: '6px',
+            color: 'rgba(24, 144, 255, 0.8)'
+          }}
+          popupClassName="custom-autocomplete-popup"
           value={columnAddSearchQuery}
           onSelect={async (value) => {
             // Check if we can use OpenAI features
@@ -176,31 +183,72 @@ export const PaperTable = (props: {
 
             setCustomColumns([...customColumns, value])
             let newPapers = [...updatedPapers]
+            
+            // Count papers that need processing
+            const papersToProcess = newPapers.filter(paper => !paper[value])
+            console.log(`🔍 Custom Column Processing: Starting analysis of ${papersToProcess.length} papers for column "${value}"`)
+            
+            if (papersToProcess.length === 0) {
+              console.log(`✅ Custom Column Processing: All papers already have "${value}" data`)
+              return
+            }
+            
+            // Show progress message
+            const hideMessage = message.loading(`Analyzing ${papersToProcess.length} papers for "${value}"... Please wait`, 0)
+            
             try {
-              newPapers = await asyncMap(newPapers, async (paper) => {
+              let processedCount = 0
+              
+              await asyncForEach(newPapers, async (paper, index) => {
                 const newPaper = { ...paper } as AcademicPaper
-                if (newPaper[value]) return newPaper
+                if (newPaper[value]) return // Skip if already has data
+                
                 try {
+                  console.log(`📝 Processing paper ${processedCount + 1}/${papersToProcess.length}: "${paper.title?.substring(0, 50)}..."`)
+                  
                   newPaper[value] = await OpenAIService.getDetailAboutPaper(
                     newPaper,
                     value
                   )
+                  
+                  processedCount++
+                  console.log(`✅ Completed paper ${processedCount}/${papersToProcess.length}`)
+                  
+                  // Rate limiting: 1 second per 4 papers (5 seconds per 20 papers)
+                  if (processedCount < papersToProcess.length && processedCount % 4 === 0) {
+                    console.log(`⏳ Rate limiting: Waiting 1 second after processing ${processedCount} papers...`)
+                    await new Promise(resolve => setTimeout(resolve, 1000))
+                  }
+                  
                 } catch (error) {
-                  console.error(`Failed to get ${value} for paper ${paper.title}:`, error)
+                  console.error(`❌ Failed to get ${value} for paper "${paper.title}":`, error)
                   newPaper[value] = "Analysis failed"
+                  processedCount++
                 }
-                return newPaper
+                
+                // Update papers array with the new data
+                newPapers[index] = newPaper
+                
+                // Update UI every few papers to show progress
+                if (processedCount % 3 === 0 || processedCount === papersToProcess.length) {
+                  setUpdatedPapers([...newPapers])
+                }
               })
-              setUpdatedPapers(newPapers)
+              
+              hideMessage()
+              message.success(`Successfully analyzed ${processedCount} papers for "${value}"`)
+              console.log(`🎉 Custom Column Processing Complete: Analyzed ${processedCount} papers for "${value}"`)
+              
             } catch (error) {
-              console.error("Failed to process custom column:", error)
+              hideMessage()
+              console.error("❌ Failed to process custom column:", error)
               message.error("Failed to analyze papers. Please check your configuration.")
             }
             setColumnAddSearchQuery("")
           }}
           onSearch={(text) => setColumnAddSearchQuery(text)}
           suffixIcon={<PlusOutlined />}
-          placeholder='Add a Custom Column'
+          placeholder={!columnAddSearchQuery ? 'Add a Custom Column' : ''}
         />
 
         <Button icon={<DownloadOutlined />} onClick={downloadCSV}>

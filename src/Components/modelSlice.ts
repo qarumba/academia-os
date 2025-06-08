@@ -4,8 +4,6 @@ interface ModelConfig {
   apiKey: string;
   openaiEmbeddingsKey?: string;
   email?: string;
-  heliconeEndpoint?: string;
-  heliconeKey?: string;
   adobePDFOCR_client_id?: string;
   adobePDFOCR_client_secret?: string;
 }

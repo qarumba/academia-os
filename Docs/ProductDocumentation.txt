@@ -7,7 +7,7 @@ AcademiaOS 2.0 is a React/TypeScript application for academic information retrie
 Version 2.0 Enhancements:
 - Multi-provider AI model support (OpenAI, Anthropic Claude)
 - Complete LangChain v0.3.27 migration with modern architecture
-- Production-ready Helicone integration with server proxy
+- Self-hosted LangFuse AI Observatory for academic data privacy
 - Enhanced user interface with progressive loading states
 - Native Anthropic support with automatic fallback handling
 - Complete Gioia methodology automation with improved reliability
@@ -42,19 +42,20 @@ Frontend Stack:
 - PDF.js 3.10.111 (document processing)
 
 Backend Services:
-- Node.js server for Helicone API proxy
+- Node.js server for LangFuse and Semantic Scholar API proxies
 - Express.js for API endpoints
 
 AI Integration:
 - LangChain v0.3.27 (fully migrated from legacy v0.0.190)
 - @langchain/core 0.3.57, @langchain/openai 0.5.12, @langchain/anthropic 0.3.21
 - @langchain/textsplitters 0.1.0, @langchain/community 0.3.45
-- Native Anthropic integration (@anthropic-ai/sdk 0.39.0)
+- OpenAI SDK v5.1.1 (upgraded from v4.104.0 for latest API compatibility)
+- Anthropic SDK v0.53.0 (upgraded from v0.39.0 for enhanced features)
 - Multi-provider abstraction with graceful fallbacks
 
 External APIs:
 - Semantic Scholar API (academic paper search)
-- Helicone (AI model monitoring)
+- LangFuse (self-hosted AI observability)
 - Adobe PDF Extract API (OCR processing)
 
 Architecture Patterns:
@@ -86,11 +87,21 @@ AI Model Configuration:
 - OpenAI embeddings support for all providers
 - API key management with validation
 
-Monitoring and Analytics:
-- Helicone integration for AI inference monitoring
-- Cost tracking and budget management
-- API usage analytics
-- Performance metrics
+LangFuse AI Observatory Integration:
+- Self-hosted LangFuse v3.66.1 for academic data privacy and compliance
+- Real-time AI model cost tracking across OpenAI and Anthropic providers
+- Academic session monitoring with usage statistics for institutional reporting
+- LangChain callback integration for automatic request tracing and debugging
+- PostgreSQL + ClickHouse backend for comprehensive analytics storage
+- Accessible at http://localhost:3030 when configured in Model Configuration Advanced Options
+
+Browser Testing and Automation:
+- Puppeteer MCP Server for headless browser automation and programmatic testing
+- BrowserTools MCP Chrome Extension for live browser interaction and console monitoring
+- MCP (Model Context Protocol) integration for AI-assisted testing workflows
+- Automated screenshot capture and visual regression testing capabilities
+- Real-time error detection and debugging through browser console monitoring
+- Script location: Utilities/start-browser-tools.sh for automated test environment setup
 
 5. DEVELOPMENT COMMANDS
 
@@ -100,22 +111,45 @@ Local Development:
 - npm run build: Production bundle
 - npm install: Install dependencies
 
-Full Stack Development:
+Docker Development (Recommended):
+- docker-compose up -d: Start React client and API server containers
+- docker-compose -f docker-compose.langfuse.yml up -d: Start LangFuse AI Observatory
+- aos-full-up: Start all three services (client + server + LangFuse)
+- Health checks: localhost:3000, localhost:3001/health, localhost:3030
+
+Alternative Local Development:
 - npm run setup: Install all dependencies (client + server)
-- npm run dev: Start both React client and Helicone server
-- npm run server: Start Helicone API server only
+- npm start: Start React development server
+- cd server && npm start: Start Semantic Scholar API proxy server
 
 6. DEPLOYMENT
 
 Build Process:
 - npm run build creates optimized production bundle
 - Minified React bundle with hash-based filenames
-- Docker support with included Dockerfile and docker-compose.yml
+- Multi-container Docker deployment with separate client and server containers
+- LangFuse Observatory with PostgreSQL and ClickHouse backends
 
 Requirements:
-- Node.js (latest LTS)
-- OpenAI API key (required for embeddings)
-- Optional: Anthropic API key, Helicone API key, Adobe PDF Extract API credentials
+- Docker and Docker Compose (recommended deployment)
+- Node.js 18 LTS (for local development)
+- OpenAI API key (required for embeddings) - using OpenAI SDK v5.1.1
+- Optional: Anthropic API key (using Anthropic SDK v0.53.0), Adobe PDF Extract API credentials
+
+Container Architecture:
+- academia-os-client: React development server (port 3000)
+- academia-os-server: API proxy server (port 3001)  
+- langfuse-server: AI monitoring server (port 3030)
+- langfuse-db: PostgreSQL database for LangFuse data
+- langfuse-clickhouse: ClickHouse analytics database for LangFuse metrics
+
+LangFuse AI Observatory Setup:
+- Purpose: Self-hosted AI monitoring for academic data privacy and institutional compliance
+- Features: Cost tracking, usage analytics, request tracing, academic reporting
+- Setup: Requires Docker deployment of LangFuse v3.66.1 with PostgreSQL and ClickHouse
+- Configuration: API keys obtained from LangFuse dashboard and configured in AcademiaOS Advanced Options
+- Access: Web interface at http://localhost:3030 for monitoring dashboards
+- Integration: Automatic LangChain callback integration for seamless request tracking
 
 7. LICENSING
 

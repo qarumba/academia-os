@@ -42,17 +42,21 @@ src/
 3. KEY FILES
 
 Configuration:
-- package.json: Project dependencies and scripts
+- package.json: Project dependencies and scripts (updated OpenAI SDK v5.1.1, Anthropic SDK v0.53.0)
 - tsconfig.json: TypeScript configuration
-- docker-compose.yml: Multi-container orchestration
+- docker-compose.yml: Multi-container orchestration (React client + API server)
+- docker-compose.langfuse.yml: LangFuse AI Observatory with ClickHouse and PostgreSQL
+- docker-compose.langfuse-simple.yml: Simplified LangFuse setup (deprecated)
 
 Documentation:
 - README.md: Setup and development guide
 - LICENSE.md: MIT license terms
 - CONTRIBUTING.MD: Contribution guidelines
+- CLAUDE.md: Claude Code development instructions with Docker management
 
 Build:
-- Dockerfile: Container configuration
+- Dockerfile: React client container configuration (Node.js 18 Alpine)
+- server/Dockerfile: API server container configuration (Node.js 18 Alpine)
 - npm_output.log: Build logs
 
 4. FILE STATISTICS
@@ -72,18 +76,18 @@ Workflow Components:
 - Modeling.tsx: Theory construction and visualization
 
 Core Components:
-- ModelConfiguration.tsx: AI model setup interface
-- PaperTable.tsx: Academic paper display and management
-- HeliconeMonitor.tsx: API usage monitoring
-- SearchLoadingState.tsx: Progressive loading interface
+- ModelConfiguration.tsx: AI model setup interface with LangFuse integration options
+- PaperTable.tsx: Academic paper display with configurable custom columns
+- LangFuseMonitor.tsx: AI Observatory monitoring and cost tracking interface
+- SearchLoadingState.tsx: Progressive loading with multi-stage feedback
 
 Service Classes:
 - ChatService.ts: Multi-provider AI model abstraction (LangChain v0.3)
 - OpenAIService.ts: Gioia methodology implementation (updated imports)
 - EmbeddingService.ts: Vector embeddings management (@langchain/openai)
-- HeliconeService.ts: API monitoring and cost tracking (server proxy)
+- LangFuseService.ts: Self-hosted AI Observatory integration (server proxy)
 - RankingService.ts: Paper relevance scoring (@langchain/textsplitters)
-- SearchService.ts: Academic paper search (rate limiting)
+- SearchService.ts: Academic paper search with configurable limits and rate limiting
 
 6. ARCHITECTURE PATTERNS
 
@@ -95,10 +99,11 @@ Frontend:
 - LangChain v0.3 integration with async imports
 
 Backend:
-- Express.js API server
-- Proxy pattern for Helicone integration
+- Express.js API server (containerized as academia-os-server)
+- Proxy pattern for Semantic Scholar API and LangFuse Observatory integration
 - CORS handling for browser compatibility
-- Production-ready server configuration
+- Docker-based development and production deployment
+- Multi-container architecture: client + server + LangFuse + PostgreSQL + ClickHouse
 
 Build System:
 - Create React App configuration
@@ -106,7 +111,28 @@ Build System:
 - Docker containerization support
 - LangChain v0.3 package overrides
 
-7. POWERSHELL AUTOMATION
+7. BROWSER TESTING AUTOMATION
+
+Browser Tools MCP Integration:
+Location: Utilities/start-browser-tools.sh
+Purpose: Automated browser testing and debugging using multiple MCP servers
+Features:
+- Puppeteer MCP Server for programmatic browser automation
+- BrowserTools MCP Server for Chrome extension integration
+- Real-time console log monitoring and error detection
+- Screenshot capture for visual regression testing
+- Interactive browser manipulation and testing
+
+Usage:
+./Utilities/start-browser-tools.sh
+
+Technologies:
+- Puppeteer MCP Server: Headless browser automation for testing
+- BrowserTools MCP Chrome Extension: Live browser interaction and console monitoring
+- MCP (Model Context Protocol): Integration framework for AI-assisted testing
+- Automated screenshot capture and comparison capabilities
+
+8. POWERSHELL AUTOMATION
 
 File Structure Generation Script:
 Location: Utilities/Generate-FileStructure.ps1
@@ -122,19 +148,25 @@ Usage:
 
 8. DEVELOPMENT WORKFLOW
 
-Local Development:
+Docker Development (Recommended):
+1. docker-compose up -d (start React client + API server)
+2. docker-compose -f docker-compose.langfuse.yml up -d (optional LangFuse monitoring)
+3. Health checks: curl localhost:3000, curl localhost:3001/health, curl localhost:3030
+
+Alternative Local Development:
 1. npm install (install dependencies)
-2. npm start (development server)
-3. npm run server:dev (API server for Helicone with auto-restart)
+2. npm start (React development server)
+3. cd server && npm start (API server for Semantic Scholar proxy)
 
 Full Stack:
 1. npm run setup (install all dependencies - client + server)
-2. npm run dev (start both React client and Helicone server)
+2. Docker aliases: aos-up, aos-down, aos-full-up, aos-full-down
+3. Individual container management with docker-compose services
 
 Production:
 1. npm run build (create production bundle)
-2. Docker deployment with docker-compose
-3. Server deployment with npm run server
+2. Multi-container Docker deployment with docker-compose
+3. LangFuse Observatory deployment with PostgreSQL and ClickHouse
 
 LangChain v0.3 Migration Notes:
 - All @langchain/* packages are properly configured

@@ -240,32 +240,97 @@ const CodingStep = (props: {
     }
   }
 
-  const load = async () => {
-    console.log("Loading started")
-    
-    // Check if we have proper model configuration
+  // Check model configuration before starting any stage
+  const checkModelConfig = () => {
     const config = ModelService.getModelConfig()
     if (!config) {
       message.error("No AI model configured")
-      return
+      return false
     }
 
     if (config.provider === 'anthropic') {
       const hasOpenAIKey = config.openaiEmbeddingsKey || localStorage.getItem("openAIKey");
       if (!hasOpenAIKey) {
         message.error("Coding analysis requires OpenAI models. Please switch to OpenAI or add OpenAI key in advanced settings.")
-        return
+        return false
       }
     }
+    return true
+  }
+
+  // Stage 1: Start 1st Order Coding only
+  const startFirstOrderCoding = async () => {
+    console.log("Starting 1st Order Coding")
+    
+    if (!checkModelConfig()) return
+
+    try {
+      const codes = await loadInitialCodes()
+      if (codes.length > 0) {
+        props?.onModelDataChange?.({
+          firstOrderCodes: codes,
+        })
+        setCurrent(0) // Stay on 1st Order Coding step
+      }
+    } catch (error) {
+      console.error("1st Order Coding failed:", error)
+      message.error("Failed to analyze papers. Please check your configuration.")
+      setFirstOrderLoading(false)
+    }
+  }
+
+  // Stage 2: Start 2nd Order Coding 
+  const startSecondOrderCoding = async () => {
+    console.log("Starting 2nd Order Coding")
+    
+    if (!checkModelConfig()) return
+    
+    try {
+      const focusCodes = await loadFocusCodes(initialCodes)
+      if (Object.keys(focusCodes).length > 0) {
+        props?.onModelDataChange?.({
+          secondOrderCodes: focusCodes,
+        })
+        setCurrent(1) // Move to 2nd Order Coding step
+      }
+    } catch (error) {
+      console.error("2nd Order Coding failed:", error)
+      message.error("Failed to generate 2nd order codes. Please try again.")
+      setSecondOrderLoading(false)
+    }
+  }
+
+  // Stage 3: Start Aggregate Dimensions
+  const startAggregateDimensions = async () => {
+    console.log("Starting Aggregate Dimensions")
+    
+    if (!checkModelConfig()) return
+    
+    try {
+      const aggregateDimensionCodes = await loadAggregateDimensions(focusCodes)
+      props?.onModelDataChange?.({
+        aggregateDimensions: aggregateDimensionCodes,
+      })
+      setCurrent(2) // Move to Aggregate Dimensions step
+    } catch (error) {
+      console.error("Aggregate Dimensions failed:", error)
+      message.error("Failed to generate aggregate dimensions. Please try again.")
+      setAggregateLoading(false)
+    }
+  }
+
+  // Legacy function for restart - runs all stages
+  const restartAllCoding = async () => {
+    console.log("Restarting all coding stages")
+    
+    if (!checkModelConfig()) return
 
     try {
       const codes = await loadInitialCodes()
       if (codes.length > 0) {
         const focusCodes = await loadFocusCodes(codes)
         if (Object.keys(focusCodes).length > 0) {
-          const aggregateDimensionCodes = await loadAggregateDimensions(
-            focusCodes
-          )
+          const aggregateDimensionCodes = await loadAggregateDimensions(focusCodes)
           props?.onModelDataChange?.({
             firstOrderCodes: codes,
             secondOrderCodes: focusCodes,
@@ -301,7 +366,7 @@ const CodingStep = (props: {
       loading: firstOrderLoading,
       content:
         !firstOrderLoading && initialCodes.length === 0 ? (
-          <Space direction='horizontal'>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "12px" }}>
             <RemarkComponent
               papers={props?.modelData?.papers || []}
               value={props.modelData?.remarks || ""}
@@ -311,14 +376,35 @@ const CodingStep = (props: {
                 })
               }}
             />
-            <Button onClick={load}>Start Coding</Button>
-          </Space>
+            <Button type="primary" onClick={startFirstOrderCoding}>Start Coding</Button>
+          </div>
         ) : (
-          <PaperTable
-            papers={props?.modelData?.papers || []}
-            responsiveToUpdates={true}
-            customColumns={["Initial Codes"]}
-          />
+          <Space direction="vertical" style={{ width: "100%" }}>
+            {/* Step-specific button section */}
+            <div style={{ 
+              backgroundColor: "#f8f9fa", 
+              padding: "12px", 
+              marginBottom: "16px", 
+              borderRadius: "6px",
+              border: "1px solid #e9ecef",
+              textAlign: "center"
+            }}>
+              <Button 
+                type={(secondOrderLoading || initialCodes.length === 0) ? "default" : "primary"}
+                onClick={startSecondOrderCoding}
+                disabled={secondOrderLoading || initialCodes.length === 0}
+                loading={secondOrderLoading}
+              >
+                Next: Generate 2nd Order Codes
+              </Button>
+            </div>
+            
+            <PaperTable
+              papers={props?.modelData?.papers || []}
+              responsiveToUpdates={true}
+              customColumns={["Initial Codes"]}
+            />
+          </Space>
         ),
     },
     {
@@ -327,19 +413,50 @@ const CodingStep = (props: {
       loading: secondOrderLoading,
       content: secondOrderLoading ? (
         <p>AcademiaOS is busy coding.</p>
+      ) : Object.keys(focusCodes).length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
+          <p>Complete 1st Order Coding first, then proceed to generate 2nd Order Codes.</p>
+        </div>
       ) : (
-        <GioiaCoding
-          firstOrderCodes={initialCodes || []}
-          secondOrderCodes={focusCodes || {}}
-          aggregateDimensions={{}}
-        />
+        <Space direction="vertical" style={{ width: "100%" }}>
+          {/* Step-specific button section */}
+          <div style={{ 
+            backgroundColor: "#f8f9fa", 
+            padding: "12px", 
+            marginBottom: "16px", 
+            borderRadius: "6px",
+            border: "1px solid #e9ecef",
+            textAlign: "center"
+          }}>
+            <Button 
+              type={(aggregateLoading || Object.keys(focusCodes).length === 0) ? "default" : "primary"}
+              onClick={startAggregateDimensions}
+              disabled={aggregateLoading || Object.keys(focusCodes).length === 0}
+              loading={aggregateLoading}
+            >
+              Next: Generate Aggregate Dimensions
+            </Button>
+          </div>
+          
+          <GioiaCoding
+            firstOrderCodes={initialCodes || []}
+            secondOrderCodes={focusCodes || {}}
+            aggregateDimensions={{}}
+          />
+        </Space>
       ),
     },
     {
       key: "aggregate",
       title: "Aggregate Dimensions",
       loading: aggregateLoading,
-      content: (
+      content: aggregateLoading ? (
+        <p>AcademiaOS is generating aggregate dimensions.</p>
+      ) : Object.keys(aggregateDimensions).length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
+          <p>Complete 2nd Order Coding first, then proceed to generate Aggregate Dimensions.</p>
+        </div>
+      ) : (
         <GioiaCoding
           firstOrderCodes={initialCodes || []}
           secondOrderCodes={focusCodes || {}}
@@ -372,9 +489,11 @@ const CodingStep = (props: {
           }))}
         />
         <Button
+          type={props.modelData.firstOrderCodes ? "default" : "primary"}
+          danger={props.modelData.firstOrderCodes ? true : false}
           loading={firstOrderLoading || secondOrderLoading || aggregateLoading}
           style={{ marginLeft: "20px" }}
-          onClick={load}>
+          onClick={restartAllCoding}>
           {props.modelData.firstOrderCodes ? "Restart Coding" : "Start Coding"}
         </Button>
       </div>

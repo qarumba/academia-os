@@ -33,6 +33,7 @@ const ModelingStep = (props: {
   const [constructLoading, setConstructLoading] = useState(false)
   const [visualizationLoading, setVisualizationLoading] = useState(false)
   const [iteratingLoading, setIteratingLoading] = useState(false)
+  const [mermaidError, setMermaidError] = useState(false)
 
   const [modelingRemarks, setModelingRemarks] = useState(
     props?.modelData?.remarks || ""
@@ -189,6 +190,13 @@ const ModelingStep = (props: {
 
   const load = async () => {
     if (props?.modelData?.aggregateDimensions) {
+      // Check if this is a restart (has existing theories)
+      const isRestart = props.modelData.applicableTheories && props.modelData.applicableTheories.length > 0
+      
+      if (isRestart) {
+        message.info("Modeling restarted...", 3)
+      }
+      
       try {
         setExploreLoading(true)
         
@@ -370,11 +378,11 @@ const ModelingStep = (props: {
                 })
               }}
             />
-            <Button onClick={load}>Start Modeling</Button>
+            <Button type="primary" onClick={load}>Start Modeling</Button>
           </Space>
         ) : (
           <Table
-            rowKey={(record, index) => record.theory || `theory-${index}`}
+            rowKey={(record) => record.theory || `theory-${Math.random().toString(36).substr(2, 9)}`}
             dataSource={props.modelData.applicableTheories || []}
             columns={[
               { title: "Theory", dataIndex: "theory" },
@@ -412,6 +420,8 @@ const ModelingStep = (props: {
         <Space direction='vertical'>
           <Space direction='horizontal'>
             <Input
+              id="modeling-remarks"
+              name="modeling-remarks"
               style={{ width: "300px" }}
               value={modelingRemarks}
               onChange={(e) => setModelingRemarks(e.target.value)}
@@ -442,12 +452,18 @@ const ModelingStep = (props: {
           <Typography.Title level={3}>
             {props.modelData?.modelName}
           </Typography.Title>
-          <Mermaid chart={props?.modelData?.modelVisualization} />
-          <Alert
-            type='info'
-            message='If you see the message "Syntax error in text" it means that there
-            was an error in creating the visualization. You can hit "Start Modeling" to try again.'
+          <Mermaid 
+            chart={props?.modelData?.modelVisualization} 
+            onError={setMermaidError}
+            id="model-visualization"
           />
+          {mermaidError && (
+            <Alert
+              type='warning'
+              message='Mermaid syntax error detected in the visualization. You can hit "Start Modeling" to regenerate the diagram.'
+              showIcon
+            />
+          )}
         </Space>
       ),
     },
@@ -499,11 +515,15 @@ const ModelingStep = (props: {
           }))}
         />
         <Button
+          type={props.modelData.applicableTheories ? "default" : "primary"}
+          danger={props.modelData.applicableTheories ? true : false}
           loading={
-            exploreLoading ||
-            constructLoading ||
-            visualizationLoading ||
-            interrelationshipsLoading
+            !props.modelData.applicableTheories && (
+              exploreLoading ||
+              constructLoading ||
+              visualizationLoading ||
+              interrelationshipsLoading
+            )
           }
           style={{ marginLeft: "20px" }}
           onClick={load}>

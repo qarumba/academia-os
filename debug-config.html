@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Model Config</title>
+</head>
+<body>
+    <h1>Model Configuration Debug</h1>
+    <div id="output"></div>
+    
+    <script>
+        const config = localStorage.getItem('modelConfig');
+        const parsed = config ? JSON.parse(config) : null;
+        
+        document.getElementById('output').innerHTML = `
+            <h2>Raw localStorage:</h2>
+            <pre>${config || 'null'}</pre>
+            
+            <h2>Parsed config:</h2>
+            <pre>${JSON.stringify(parsed, null, 2)}</pre>
+            
+            <h2>Key analysis:</h2>
+            <ul>
+                <li>Provider: ${parsed?.provider || 'not set'}</li>
+                <li>Model: ${parsed?.model || 'not set'}</li>
+                <li>API Key starts with: ${parsed?.apiKey ? parsed.apiKey.substring(0, 6) + '...' : 'not set'}</li>
+                <li>OpenAI Embeddings Key: ${parsed?.openaiEmbeddingsKey ? 'set' : 'not set'}</li>
+            </ul>
+        `;
+    </script>
+</body>
+</html>

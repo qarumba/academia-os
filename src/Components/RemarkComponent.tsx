@@ -57,7 +57,7 @@ export const RemarkComponent = (props: {
     <div>
       <AutoComplete
         suffixIcon={loading && <LoadingOutlined />}
-        style={{ width: 300 }}
+        style={{ width: 500 }}
         options={researchQuestions.map((question) => ({ value: question }))}
         value={props.value}
         onChange={(value) => {
@@ -65,7 +65,7 @@ export const RemarkComponent = (props: {
           console.log(value)
         }}
         placeholder='Free-text remarks or tentative research question ...'>
-        <Input.TextArea rows={1} />
+        <Input.TextArea rows={5} />
       </AutoComplete>
     </div>
   )
