@@ -33,6 +33,7 @@ const ModelingStep = (props: {
   const [constructLoading, setConstructLoading] = useState(false)
   const [visualizationLoading, setVisualizationLoading] = useState(false)
   const [iteratingLoading, setIteratingLoading] = useState(false)
+  const [mermaidError, setMermaidError] = useState(false)
 
   const [modelingRemarks, setModelingRemarks] = useState(
     props?.modelData?.remarks || ""
@@ -444,12 +445,18 @@ const ModelingStep = (props: {
           <Typography.Title level={3}>
             {props.modelData?.modelName}
           </Typography.Title>
-          <Mermaid chart={props?.modelData?.modelVisualization} />
-          <Alert
-            type='info'
-            message='If you see the message "Syntax error in text" it means that there
-            was an error in creating the visualization. You can hit "Start Modeling" to try again.'
+          <Mermaid 
+            chart={props?.modelData?.modelVisualization} 
+            onError={setMermaidError}
+            id="model-visualization"
           />
+          {mermaidError && (
+            <Alert
+              type='warning'
+              message='Mermaid syntax error detected in the visualization. You can hit "Start Modeling" to regenerate the diagram.'
+              showIcon
+            />
+          )}
         </Space>
       ),
     },
