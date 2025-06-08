@@ -32,11 +32,47 @@ app.get('/health', (req, res) => {
 // Semantic Scholar API Proxy (CORS fix)
 // ==============================================
 
+// Allowlisted Semantic Scholar API endpoints for security
+const ALLOWED_SS_ENDPOINTS = [
+  'paper/search',
+  'paper/batch',
+  'author/search',
+  'author/batch',
+  'recommendations'
+];
+
+// Validate if the requested path is allowed
+function isValidSemanticScholarPath(path) {
+  if (!path || typeof path !== 'string') {
+    return false;
+  }
+  
+  // Remove any leading slashes and normalize
+  const normalizedPath = path.replace(/^\/+/, '');
+  
+  // Check if path starts with any allowed endpoint
+  return ALLOWED_SS_ENDPOINTS.some(endpoint => 
+    normalizedPath.startsWith(endpoint) || 
+    normalizedPath.startsWith(`v1/${endpoint}`)
+  );
+}
+
 app.get('/api/semantic-scholar/*', async (req, res) => {
   try {
     const path = req.params[0];
+    
+    // Security: Validate the requested path against allowlist
+    if (!isValidSemanticScholarPath(path)) {
+      console.warn('🚫 Blocked potentially unsafe Semantic Scholar path:', path);
+      return res.status(400).json({ 
+        error: 'Invalid API endpoint',
+        message: 'Only Semantic Scholar paper and author endpoints are allowed'
+      });
+    }
+    
     const queryString = req.url.split('?')[1] || '';
-    const url = `https://api.semanticscholar.org/${path}${queryString ? `?${queryString}` : ''}`;
+    const baseUrl = 'https://api.semanticscholar.org';
+    const url = `${baseUrl}/${path}${queryString ? `?${queryString}` : ''}`;
     
     console.log('📚 Proxying Semantic Scholar request to:', url);
     console.log('📚 Original request path:', req.path);
