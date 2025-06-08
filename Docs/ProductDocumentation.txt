@@ -49,7 +49,8 @@ AI Integration:
 - LangChain v0.3.27 (fully migrated from legacy v0.0.190)
 - @langchain/core 0.3.57, @langchain/openai 0.5.12, @langchain/anthropic 0.3.21
 - @langchain/textsplitters 0.1.0, @langchain/community 0.3.45
-- Native Anthropic integration (@anthropic-ai/sdk 0.39.0)
+- OpenAI SDK v5.1.1 (upgraded from v4.104.0 for latest API compatibility)
+- Anthropic SDK v0.53.0 (upgraded from v0.39.0 for enhanced features)
 - Multi-provider abstraction with graceful fallbacks
 
 External APIs:
@@ -94,6 +95,14 @@ LangFuse AI Observatory Integration:
 - PostgreSQL + ClickHouse backend for comprehensive analytics storage
 - Accessible at http://localhost:3030 when configured in Model Configuration Advanced Options
 
+Browser Testing and Automation:
+- Puppeteer MCP Server for headless browser automation and programmatic testing
+- BrowserTools MCP Chrome Extension for live browser interaction and console monitoring
+- MCP (Model Context Protocol) integration for AI-assisted testing workflows
+- Automated screenshot capture and visual regression testing capabilities
+- Real-time error detection and debugging through browser console monitoring
+- Script location: Utilities/start-browser-tools.sh for automated test environment setup
+
 5. DEVELOPMENT COMMANDS
 
 Local Development:
@@ -124,8 +133,8 @@ Build Process:
 Requirements:
 - Docker and Docker Compose (recommended deployment)
 - Node.js 18 LTS (for local development)
-- OpenAI API key (required for embeddings) - updated to SDK v5.1.1
-- Optional: Anthropic API key (updated to SDK v0.53.0), Adobe PDF Extract API credentials
+- OpenAI API key (required for embeddings) - using OpenAI SDK v5.1.1
+- Optional: Anthropic API key (using Anthropic SDK v0.53.0), Adobe PDF Extract API credentials
 
 Container Architecture:
 - academia-os-client: React development server (port 3000)

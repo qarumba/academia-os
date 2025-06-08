@@ -15,6 +15,11 @@
 .env
 .env.example
 
+# Test API keys (DO NOT COMMIT)
+test_keys.md
+*_keys.md
+*.key
+
 # misc
 .DS_Store
 .env.local

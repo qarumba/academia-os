@@ -111,7 +111,28 @@ Build System:
 - Docker containerization support
 - LangChain v0.3 package overrides
 
-7. POWERSHELL AUTOMATION
+7. BROWSER TESTING AUTOMATION
+
+Browser Tools MCP Integration:
+Location: Utilities/start-browser-tools.sh
+Purpose: Automated browser testing and debugging using multiple MCP servers
+Features:
+- Puppeteer MCP Server for programmatic browser automation
+- BrowserTools MCP Server for Chrome extension integration
+- Real-time console log monitoring and error detection
+- Screenshot capture for visual regression testing
+- Interactive browser manipulation and testing
+
+Usage:
+./Utilities/start-browser-tools.sh
+
+Technologies:
+- Puppeteer MCP Server: Headless browser automation for testing
+- BrowserTools MCP Chrome Extension: Live browser interaction and console monitoring
+- MCP (Model Context Protocol): Integration framework for AI-assisted testing
+- Automated screenshot capture and comparison capabilities
+
+8. POWERSHELL AUTOMATION
 
 File Structure Generation Script:
 Location: Utilities/Generate-FileStructure.ps1

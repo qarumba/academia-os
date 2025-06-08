@@ -3,7 +3,7 @@
 
 services:
   langfuse-server:
-    image: langfuse/langfuse:2
+    image: langfuse/langfuse:3.66.1
     container_name: langfuse-server
     ports:
       - "3030:3000"
