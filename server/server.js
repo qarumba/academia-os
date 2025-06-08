@@ -136,15 +136,29 @@ app.get('/api/semantic-scholar/*', async (req, res) => {
     // Rate limiting: Wait if necessary
     await rateLimiter.waitForRateLimit();
     
-    const queryString = req.url.split('?')[1] || '';
+    // SECURITY: Construct URL safely to prevent SSRF
     const baseUrl = 'https://api.semanticscholar.org';
-    const url = `${baseUrl}/${path}${queryString ? `?${queryString}` : ''}`;
     
-    console.log('📚 Proxying Semantic Scholar request to:', url);
+    // Extract and validate query parameters safely
+    const allowedParams = ['query', 'fields', 'offset', 'limit', 'year', 'venue', 'fieldsOfStudy'];
+    const safeQueryParams = new URLSearchParams();
+    
+    // Only allow specific query parameters to prevent SSRF
+    for (const [key, value] of new URLSearchParams(req.url.split('?')[1] || '')) {
+      if (allowedParams.includes(key)) {
+        safeQueryParams.append(key, value);
+      }
+    }
+    
+    // Construct URL with validated components only
+    const url = new URL(path, baseUrl);
+    url.search = safeQueryParams.toString();
+    
+    console.log('📚 Proxying Semantic Scholar request to:', url.toString());
     console.log('📚 Original request path:', req.path);
     console.log('📚 Extracted path:', path);
     
-    const response = await fetch(url, {
+    const response = await fetch(url.toString(), {
       method: req.method,
       headers: {
         'User-Agent': 'AcademiaOS/2.0',
