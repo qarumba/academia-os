@@ -201,6 +201,8 @@ const StepFind = (props: {
                 <Space style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '10px' }}>
                   <div style={{ position: 'relative' }}>
                     <Input
+                      id="search-query"
+                      name="search-query"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       autoComplete='off'
@@ -218,6 +220,8 @@ const StepFind = (props: {
                     />
                   </div>
                   <InputNumber
+                    id="paper-limit"
+                    name="paper-limit"
                     value={paperLimit}
                     onChange={(value) => setPaperLimit(value || 20)}
                     disabled={searchLoading}

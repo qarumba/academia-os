@@ -412,6 +412,8 @@ const ModelingStep = (props: {
         <Space direction='vertical'>
           <Space direction='horizontal'>
             <Input
+              id="modeling-remarks"
+              name="modeling-remarks"
               style={{ width: "300px" }}
               value={modelingRemarks}
               onChange={(e) => setModelingRemarks(e.target.value)}
