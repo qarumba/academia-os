@@ -1,9 +1,9 @@
 services:
-  academia-os:
+  academia-os-client:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: academia-os-dev
+    container_name: academia-os-client
     ports:
       - "3000:3000"
     volumes:
@@ -18,3 +18,20 @@ services:
       - WATCHPACK_POLLING=true    # For webpack file watching
     stdin_open: true  # Keep STDIN open (equivalent to -i)
     tty: true         # Allocate a pseudo-TTY (equivalent to -t)
+
+  academia-os-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: academia-os-server
+    ports:
+      - "3001:3001"
+    volumes:
+      # Mount server source for hot reloading
+      - ./server:/app
+      # Prevent node_modules from being overwritten
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - academia-os-client

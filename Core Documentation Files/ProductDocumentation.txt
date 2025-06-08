@@ -100,22 +100,37 @@ Local Development:
 - npm run build: Production bundle
 - npm install: Install dependencies
 
-Full Stack Development:
+Docker Development (Recommended):
+- docker-compose up -d: Start React client and API server containers
+- docker-compose -f docker-compose.langfuse.yml up -d: Start LangFuse AI Observatory
+- aos-full-up: Start all three services (client + server + LangFuse)
+- Health checks: localhost:3000, localhost:3001/health, localhost:3030
+
+Alternative Local Development:
 - npm run setup: Install all dependencies (client + server)
-- npm run dev: Start both React client and LangFuse proxy server
-- npm run server: Start LangFuse and Semantic Scholar API proxy server only
+- npm start: Start React development server
+- cd server && npm start: Start Semantic Scholar API proxy server
 
 6. DEPLOYMENT
 
 Build Process:
 - npm run build creates optimized production bundle
 - Minified React bundle with hash-based filenames
-- Docker support with included Dockerfile and docker-compose.yml
+- Multi-container Docker deployment with separate client and server containers
+- LangFuse Observatory with PostgreSQL and ClickHouse backends
 
 Requirements:
-- Node.js (latest LTS)
-- OpenAI API key (required for embeddings)
-- Optional: Anthropic API key, self-hosted LangFuse instance, Adobe PDF Extract API credentials
+- Docker and Docker Compose (recommended deployment)
+- Node.js 18 LTS (for local development)
+- OpenAI API key (required for embeddings) - updated to SDK v5.1.1
+- Optional: Anthropic API key (updated to SDK v0.53.0), self-hosted LangFuse instance, Adobe PDF Extract API credentials
+
+Container Architecture:
+- academia-os-client: React development server (port 3000)
+- academia-os-server: API proxy server (port 3001)  
+- langfuse-server: AI monitoring server (port 3030)
+- langfuse-db: PostgreSQL database
+- langfuse-clickhouse: ClickHouse analytics database
 
 7. LICENSING
 

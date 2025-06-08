@@ -10,6 +10,8 @@ import {
   Tour,
   Typography,
   App,
+  Select,
+  InputNumber,
 } from "antd"
 import { CheckCard } from "@ant-design/pro-components"
 import React, { useEffect, useRef, useState } from "react"
@@ -33,8 +35,38 @@ const StepFind = (props: {
   const [results, setResults] = useState<AcademicPaper[]>([])
   const [uploadTourOpen, setUploadTourOpen] = useState<boolean>(false)
   const [loadingStage, setLoadingStage] = useState<'searching' | 'processing' | 'ranking'>('searching')
+  const [paperLimit, setPaperLimit] = useState<number>(() => {
+    // Load saved paper limit from localStorage, default to 20 for cost efficiency
+    const saved = localStorage.getItem('academiaos_paper_limit')
+    if (saved) {
+      const parsed = parseInt(saved)
+      // Validate range: 1-100
+      if (parsed >= 1 && parsed <= 100) {
+        return parsed
+      }
+    }
+    return 20 // Default fallback
+  })
+  const [inputValue, setInputValue] = useState<string>('')
 
   const refUpload = useRef(null)
+
+  // Save paper limit preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('academiaos_paper_limit', paperLimit.toString())
+    console.log(`💾 Paper limit preference saved: ${paperLimit} papers`)
+  }, [paperLimit])
+
+  // Calculate dynamic width for search input based on content
+  const calculateInputWidth = (text: string) => {
+    const minWidth = 300 // Minimum width in pixels
+    const maxWidth = 600 // Maximum width in pixels
+    const charWidth = 8 // Approximate width per character in pixels
+    const padding = 40 // Padding for input borders and spacing
+    
+    const calculatedWidth = Math.max(minWidth, Math.min(maxWidth, text.length * charWidth + padding))
+    return calculatedWidth
+  }
 
   const search = async (query: string) => {
     setSearchQuery(query)
@@ -46,7 +78,8 @@ const StepFind = (props: {
     try {
       // Stage 1: Searching Semantic Scholar
       setLoadingStage('searching')
-      const searchResponse = await SearchRepository.searchPapers(query)
+      console.log(`🔍 Find: Searching for ${paperLimit} papers with query: "${query}"`)
+      const searchResponse = await SearchRepository.searchPapers(query, paperLimit)
       searchResults = searchResponse?.data || []
       
       // Stage 2: Processing results
@@ -158,21 +191,53 @@ const StepFind = (props: {
             <div
               style={{
                 width: "100%",
-                maxWidth: "400px",
+                maxWidth: "700px",
                 textAlign: "center",
+                margin: "0 auto",
               }}>
               <Form
                 autoComplete='off'
-                onFinish={(values) => search(values?.query)}>
-                <Form.Item name='query'>
-                  <Input
-                    autoComplete='off'
-                    autoFocus
+                onFinish={(values) => search(values?.query || inputValue)}>
+                <Space style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '10px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <Input
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      autoComplete='off'
+                      autoFocus
+                      disabled={searchLoading}
+                      size='large'
+                      placeholder='Search for Papers'
+                      style={{ 
+                        width: calculateInputWidth(inputValue || 'Search for Papers'),
+                        transition: 'width 0.3s ease',
+                        textAlign: 'left',
+                        backgroundColor: '#f5f5f5'
+                      }}
+                      onPressEnter={() => search(inputValue)}
+                    />
+                  </div>
+                  <InputNumber
+                    value={paperLimit}
+                    onChange={(value) => setPaperLimit(value || 20)}
                     disabled={searchLoading}
                     size='large'
-                    placeholder='Search for Papers'
+                    min={1}
+                    max={100}
+                    style={{ width: 140, backgroundColor: '#f5f5f5' }}
+                    placeholder="#"
+                    addonAfter="papers"
                   />
-                </Form.Item>
+                  <Button
+                    type="primary"
+                    size="large"
+                    htmlType="submit"
+                    disabled={searchLoading}
+                    loading={searchLoading}
+                  >
+                    Search
+                  </Button>
+                </Space>
               </Form>
               <Space ref={refUpload}>
                 <PDFUpload

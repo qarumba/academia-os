@@ -16,7 +16,8 @@ export class SearchRepository {
   }
 
   public static searchPapers = async (
-    query?: string
+    query?: string,
+    limit: number = 20
   ): Promise<PaginatedResults<Paper> | null> => {
     if (!query || query.trim().length === 0) {
       console.warn('SearchRepository: Empty query provided');
@@ -28,11 +29,13 @@ export class SearchRepository {
 
     try {
       // Use server proxy to avoid CORS issues
+      console.log(`🔍 SearchService: Searching for ${limit} papers with query: "${query.trim()}"`)
+      
       const params = new URLSearchParams({
         query: query.trim(),
         fields: 'abstract,authors,citationCount,corpusId,externalIds,fieldsOfStudy,influentialCitationCount,isOpenAccess,journal,openAccessPdf,paperId,publicationDate,publicationTypes,publicationVenue,referenceCount,s2FieldsOfStudy,title,url,venue,year',
         offset: '0',
-        limit: '100'
+        limit: limit.toString()
       });
 
       const url = `http://localhost:3001/api/semantic-scholar/graph/v1/paper/search?${params.toString()}`;
@@ -63,7 +66,7 @@ export class SearchRepository {
             query: query.trim(),
             fields: 'abstract,authors,citationCount,corpusId,externalIds,fieldsOfStudy,influentialCitationCount,isOpenAccess,journal,openAccessPdf,paperId,publicationDate,publicationTypes,publicationVenue,referenceCount,s2FieldsOfStudy,title,url,venue,year',
             offset: data.next.toString(),
-            limit: '100'
+            limit: limit.toString()
           });
           const nextUrl = `http://localhost:3001/api/semantic-scholar/graph/v1/paper/search?${nextParams.toString()}`;
           const nextResponse = await fetch(nextUrl);
