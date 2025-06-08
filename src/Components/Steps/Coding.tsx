@@ -389,7 +389,7 @@ const CodingStep = (props: {
               <Button 
                 type="primary" 
                 onClick={startSecondOrderCoding}
-                disabled={secondOrderLoading}
+                disabled={secondOrderLoading || initialCodes.length === 0}
                 loading={secondOrderLoading}
               >
                 Next: Generate 2nd Order Codes
@@ -419,7 +419,7 @@ const CodingStep = (props: {
             <Button 
               type="primary" 
               onClick={startAggregateDimensions}
-              disabled={aggregateLoading}
+              disabled={aggregateLoading || Object.keys(focusCodes).length === 0}
               loading={aggregateLoading}
             >
               Next: Generate Aggregate Dimensions
