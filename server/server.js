@@ -34,6 +34,17 @@ app.get('/health', (req, res) => {
 
 // Allowlisted Semantic Scholar API endpoints for security
 const ALLOWED_SS_ENDPOINTS = [
+  'graph/v1/paper/search',
+  'graph/v1/paper/batch', 
+  'graph/v1/author/search',
+  'graph/v1/author/batch',
+  'graph/v1/recommendations',
+  // Legacy v1 endpoints (if needed)
+  'v1/paper/search',
+  'v1/paper/batch',
+  'v1/author/search', 
+  'v1/author/batch',
+  // Direct endpoints (if needed)
   'paper/search',
   'paper/batch',
   'author/search',
@@ -50,10 +61,9 @@ function isValidSemanticScholarPath(path) {
   // Remove any leading slashes and normalize
   const normalizedPath = path.replace(/^\/+/, '');
   
-  // Check if path starts with any allowed endpoint
+  // Check if path matches any allowed endpoint exactly or starts with it
   return ALLOWED_SS_ENDPOINTS.some(endpoint => 
-    normalizedPath.startsWith(endpoint) || 
-    normalizedPath.startsWith(`v1/${endpoint}`)
+    normalizedPath === endpoint || normalizedPath.startsWith(endpoint + '?')
   );
 }
 
