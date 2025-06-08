@@ -76,18 +76,18 @@ Workflow Components:
 - Modeling.tsx: Theory construction and visualization
 
 Core Components:
-- ModelConfiguration.tsx: AI model setup interface
-- PaperTable.tsx: Academic paper display and management
-- HeliconeMonitor.tsx: API usage monitoring
-- SearchLoadingState.tsx: Progressive loading interface
+- ModelConfiguration.tsx: AI model setup interface with LangFuse integration options
+- PaperTable.tsx: Academic paper display with configurable custom columns
+- LangFuseMonitor.tsx: AI Observatory monitoring and cost tracking interface
+- SearchLoadingState.tsx: Progressive loading with multi-stage feedback
 
 Service Classes:
 - ChatService.ts: Multi-provider AI model abstraction (LangChain v0.3)
 - OpenAIService.ts: Gioia methodology implementation (updated imports)
 - EmbeddingService.ts: Vector embeddings management (@langchain/openai)
-- HeliconeService.ts: API monitoring and cost tracking (server proxy)
+- LangFuseService.ts: Self-hosted AI Observatory integration (server proxy)
 - RankingService.ts: Paper relevance scoring (@langchain/textsplitters)
-- SearchService.ts: Academic paper search (rate limiting)
+- SearchService.ts: Academic paper search with configurable limits and rate limiting
 
 6. ARCHITECTURE PATTERNS
 
@@ -100,10 +100,10 @@ Frontend:
 
 Backend:
 - Express.js API server (containerized as academia-os-server)
-- Proxy pattern for Semantic Scholar API and LangFuse integration
+- Proxy pattern for Semantic Scholar API and LangFuse Observatory integration
 - CORS handling for browser compatibility
 - Docker-based development and production deployment
-- Multi-container architecture with service dependencies
+- Multi-container architecture: client + server + LangFuse + PostgreSQL + ClickHouse
 
 Build System:
 - Create React App configuration

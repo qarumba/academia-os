@@ -86,11 +86,13 @@ AI Model Configuration:
 - OpenAI embeddings support for all providers
 - API key management with validation
 
-AI Observatory and Analytics:
-- Self-hosted LangFuse integration for academic data privacy
-- Real-time AI model cost tracking and usage metrics
-- Academic session monitoring with institutional compliance
-- LangChain callback integration for automatic tracing
+LangFuse AI Observatory Integration:
+- Self-hosted LangFuse v3.66.1 for academic data privacy and compliance
+- Real-time AI model cost tracking across OpenAI and Anthropic providers
+- Academic session monitoring with usage statistics for institutional reporting
+- LangChain callback integration for automatic request tracing and debugging
+- PostgreSQL + ClickHouse backend for comprehensive analytics storage
+- Accessible at http://localhost:3030 when configured in Model Configuration Advanced Options
 
 5. DEVELOPMENT COMMANDS
 
@@ -123,14 +125,22 @@ Requirements:
 - Docker and Docker Compose (recommended deployment)
 - Node.js 18 LTS (for local development)
 - OpenAI API key (required for embeddings) - updated to SDK v5.1.1
-- Optional: Anthropic API key (updated to SDK v0.53.0), self-hosted LangFuse instance, Adobe PDF Extract API credentials
+- Optional: Anthropic API key (updated to SDK v0.53.0), Adobe PDF Extract API credentials
 
 Container Architecture:
 - academia-os-client: React development server (port 3000)
 - academia-os-server: API proxy server (port 3001)  
 - langfuse-server: AI monitoring server (port 3030)
-- langfuse-db: PostgreSQL database
-- langfuse-clickhouse: ClickHouse analytics database
+- langfuse-db: PostgreSQL database for LangFuse data
+- langfuse-clickhouse: ClickHouse analytics database for LangFuse metrics
+
+LangFuse AI Observatory Setup:
+- Purpose: Self-hosted AI monitoring for academic data privacy and institutional compliance
+- Features: Cost tracking, usage analytics, request tracing, academic reporting
+- Setup: Requires Docker deployment of LangFuse v3.66.1 with PostgreSQL and ClickHouse
+- Configuration: API keys obtained from LangFuse dashboard and configured in AcademiaOS Advanced Options
+- Access: Web interface at http://localhost:3030 for monitoring dashboards
+- Integration: Automatic LangChain callback integration for seamless request tracking
 
 7. LICENSING
 
