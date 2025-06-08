@@ -43,57 +43,101 @@ To get started with AcademiaOS, you require [Node.js](https://nodejs.org/en/down
 1. Use `git clone` to clone this repository. 
 2. Run `npm install`.
 
-## 👨‍💻 Development Mode  
+## 👨‍💻 Development Mode
 
-### Full Stack Development (Recommended)
+#  Docker Development (Recommended)
 
-**Quick Setup:**
-```bash
-npm run setup    # Install all dependencies (client + server)
-npm run dev      # Start both React client and Helicone server
-```
+Full Stack Setup:
+  # Start all AcademiaOS services
+  docker-compose up -d
 
-This starts:
-- React client on [http://localhost:3000](http://localhost:3000)
-- Helicone API server on [http://localhost:3001](http://localhost:3001)
+# Optional: Add LangFuse AI Observatory for monitoring
+  docker-compose -f docker-compose.langfuse.yml up -d
 
-### Individual Components
+  This starts:
+  - React client on http://localhost:3000
+  - API server on http://localhost:3001
+  - LangFuse monitoring on http://localhost:3030 (optional)
 
-**Client Only:**
-```bash
-npm start        # React development server only
-npm test         # Test runner in interactive watch mode
-npm run build    # Production build
-```
+Health Checks:
+  curl http://localhost:3000    # React app
+  curl http://localhost:3001    # API server status
+  curl http://localhost:3030    # LangFuse dashboard (if enabled)
 
-**Server Only (Helicone API Proxy):**
-```bash
-npm run server:install  # Install server dependencies
-npm run server:dev      # Start server with auto-restart
-npm run server          # Start server (production mode)
-```
+Individual Service Management:
+  # AcademiaOS services
+  docker-compose up -d academia-os-client    # React client only
+  docker-compose up -d academia-os-server     # API server only
 
-### Helicone Integration Requirements
+# LangFuse services (optional)
+  docker-compose -f docker-compose.langfuse.yml up -d
 
-⚠️ **Important**: The Helicone monitoring features require the server to be running due to CORS restrictions. The server proxies API requests to Helicone's endpoints.
+  Development Commands:
+  docker-compose logs -f                      # View all service logs
+  docker-compose restart academia-os-server   # Restart API server
+  docker-compose down                         # Stop all services
 
-- **Real-time cost tracking**: Requires server
-- **API monitoring dashboard**: Requires server  
-- **Connection testing**: Requires server
+## Alternative: Local Development
 
-Without the server, Helicone configuration is still used for AI model requests but monitoring features are disabled.
+  Prerequisites: https://nodejs.org/en/download installed
 
-## 🏭 Production Build 
+  # Install dependencies
+  npm install
 
-### `npm run build`
+  # Client development server
+  npm start                    # React client on port 3000
 
-Compiles the application for production into the `build` folder.\
-Efficiently bundles React in the production mode and optimizes the build to deliver optimum performance.
+  # API server (separate terminal)
+  cd server && npm install     # Install server dependencies
+  npm start                    # API server on port 3001 
 
-The build is minified, and the filenames include the hashes.\
-Your application is now ready for deployment!
+### LangFuse Integration Requirements (NOTE: NOT FULLY IMPLEMENTED YET)
 
-Visit the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for an in-depth understanding.
+⚠️ Important: The LangFuse monitoring features require both the API
+  server and LangFuse services to be running.
+
+  - Real-time cost tracking: Requires API server + LangFuse
+  - AI model usage monitoring: Requires API server + LangFuse
+  - Academic research session tracking: Requires API server + LangFuse
+
+  Without LangFuse, AI model requests still function but advanced
+  monitoring features are disabled.
+
+### 🏭 Production Build
+
+## Docker Production Deployment
+
+Quick Production Start:
+  docker-compose up -d                                    # Start 
+  AcademiaOS
+  docker-compose -f docker-compose.langfuse.yml up -d    # Start 
+  monitoring (optional)
+
+Production Architecture:
+  - React Client Container: Optimized build served via development server
+  with hot reloading
+  - API Server Container: Node.js Express server handling Semantic Scholar
+   proxy and LangFuse integration
+  - LangFuse Stack: PostgreSQL + ClickHouse + LangFuse server for AI
+  observability
+
+Production Health Monitoring:
+  - Health endpoint: http://localhost:3001/health
+  - LangFuse dashboard: http://localhost:3030
+  - Rate limiting status:
+  http://localhost:3001/api/semantic-scholar-rate-limit-status
+
+Manual Production Build
+
+  npm run build
+
+  Compiles the application for production into the build folder.
+  Efficiently bundles React in production mode and optimizes for performance.
+
+  The build is minified and filenames include hashes for optimal caching.
+  For deployment options, see [https://facebook.github.io/create-react-app/docs/deployment].
+
+  Note: Production deployments should use the Docker architecture for proper service orchestration and LangFuse integration.
 
 ## 💡 Contributing 
 
@@ -107,3 +151,4 @@ This endeavor is under the aegis of an open-source License. Refer to the [LICENS
 
 Crafted with passion and commitment by Thomas Übellacker, A Helme and Claude 4 Sonnet❣️ 
 Happy coding! ⌨️💡
+
