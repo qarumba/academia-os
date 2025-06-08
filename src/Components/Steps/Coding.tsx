@@ -311,7 +311,7 @@ const CodingStep = (props: {
                 })
               }}
             />
-            <Button onClick={load}>Start Coding</Button>
+            <Button type="primary" onClick={load}>Start Coding</Button>
           </Space>
         ) : (
           <PaperTable
@@ -372,6 +372,7 @@ const CodingStep = (props: {
           }))}
         />
         <Button
+          type="primary"
           loading={firstOrderLoading || secondOrderLoading || aggregateLoading}
           style={{ marginLeft: "20px" }}
           onClick={load}>
