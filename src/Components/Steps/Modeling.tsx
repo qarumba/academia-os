@@ -374,7 +374,7 @@ const ModelingStep = (props: {
           </Space>
         ) : (
           <Table
-            rowKey={(record, index) => record.theory || `theory-${index}`}
+            rowKey={(record) => record.theory || `theory-${Math.random().toString(36).substr(2, 9)}`}
             dataSource={props.modelData.applicableTheories || []}
             columns={[
               { title: "Theory", dataIndex: "theory" },
