@@ -120,6 +120,38 @@ function isValidSemanticScholarPath(path) {
   );
 }
 
+// SECURITY: Map validated user input to predefined safe endpoint URLs
+// This prevents any user input from being directly concatenated into URLs
+function getValidatedSemanticScholarEndpoint(userPath) {
+  if (!userPath || typeof userPath !== 'string') {
+    return null;
+  }
+  
+  // Remove any leading slashes and normalize
+  const normalizedPath = userPath.replace(/^\/+/, '').split('?')[0]; // Remove query params for mapping
+  
+  // Predefined safe endpoint mappings (no user input concatenation)
+  const endpointMap = {
+    'graph/v1/paper/search': 'https://api.semanticscholar.org/graph/v1/paper/search',
+    'graph/v1/paper/batch': 'https://api.semanticscholar.org/graph/v1/paper/batch',
+    'graph/v1/author/search': 'https://api.semanticscholar.org/graph/v1/author/search',
+    'graph/v1/author/batch': 'https://api.semanticscholar.org/graph/v1/author/batch',
+    'graph/v1/recommendations': 'https://api.semanticscholar.org/graph/v1/recommendations',
+    'v1/paper/search': 'https://api.semanticscholar.org/v1/paper/search',
+    'v1/paper/batch': 'https://api.semanticscholar.org/v1/paper/batch',
+    'v1/author/search': 'https://api.semanticscholar.org/v1/author/search',
+    'v1/author/batch': 'https://api.semanticscholar.org/v1/author/batch',
+    'paper/search': 'https://api.semanticscholar.org/paper/search',
+    'paper/batch': 'https://api.semanticscholar.org/paper/batch',
+    'author/search': 'https://api.semanticscholar.org/author/search',
+    'author/batch': 'https://api.semanticscholar.org/author/batch',
+    'recommendations': 'https://api.semanticscholar.org/recommendations'
+  };
+  
+  // Return the predefined safe URL or null if not found
+  return endpointMap[normalizedPath] || null;
+}
+
 app.get('/api/semantic-scholar/*', async (req, res) => {
   try {
     const path = req.params[0];
@@ -137,7 +169,15 @@ app.get('/api/semantic-scholar/*', async (req, res) => {
     await rateLimiter.waitForRateLimit();
     
     // SECURITY: Construct URL safely to prevent SSRF
-    const baseUrl = 'https://api.semanticscholar.org';
+    // Map validated path to exact endpoint URL without user input concatenation
+    const validatedEndpoint = getValidatedSemanticScholarEndpoint(path);
+    if (!validatedEndpoint) {
+      console.warn('🚫 Failed to map path to valid endpoint:', path);
+      return res.status(400).json({ 
+        error: 'Invalid API endpoint mapping',
+        message: 'Path could not be mapped to a valid Semantic Scholar endpoint'
+      });
+    }
     
     // Extract and validate query parameters safely
     const allowedParams = ['query', 'fields', 'offset', 'limit', 'year', 'venue', 'fieldsOfStudy'];
@@ -150,8 +190,8 @@ app.get('/api/semantic-scholar/*', async (req, res) => {
       }
     }
     
-    // Construct URL with validated components only
-    const url = new URL(path, baseUrl);
+    // Construct URL using predefined endpoint string (no user input)
+    const url = new URL(validatedEndpoint);
     url.search = safeQueryParams.toString();
     
     console.log('📚 Proxying Semantic Scholar request to:', url.toString());
