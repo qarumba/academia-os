@@ -7,6 +7,7 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
   const { token } = useToken()
   const [hasError, setHasError] = useState(false)
   const [svgContent, setSvgContent] = useState('')
+  const [isRendering, setIsRendering] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const chartIdRef = useRef<string>()
   
@@ -27,7 +28,9 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
 
   useEffect(() => {
     const renderChart = async () => {
-      if (!props?.chart || !containerRef.current) return
+      if (!props?.chart) return
+      
+      setIsRendering(true)
       
       try {
         // Reset error state
@@ -54,7 +57,9 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
         console.warn(`🚫 Mermaid syntax error (${props?.id}):`, error)
         setHasError(true)
         props?.onError?.(true)
-        setSvgContent('')
+        // Don't clear svgContent on error - keep previous content
+      } finally {
+        setIsRendering(false)
       }
     }
     
@@ -62,13 +67,26 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
   }, [props?.chart, props?.onError, props?.id])
 
   return (
-    <div ref={containerRef} className='mermaid'>
+    <div ref={containerRef} className='mermaid' style={{ 
+      backgroundColor: '#f8f9fa',
+      padding: '20px',
+      borderRadius: '8px',
+      border: '1px solid #e9ecef'
+    }}>
       {svgContent ? (
-        <div dangerouslySetInnerHTML={{ __html: svgContent }} />
+        <div 
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+          style={{ opacity: isRendering ? 0.7 : 1, transition: 'opacity 0.2s ease' }}
+        />
       ) : (
-        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '12px' }}>
-          {props?.chart}
-        </pre>
+        <div style={{ 
+          padding: '20px', 
+          textAlign: 'center', 
+          color: '#666',
+          fontStyle: 'italic'
+        }}>
+          {isRendering ? 'Rendering diagram...' : 'No diagram available'}
+        </div>
       )}
     </div>
   )

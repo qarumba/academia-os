@@ -366,7 +366,7 @@ const CodingStep = (props: {
       loading: firstOrderLoading,
       content:
         !firstOrderLoading && initialCodes.length === 0 ? (
-          <Space direction='horizontal'>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "12px" }}>
             <RemarkComponent
               papers={props?.modelData?.papers || []}
               value={props.modelData?.remarks || ""}
@@ -377,17 +377,20 @@ const CodingStep = (props: {
               }}
             />
             <Button type="primary" onClick={startFirstOrderCoding}>Start Coding</Button>
-          </Space>
+          </div>
         ) : (
           <Space direction="vertical" style={{ width: "100%" }}>
-            <PaperTable
-              papers={props?.modelData?.papers || []}
-              responsiveToUpdates={true}
-              customColumns={["Initial Codes"]}
-            />
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
+            {/* Step-specific button section */}
+            <div style={{ 
+              backgroundColor: "#f8f9fa", 
+              padding: "12px", 
+              marginBottom: "16px", 
+              borderRadius: "6px",
+              border: "1px solid #e9ecef",
+              textAlign: "center"
+            }}>
               <Button 
-                type="primary" 
+                type={(secondOrderLoading || initialCodes.length === 0) ? "default" : "primary"}
                 onClick={startSecondOrderCoding}
                 disabled={secondOrderLoading || initialCodes.length === 0}
                 loading={secondOrderLoading}
@@ -395,6 +398,12 @@ const CodingStep = (props: {
                 Next: Generate 2nd Order Codes
               </Button>
             </div>
+            
+            <PaperTable
+              papers={props?.modelData?.papers || []}
+              responsiveToUpdates={true}
+              customColumns={["Initial Codes"]}
+            />
           </Space>
         ),
     },
@@ -410,14 +419,17 @@ const CodingStep = (props: {
         </div>
       ) : (
         <Space direction="vertical" style={{ width: "100%" }}>
-          <GioiaCoding
-            firstOrderCodes={initialCodes || []}
-            secondOrderCodes={focusCodes || {}}
-            aggregateDimensions={{}}
-          />
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
+          {/* Step-specific button section */}
+          <div style={{ 
+            backgroundColor: "#f8f9fa", 
+            padding: "12px", 
+            marginBottom: "16px", 
+            borderRadius: "6px",
+            border: "1px solid #e9ecef",
+            textAlign: "center"
+          }}>
             <Button 
-              type="primary" 
+              type={(aggregateLoading || Object.keys(focusCodes).length === 0) ? "default" : "primary"}
               onClick={startAggregateDimensions}
               disabled={aggregateLoading || Object.keys(focusCodes).length === 0}
               loading={aggregateLoading}
@@ -425,6 +437,12 @@ const CodingStep = (props: {
               Next: Generate Aggregate Dimensions
             </Button>
           </div>
+          
+          <GioiaCoding
+            firstOrderCodes={initialCodes || []}
+            secondOrderCodes={focusCodes || {}}
+            aggregateDimensions={{}}
+          />
         </Space>
       ),
     },
@@ -471,7 +489,8 @@ const CodingStep = (props: {
           }))}
         />
         <Button
-          type="primary"
+          type={props.modelData.firstOrderCodes ? "default" : "primary"}
+          danger={props.modelData.firstOrderCodes ? true : false}
           loading={firstOrderLoading || secondOrderLoading || aggregateLoading}
           style={{ marginLeft: "20px" }}
           onClick={restartAllCoding}>

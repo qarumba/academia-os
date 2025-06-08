@@ -117,6 +117,7 @@ export const PaperTable = (props: {
               root: { width: 300 }
             }
           }}
+          className="custom-autocomplete"
           options={[
             ...(columnAddSearchQuery
               ? [
@@ -156,7 +157,13 @@ export const PaperTable = (props: {
           filterOption={(inputValue, option) =>
             option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
           }
-          style={{ width: 200 }}
+          style={{ 
+            width: 200, 
+            border: '2px solid #1890ff',
+            borderRadius: '6px',
+            color: 'rgba(24, 144, 255, 0.8)'
+          }}
+          popupClassName="custom-autocomplete-popup"
           value={columnAddSearchQuery}
           onSelect={async (value) => {
             // Check if we can use OpenAI features
@@ -241,7 +248,7 @@ export const PaperTable = (props: {
           }}
           onSearch={(text) => setColumnAddSearchQuery(text)}
           suffixIcon={<PlusOutlined />}
-          placeholder='Add a Custom Column'
+          placeholder={!columnAddSearchQuery ? 'Add a Custom Column' : ''}
         />
 
         <Button icon={<DownloadOutlined />} onClick={downloadCSV}>

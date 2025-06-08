@@ -2,34 +2,17 @@
 import type { PaginatedResults, Paper } from "semanticscholarjs"
 
 export class SearchRepository {
-  private static lastRequestTime = 0;
-  private static readonly REQUEST_DELAY = 5000; // Increased to 5 seconds between requests
-  private static rateLimitResetTime = 0;
-
-  private static async waitForRateLimit() {
-    const now = Date.now();
-    
-    // If we hit a rate limit recently, wait longer
-    if (this.rateLimitResetTime > now) {
-      const waitTime = this.rateLimitResetTime - now;
-      console.log(`⏳ Rate limit cooldown: waiting ${Math.ceil(waitTime / 1000)}s...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+  // Server-side rate limiting - no client-side rate limiting needed
+  
+  private static async checkRateLimitStatus() {
+    try {
+      const response = await fetch('http://localhost:3001/api/semantic-scholar-rate-limit-status');
+      const status = await response.json();
+      return status;
+    } catch (error) {
+      console.warn('⚠️ Could not check rate limit status:', error);
+      return { canMakeRequest: true }; // Assume we can make request if status check fails
     }
-    
-    // Normal rate limiting
-    const timeSinceLastRequest = now - this.lastRequestTime;
-    if (timeSinceLastRequest < this.REQUEST_DELAY) {
-      const waitTime = this.REQUEST_DELAY - timeSinceLastRequest;
-      console.log(`⏳ Rate limiting: waiting ${Math.ceil(waitTime / 1000)}s before next request...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-    }
-    this.lastRequestTime = Date.now();
-  }
-
-  private static handleRateLimit() {
-    // Set a 15-second cooldown after hitting rate limit
-    this.rateLimitResetTime = Date.now() + 15000;
-    console.warn('🚫 Hit Semantic Scholar rate limit - implementing 15s cooldown');
   }
 
   public static searchPapers = async (
@@ -41,8 +24,15 @@ export class SearchRepository {
       return null;
     }
 
-    // Rate limiting to prevent 429 errors
-    await this.waitForRateLimit();
+    // Check server-side rate limiting status
+    const rateLimitStatus = await this.checkRateLimitStatus();
+    if (!rateLimitStatus.canMakeRequest) {
+      const waitTime = rateLimitStatus.cooldownEndsAt 
+        ? Math.ceil((rateLimitStatus.cooldownEndsAt - Date.now()) / 1000)
+        : Math.ceil((rateLimitStatus.nextRequestAllowedAt - Date.now()) / 1000);
+      
+      throw new Error(`Rate limit active. Please wait ${waitTime}+ seconds before searching again.`);
+    }
 
     try {
       // Use server proxy to avoid CORS issues
@@ -61,11 +51,9 @@ export class SearchRepository {
       const response = await fetch(url);
       
       if (!response.ok) {
-        if (response.status === 429) {
-          this.handleRateLimit();
-          throw new Error('Rate limit exceeded. Please wait 15+ seconds before searching again.');
-        }
-        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
+        // Server handles rate limiting now, just pass through the error
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.message || `Search failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();

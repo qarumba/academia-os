@@ -2,6 +2,157 @@
   text-align: center;
 }
 
+/* Custom styling for Add a Custom Column dropdown - Multiple targeting approaches */
+
+/* Target the input element directly */
+.custom-autocomplete input {
+  color: rgba(24, 144, 255, 0.8) !important;
+}
+
+/* Target all possible placeholder variations */
+.custom-autocomplete input::placeholder,
+.custom-autocomplete input::-webkit-input-placeholder,
+.custom-autocomplete input::-moz-placeholder,
+.custom-autocomplete input:-ms-input-placeholder,
+.custom-autocomplete input:-moz-placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Ant Design specific selectors */
+.custom-autocomplete .ant-select-selector input {
+  color: rgba(24, 144, 255, 0.8) !important;
+}
+
+.custom-autocomplete .ant-select-selector input::placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+}
+
+.custom-autocomplete .ant-select-selection-placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+}
+
+.custom-autocomplete.ant-select .ant-select-selector .ant-select-selection-placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+}
+
+.custom-autocomplete.ant-select .ant-select-selector input::placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+}
+
+.custom-autocomplete.ant-select-auto-complete .ant-select-selector input::placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+}
+
+/* Force override with highest specificity */
+.custom-autocomplete.ant-select.ant-select-auto-complete .ant-select-selector input::placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Ultra-specific override to beat Ant Design defaults */
+.ant-select.custom-autocomplete .ant-select-selector .ant-select-selection-search .ant-select-selection-search-input::placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+}
+
+.ant-select.custom-autocomplete .ant-select-selector .ant-select-selection-search .ant-select-selection-search-input {
+  color: rgba(24, 144, 255, 0.8) !important;
+}
+
+/* Workflow tabs styling - Ultra specific to override Ant Design */
+.workflow-tabs.ant-tabs {
+  background-color: #f5f5f5 !important;
+  padding: 8px 16px !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+.workflow-tabs.ant-tabs .ant-tabs-tab-bar {
+  background-color: #f5f5f5 !important;
+}
+
+.workflow-tabs.ant-tabs .ant-tabs-nav {
+  background-color: #f5f5f5 !important;
+}
+
+.workflow-tabs.ant-tabs .ant-tabs-content-holder {
+  background-color: #f5f5f5 !important;
+}
+
+/* Target the specific tab classes you mentioned */
+.workflow-tabs.ant-tabs .ant-tabs-tab,
+.workflow-tabs.ant-tabs .ant-tabs-tab-with-remove,
+.workflow-tabs.ant-tabs .ant-tabs-tab-active {
+  background-color: #f5f5f5 !important;
+}
+
+/* More specific targeting for the tab container */
+.workflow-tabs.ant-tabs .ant-tabs-nav-wrap {
+  background-color: #f5f5f5 !important;
+}
+
+.workflow-tabs.ant-tabs .ant-tabs-nav-list {
+  background-color: #f5f5f5 !important;
+}
+
+/* Ultra-specific override for the entire tabs area */
+.ant-tabs.workflow-tabs {
+  background: #f5f5f5 !important;
+  padding: 8px 16px !important;
+}
+
+.ant-tabs.workflow-tabs * {
+  background-color: inherit !important;
+}
+
+/* Global blue placeholder styling - NUCLEAR OPTION */
+* input::placeholder,
+* input::-webkit-input-placeholder,
+* input::-moz-placeholder,
+* input:-ms-input-placeholder,
+* input:-moz-placeholder,
+* textarea::placeholder,
+* textarea::-webkit-input-placeholder,
+* textarea::-moz-placeholder,
+* textarea:-ms-input-placeholder,
+* textarea:-moz-placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Ultra-specific Ant Design placeholder overrides */
+body .ant-input::placeholder,
+body .ant-input::-webkit-input-placeholder,
+body .ant-input::-moz-placeholder,
+body .ant-input:-ms-input-placeholder,
+body .ant-input:-moz-placeholder,
+body .ant-input-number input::placeholder,
+body .ant-input-number input::-webkit-input-placeholder,
+body .ant-input-number input::-moz-placeholder,
+body .ant-input-number input:-ms-input-placeholder,
+body .ant-input-number input:-moz-placeholder,
+body .ant-select-selector .ant-select-selection-placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Maximum specificity for AutoComplete and Select */
+html body .ant-select .ant-select-selector .ant-select-selection-placeholder,
+html body .ant-select-auto-complete .ant-select-selector input::placeholder,
+html body .ant-select-auto-complete .ant-select-selector input::-webkit-input-placeholder,
+html body .ant-select-auto-complete .ant-select-selector input::-moz-placeholder,
+html body .ant-select-auto-complete .ant-select-selector input:-ms-input-placeholder,
+html body .ant-select-auto-complete .ant-select-selector input:-moz-placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Force override everything with highest CSS specificity possible */
+html body div input::placeholder,
+html body div textarea::placeholder {
+  color: rgba(24, 144, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

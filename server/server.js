@@ -29,8 +29,61 @@ app.get('/health', (req, res) => {
 
 
 // ==============================================
-// Semantic Scholar API Proxy (CORS fix)
+// Semantic Scholar API Proxy (CORS fix + Rate Limiting)
 // ==============================================
+
+// Server-side rate limiting for Semantic Scholar API
+class SemanticScholarRateLimit {
+  constructor() {
+    this.lastRequestTime = 0;
+    this.REQUEST_DELAY = 5000; // 5 seconds between requests
+    this.rateLimitResetTime = 0;
+  }
+
+  async waitForRateLimit() {
+    const now = Date.now();
+    
+    // If we hit a rate limit recently, wait longer
+    if (this.rateLimitResetTime > now) {
+      const waitTime = this.rateLimitResetTime - now;
+      console.log(`⏳ Server rate limit cooldown: waiting ${Math.ceil(waitTime / 1000)}s...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    // Normal rate limiting
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    if (timeSinceLastRequest < this.REQUEST_DELAY) {
+      const waitTime = this.REQUEST_DELAY - timeSinceLastRequest;
+      console.log(`⏳ Server rate limiting: waiting ${Math.ceil(waitTime / 1000)}s before next request...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    this.lastRequestTime = Date.now();
+  }
+
+  handleRateLimit() {
+    // Set a 10-second cooldown after hitting rate limit
+    this.rateLimitResetTime = Date.now() + 10000;
+    console.warn('🚫 Hit Semantic Scholar rate limit - implementing 10s server cooldown');
+  }
+
+  getRateLimitStatus() {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    const nextRequestAllowedAt = this.lastRequestTime + this.REQUEST_DELAY;
+    const cooldownEndsAt = this.rateLimitResetTime;
+    
+    return {
+      canMakeRequest: timeSinceLastRequest >= this.REQUEST_DELAY && now >= this.rateLimitResetTime,
+      nextRequestAllowedAt,
+      cooldownEndsAt: this.rateLimitResetTime > now ? cooldownEndsAt : null,
+      timeSinceLastRequest,
+      requestDelay: this.REQUEST_DELAY
+    };
+  }
+}
+
+// Create singleton rate limiter
+const rateLimiter = new SemanticScholarRateLimit();
 
 // Allowlisted Semantic Scholar API endpoints for security
 const ALLOWED_SS_ENDPOINTS = [
@@ -80,6 +133,9 @@ app.get('/api/semantic-scholar/*', async (req, res) => {
       });
     }
     
+    // Rate limiting: Wait if necessary
+    await rateLimiter.waitForRateLimit();
+    
     const queryString = req.url.split('?')[1] || '';
     const baseUrl = 'https://api.semanticscholar.org';
     const url = `${baseUrl}/${path}${queryString ? `?${queryString}` : ''}`;
@@ -96,12 +152,28 @@ app.get('/api/semantic-scholar/*', async (req, res) => {
       }
     });
     
+    // Handle rate limiting response from Semantic Scholar
+    if (response.status === 429) {
+      rateLimiter.handleRateLimit();
+      return res.status(429).json({ 
+        error: 'Rate limit exceeded', 
+        message: 'Please wait 10+ seconds before searching again.',
+        retryAfter: 10
+      });
+    }
+    
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (error) {
     console.error('❌ Semantic Scholar proxy error:', error.message);
     res.status(500).json({ error: 'Proxy request failed' });
   }
+});
+
+// Rate limit status endpoint for client feedback
+app.get('/api/semantic-scholar-rate-limit-status', (req, res) => {
+  const status = rateLimiter.getRateLimitStatus();
+  res.json(status);
 });
 
 // ==============================================

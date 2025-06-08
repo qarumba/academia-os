@@ -190,6 +190,13 @@ const ModelingStep = (props: {
 
   const load = async () => {
     if (props?.modelData?.aggregateDimensions) {
+      // Check if this is a restart (has existing theories)
+      const isRestart = props.modelData.applicableTheories && props.modelData.applicableTheories.length > 0
+      
+      if (isRestart) {
+        message.info("Modeling restarted...", 3)
+      }
+      
       try {
         setExploreLoading(true)
         
@@ -371,7 +378,7 @@ const ModelingStep = (props: {
                 })
               }}
             />
-            <Button onClick={load}>Start Modeling</Button>
+            <Button type="primary" onClick={load}>Start Modeling</Button>
           </Space>
         ) : (
           <Table
@@ -508,11 +515,15 @@ const ModelingStep = (props: {
           }))}
         />
         <Button
+          type={props.modelData.applicableTheories ? "default" : "primary"}
+          danger={props.modelData.applicableTheories ? true : false}
           loading={
-            exploreLoading ||
-            constructLoading ||
-            visualizationLoading ||
-            interrelationshipsLoading
+            !props.modelData.applicableTheories && (
+              exploreLoading ||
+              constructLoading ||
+              visualizationLoading ||
+              interrelationshipsLoading
+            )
           }
           style={{ marginLeft: "20px" }}
           onClick={load}>
