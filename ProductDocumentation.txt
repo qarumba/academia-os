@@ -7,7 +7,7 @@ AcademiaOS 2.0 is a React/TypeScript application for academic information retrie
 Version 2.0 Enhancements:
 - Multi-provider AI model support (OpenAI, Anthropic Claude)
 - Complete LangChain v0.3.27 migration with modern architecture
-- Production-ready Helicone integration with server proxy
+- Self-hosted LangFuse AI Observatory for academic data privacy
 - Enhanced user interface with progressive loading states
 - Native Anthropic support with automatic fallback handling
 - Complete Gioia methodology automation with improved reliability
@@ -42,7 +42,7 @@ Frontend Stack:
 - PDF.js 3.10.111 (document processing)
 
 Backend Services:
-- Node.js server for Helicone API proxy
+- Node.js server for LangFuse and Semantic Scholar API proxies
 - Express.js for API endpoints
 
 AI Integration:
@@ -54,7 +54,7 @@ AI Integration:
 
 External APIs:
 - Semantic Scholar API (academic paper search)
-- Helicone (AI model monitoring)
+- LangFuse (self-hosted AI observability)
 - Adobe PDF Extract API (OCR processing)
 
 Architecture Patterns:
@@ -86,11 +86,11 @@ AI Model Configuration:
 - OpenAI embeddings support for all providers
 - API key management with validation
 
-Monitoring and Analytics:
-- Helicone integration for AI inference monitoring
-- Cost tracking and budget management
-- API usage analytics
-- Performance metrics
+AI Observatory and Analytics:
+- Self-hosted LangFuse integration for academic data privacy
+- Real-time AI model cost tracking and usage metrics
+- Academic session monitoring with institutional compliance
+- LangChain callback integration for automatic tracing
 
 5. DEVELOPMENT COMMANDS
 
@@ -102,8 +102,8 @@ Local Development:
 
 Full Stack Development:
 - npm run setup: Install all dependencies (client + server)
-- npm run dev: Start both React client and Helicone server
-- npm run server: Start Helicone API server only
+- npm run dev: Start both React client and LangFuse proxy server
+- npm run server: Start LangFuse and Semantic Scholar API proxy server only
 
 6. DEPLOYMENT
 
@@ -115,7 +115,7 @@ Build Process:
 Requirements:
 - Node.js (latest LTS)
 - OpenAI API key (required for embeddings)
-- Optional: Anthropic API key, Helicone API key, Adobe PDF Extract API credentials
+- Optional: Anthropic API key, self-hosted LangFuse instance, Adobe PDF Extract API credentials
 
 7. LICENSING
 

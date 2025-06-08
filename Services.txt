@@ -23,6 +23,9 @@ Key Methods:
 - getModelConfig(): Retrieve configuration from localStorage
 - createChatModel(options): Create configured chat model instance
 - isAnthropicAvailable(): Check native Anthropic integration status
+- isLangFuseAvailable(): Check LangFuse observability configuration
+- initializeLangFuseHandler(): Setup callback handler for automatic tracing
+- getLangFuseCallbacks(): Get active callback handlers for model calls
 - handleError(): Centralized error handling with user feedback
 - getEmbeddings(): Get OpenAI embeddings instance (compatibility)
 
@@ -114,30 +117,31 @@ Validation Logic:
 - Supports legacy OpenAI key fallback
 - JSON parsing with error handling
 
-6. HELICONESERVICE - API MONITORING & COST TRACKING
+6. LANGFUSESERVICE - SELF-HOSTED AI OBSERVABILITY
 
-Purpose: Monitor AI API usage, track costs, and provide analytics
+Purpose: Monitor AI API usage, track costs, and provide academic-compliant analytics
 
 Key Methods:
-- isHeliconeConfigured(): Check configuration status
-- getHeliconeConfigForProvider(provider): Get provider-specific config
-- testConnection(): Validate API connectivity via server proxy
-- getSessionStats(startTime): Fetch session-based statistics
-- getRecentRequests(limit): Retrieve recent API calls
-- safeApiCall(apiCall, fallback): Graceful API call handling
+- getStatus(): Check LangFuse instance connectivity and configuration
+- getCurrentModelUsage(timeframe): Fetch current model usage metrics
+- getTotalCost(timeframe): Calculate total AI costs for academic budgeting
+- getAcademicStats(timeframe): Generate academic research statistics
+- queryMetrics(query): Execute metrics API queries for custom analytics
+- testConnection(): Validate connectivity to self-hosted instance
 
 Server Integration Methods:
-- Uses dedicated Node.js server for CORS-free API access
-- API_BASE_URL: http://localhost:3001/api/helicone (dev) or /api/helicone (prod)
-- POST endpoints for requests and connection testing
-- Enhanced error handling with specific CORS messaging
+- Uses dedicated Node.js server for self-hosted LangFuse API access
+- API_BASE_URL: http://localhost:3001/api/langfuse (configurable for production)
+- RESTful endpoints for health checks, metrics, and academic statistics
+- Enhanced error handling for self-hosted deployment scenarios
 
 Implementation Details:
-- Provider-specific endpoints (OpenAI: oai.helicone.ai, Anthropic: anthropic.helicone.ai)
-- Production-ready server-side proxy for CORS handling
-- Real-time statistics with session tracking and reset capabilities
-- Comprehensive error handling for network and server issues
-- Development mode fallbacks for offline usage
+- Self-hosted deployment for academic data privacy compliance
+- Metrics API integration for real-time cost and usage tracking
+- Academic session monitoring with institutional metadata
+- LangChain callback handler integration for automatic tracing
+- Docker-based deployment with PostgreSQL backend
+- Development mode graceful degradation for missing instances
 
 7. LANGCHAINSERVICE - FRAMEWORK INTEGRATION
 
