@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import mermaid from "mermaid"
 import { theme } from "antd"
 
@@ -6,51 +6,55 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
   const { useToken } = theme
   const { token } = useToken()
   const [hasError, setHasError] = useState(false)
-  const [cleanedChart, setCleanedChart] = useState('')
+  const [svgContent, setSvgContent] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const chartIdRef = useRef<string>()
   
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: "dark",
-    securityLevel: "loose",
-    fontFamily: "Fira Code",
-  })
+  // Generate stable chart ID only once
+  if (!chartIdRef.current) {
+    chartIdRef.current = `${props?.id || 'mermaid'}-${Math.random().toString(36).substr(2, 9)}`
+  }
+  
+  // Initialize Mermaid once
+  useEffect(() => {
+    mermaid.initialize({
+      startOnLoad: false, // We'll handle rendering manually
+      theme: "dark",
+      securityLevel: "loose",
+      fontFamily: "Fira Code",
+    })
+  }, [])
 
   useEffect(() => {
     const renderChart = async () => {
+      if (!props?.chart || !containerRef.current) return
+      
       try {
         // Reset error state
         setHasError(false)
         props?.onError?.(false)
         
-        // Try to parse and render the chart
-        if (props?.chart) {
-          // Basic syntax cleanup for common issues
-          let cleanChart = props.chart
-            .trim()
-            // Fix missing newlines after comments
-            .replace(/(%%.*)([A-Z])/g, '$1\n  $2')
-            // Remove invalid group syntax like (A & B & C & D)
-            .replace(/\([A-Z\s&]+\)\s*-->/g, '')
-            // Clean up extra whitespace
-            .replace(/\n\s*\n/g, '\n')
-          
-          console.log(`🔍 Cleaned Mermaid chart (${props?.id}):`, cleanChart)
-          setCleanedChart(cleanChart)
-          
-          // Validate syntax first
-          await mermaid.parse(cleanChart)
-          
-          // Let Mermaid handle the rendering naturally
-          setTimeout(() => {
-            mermaid.contentLoaded()
-          }, 100)
-        }
+        // Basic syntax cleanup for common issues
+        let cleanChart = props.chart
+          .trim()
+          // Fix missing newlines after comments
+          .replace(/(%%.*)([A-Z])/g, '$1\n  $2')
+          // Remove invalid group syntax like (A & B & C & D)
+          .replace(/\([A-Z\s&]+\)\s*-->/g, '')
+          // Clean up extra whitespace
+          .replace(/\n\s*\n/g, '\n')
+        
+        console.log(`🔍 Rendering Mermaid chart (${props?.id}):`, cleanChart)
+        
+        // Use Mermaid's render API directly
+        const { svg } = await mermaid.render(chartIdRef.current!, cleanChart)
+        setSvgContent(svg)
+        
       } catch (error) {
         console.warn(`🚫 Mermaid syntax error (${props?.id}):`, error)
         setHasError(true)
         props?.onError?.(true)
-        // If parsing fails, still display the original chart
-        setCleanedChart(props?.chart || '')
+        setSvgContent('')
       }
     }
     
@@ -58,12 +62,14 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
   }, [props?.chart, props?.onError, props?.id])
 
   return (
-    <div 
-      key={`${props?.id || 'mermaid'}-${props?.chart?.substring(0, 50)}`} 
-      className='mermaid'
-      id={props?.id || `mermaid-${Math.random().toString(36).substr(2, 9)}`}
-    >
-      {cleanedChart || props?.chart}
+    <div ref={containerRef} className='mermaid'>
+      {svgContent ? (
+        <div dangerouslySetInnerHTML={{ __html: svgContent }} />
+      ) : (
+        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '12px' }}>
+          {props?.chart}
+        </pre>
+      )}
     </div>
   )
 }
