@@ -3,16 +3,33 @@ import type { PaginatedResults, Paper } from "semanticscholarjs"
 
 export class SearchRepository {
   private static lastRequestTime = 0;
-  private static readonly REQUEST_DELAY = 3000; // 3 seconds between requests
+  private static readonly REQUEST_DELAY = 5000; // Increased to 5 seconds between requests
+  private static rateLimitResetTime = 0;
 
   private static async waitForRateLimit() {
     const now = Date.now();
+    
+    // If we hit a rate limit recently, wait longer
+    if (this.rateLimitResetTime > now) {
+      const waitTime = this.rateLimitResetTime - now;
+      console.log(`⏳ Rate limit cooldown: waiting ${Math.ceil(waitTime / 1000)}s...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    // Normal rate limiting
     const timeSinceLastRequest = now - this.lastRequestTime;
     if (timeSinceLastRequest < this.REQUEST_DELAY) {
       const waitTime = this.REQUEST_DELAY - timeSinceLastRequest;
+      console.log(`⏳ Rate limiting: waiting ${Math.ceil(waitTime / 1000)}s before next request...`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
     this.lastRequestTime = Date.now();
+  }
+
+  private static handleRateLimit() {
+    // Set a 15-second cooldown after hitting rate limit
+    this.rateLimitResetTime = Date.now() + 15000;
+    console.warn('🚫 Hit Semantic Scholar rate limit - implementing 15s cooldown');
   }
 
   public static searchPapers = async (
@@ -45,7 +62,8 @@ export class SearchRepository {
       
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please wait 10+ seconds before searching again.');
+          this.handleRateLimit();
+          throw new Error('Rate limit exceeded. Please wait 15+ seconds before searching again.');
         }
         throw new Error(`Search failed: ${response.status} ${response.statusText}`);
       }
