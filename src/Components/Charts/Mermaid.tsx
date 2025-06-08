@@ -37,16 +37,13 @@ const Mermaid = (props: { chart: any; onError?: (hasError: boolean) => void; id?
           console.log(`🔍 Cleaned Mermaid chart (${props?.id}):`, cleanChart)
           setCleanedChart(cleanChart)
           
+          // Validate syntax first
           await mermaid.parse(cleanChart)
           
-          // Clear any existing mermaid content in this container before rendering
-          const containerId = props?.id || `mermaid-${Math.random().toString(36).substr(2, 9)}`
-          const container = document.getElementById(containerId)
-          if (container) {
-            container.innerHTML = cleanChart
-          }
-          
-          mermaid.contentLoaded()
+          // Let Mermaid handle the rendering naturally
+          setTimeout(() => {
+            mermaid.contentLoaded()
+          }, 100)
         }
       } catch (error) {
         console.warn(`🚫 Mermaid syntax error (${props?.id}):`, error)
