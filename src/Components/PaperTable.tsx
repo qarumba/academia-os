@@ -207,10 +207,10 @@ export const PaperTable = (props: {
                   processedCount++
                   console.log(`✅ Completed paper ${processedCount}/${papersToProcess.length}`)
                   
-                  // Rate limiting: Add delay between API calls to avoid spam
-                  if (processedCount < papersToProcess.length) {
-                    console.log(`⏳ Rate limiting: Waiting 2 seconds before next API call...`)
-                    await new Promise(resolve => setTimeout(resolve, 2000))
+                  // Rate limiting: 1 second per 4 papers (5 seconds per 20 papers)
+                  if (processedCount < papersToProcess.length && processedCount % 4 === 0) {
+                    console.log(`⏳ Rate limiting: Waiting 1 second after processing ${processedCount} papers...`)
+                    await new Promise(resolve => setTimeout(resolve, 1000))
                   }
                   
                 } catch (error) {

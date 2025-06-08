@@ -3,7 +3,7 @@ import type { PaginatedResults, Paper } from "semanticscholarjs"
 
 export class SearchRepository {
   private static lastRequestTime = 0;
-  private static readonly REQUEST_DELAY = 10000; // 10 seconds between requests
+  private static readonly REQUEST_DELAY = 3000; // 3 seconds between requests
 
   private static async waitForRateLimit() {
     const now = Date.now();
