@@ -3,6 +3,9 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
+// Import LangFuse service
+const langFuseService = require('./services/LangFuseService');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -15,95 +18,219 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', service: 'AcademiaOS Helicone Proxy' });
+  res.json({ status: 'OK', service: 'AcademiaOS Server' });
 });
 
-// Helicone API proxy endpoints
-app.post('/api/helicone/requests', async (req, res) => {
+
+
+// ==============================================
+// LangFuse API Endpoints (Self-Hosted)
+// ==============================================
+
+// LangFuse health check
+app.get('/api/langfuse/health', async (req, res) => {
+  console.log('🔍 LangFuse health check requested');
+  
   try {
-    const { apiKey, limit = 50 } = req.body;
+    const status = await langFuseService.getStatus();
     
-    if (!apiKey) {
-      return res.status(400).json({ error: 'API key is required' });
-    }
-
-    const response = await fetch(`https://api.helicone.ai/v1/request?limit=${limit}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      return res.status(response.status).json({ 
-        error: `Helicone API error: ${response.status}`,
-        details: errorData 
+    if (status.configured && status.connected) {
+      res.json({ 
+        status: 'OK', 
+        service: 'LangFuse Self-Hosted',
+        ...status
+      });
+    } else {
+      res.status(503).json({ 
+        status: 'Unavailable', 
+        service: 'LangFuse Self-Hosted',
+        ...status
       });
     }
-
-    const data = await response.json();
-    res.json(data);
   } catch (error) {
-    console.error('Helicone proxy error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
+    console.log('❌ LangFuse health check error:', error.message);
+    res.status(500).json({ 
+      status: 'Error', 
+      service: 'LangFuse Self-Hosted',
+      error: error.message
+    });
   }
 });
 
-// Test connection endpoint
-app.post('/api/helicone/test', async (req, res) => {
+// Get current model usage
+app.get('/api/langfuse/current-model', async (req, res) => {
+  console.log('📊 Current model usage requested');
+  
   try {
-    const { apiKey } = req.body;
+    const timeframe = req.query.timeframe || '1h';
+    const usage = await langFuseService.getCurrentModelUsage(timeframe);
     
-    if (!apiKey) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'API key is required' 
-      });
-    }
-
-    const response = await fetch(`https://api.helicone.ai/v1/request?limit=1`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        return res.json({ 
-          success: false, 
-          message: 'Invalid Helicone API key. Please check your configuration.' 
-        });
-      } else {
-        return res.json({ 
-          success: false, 
-          message: `Helicone API error: ${response.status} ${response.statusText}` 
-        });
-      }
-    }
-
-    await response.json(); // Validate JSON response
-    res.json({ 
-      success: true, 
-      message: 'Helicone API connection successful' 
+    res.json({
+      data: usage,
+      timeframe,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Helicone test error:', error);
-    res.json({ 
-      success: false, 
-      message: `Connection failed: ${error.message}` 
+    console.log('❌ Current model usage error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to fetch current model usage',
+      details: error.message
+    });
+  }
+});
+
+// Get total cost breakdown
+app.get('/api/langfuse/total-cost', async (req, res) => {
+  console.log('💰 Total cost breakdown requested');
+  
+  try {
+    const timeframe = req.query.timeframe || '24h';
+    const costs = await langFuseService.getTotalCostByModel(timeframe);
+    
+    res.json({
+      data: costs,
+      timeframe,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.log('❌ Total cost breakdown error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to fetch cost breakdown',
+      details: error.message
+    });
+  }
+});
+
+// Get comprehensive academic statistics
+app.get('/api/langfuse/academic-stats', async (req, res) => {
+  console.log('📚 Academic statistics requested');
+  
+  try {
+    const timeframe = req.query.timeframe || '30d';
+    const stats = await langFuseService.getAcademicStats(timeframe);
+    
+    res.json(stats);
+  } catch (error) {
+    console.log('❌ Academic statistics error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to generate academic statistics',
+      details: error.message
+    });
+  }
+});
+
+// Get model metrics (combined usage and cost)
+app.get('/api/langfuse/model-metrics', async (req, res) => {
+  console.log('📈 Model metrics requested');
+  
+  try {
+    const timeframe = req.query.timeframe || '24h';
+    
+    // Get both usage and cost data
+    const [usage, costs] = await Promise.all([
+      langFuseService.getCurrentModelUsage(timeframe),
+      langFuseService.getTotalCostByModel(timeframe)
+    ]);
+    
+    // Combine the data
+    const metrics = usage.map(usageItem => {
+      const costItem = costs.find(c => c.model === usageItem.model);
+      return {
+        model_name: usageItem.model,
+        request_count: usageItem.count,
+        total_cost: costItem?.cost || 0,
+        avg_latency: 0 // TODO: Add latency metrics
+      };
+    });
+    
+    res.json({
+      data: metrics,
+      timeframe,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.log('❌ Model metrics error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to fetch model metrics',
+      details: error.message
+    });
+  }
+});
+
+// Create academic research session
+app.post('/api/langfuse/academic-session', async (req, res) => {
+  console.log('📚 Academic session creation requested');
+  
+  try {
+    const sessionData = req.body;
+    const trace = langFuseService.createAcademicSession(sessionData);
+    
+    if (trace) {
+      res.json({
+        success: true,
+        trace_id: trace.id,
+        session_id: sessionData.sessionId,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(503).json({
+        success: false,
+        error: 'LangFuse not configured'
+      });
+    }
+  } catch (error) {
+    console.log('❌ Academic session creation error:', error.message);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to create academic session',
+      details: error.message
+    });
+  }
+});
+
+// Test LangFuse configuration
+app.post('/api/langfuse/test', async (req, res) => {
+  console.log('🧪 LangFuse configuration test requested');
+  
+  try {
+    const status = await langFuseService.getStatus();
+    
+    if (status.configured && status.connected) {
+      res.json({
+        success: true,
+        message: 'LangFuse self-hosted connection successful',
+        status
+      });
+    } else {
+      res.json({
+        success: false,
+        message: 'LangFuse configuration incomplete or unreachable',
+        status
+      });
+    }
+  } catch (error) {
+    console.log('❌ LangFuse test error:', error.message);
+    res.json({
+      success: false,
+      message: `LangFuse test failed: ${error.message}`
     });
   }
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 AcademiaOS Helicone Proxy running on port ${PORT}`);
+  console.log(`🚀 AcademiaOS AI Observatory running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔄 Helicone API endpoints ready`);
+  console.log(`🔄 Helicone API endpoints ready (legacy)`);
+  console.log(`🧠 LangFuse API endpoints ready (self-hosted)`);
+  console.log(`📈 Available endpoints:`);
+  console.log(`   - GET  /api/langfuse/health`);
+  console.log(`   - GET  /api/langfuse/current-model`);
+  console.log(`   - GET  /api/langfuse/total-cost`);
+  console.log(`   - GET  /api/langfuse/academic-stats`);
+  console.log(`   - GET  /api/langfuse/model-metrics`);
+  console.log(`   - POST /api/langfuse/academic-session`);
+  console.log(`   - POST /api/langfuse/test`);
 });
 
 module.exports = app;

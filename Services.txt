@@ -9,7 +9,7 @@ Core Services:
 - EmbeddingService: Vector embeddings and similarity search
 - OpenAIService: Gioia methodology implementation and qualitative analysis
 - ModelService: Model configuration validation and management
-- HeliconeService: AI API monitoring and cost tracking
+- LangFuseService: AI observability and cost tracking (self-hosted)
 - LangChainService: LangChain framework integration
 - PDFService: Document processing and text extraction
 - SearchService: Academic paper search via Semantic Scholar
@@ -35,7 +35,7 @@ LangChain v0.3 Integration:
 Configuration Handling:
 - Reads provider, model, and API keys from localStorage
 - Automatic fallback from Anthropic to OpenAI when needed
-- Helicone integration for both providers with provider-specific endpoints
+- LangFuse integration for AI observability and cost tracking
 - Transparent error messaging for unsupported configurations
 - Advanced debugging with development mode logging
 

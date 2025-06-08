@@ -1,12 +1,10 @@
 import { OpenAIEmbeddings } from "@langchain/openai"
-import { HeliconeService } from "./HeliconeService"
 
 interface ModelConfig {
   provider: 'openai' | 'anthropic';
   model: string;
   apiKey: string;
   openaiEmbeddingsKey?: string;
-  heliconeKey?: string;
 }
 
 export class EmbeddingService {
@@ -51,17 +49,6 @@ export class EmbeddingService {
   }
 
   private static getOpenAIConfiguration() {
-    // Get Helicone configuration for OpenAI (embeddings always use OpenAI)
-    const heliconeConfig = HeliconeService.getHeliconeConfigForProvider('openai');
-
-    if (heliconeConfig) {
-      return {
-        baseOptions: {
-          headers: heliconeConfig.headers,
-        },
-      };
-    }
-
     // Return default OpenAI configuration
     return {};
   }

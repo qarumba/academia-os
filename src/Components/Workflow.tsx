@@ -45,8 +45,8 @@ import StepFind from "./Steps/Find"
 import CodingStep from "./Steps/Coding"
 import { ModelData } from "../Types/ModelData"
 import ModelingStep from "./Steps/Modeling"
-import { HeliconeMonitor } from "./HeliconeMonitor"
-import { HeliconeService } from "../Services/HeliconeService"
+import { LangFuseMonitor } from "./LangFuseMonitor"
+import { ChatService } from "../Services/ChatService"
 import SearchLoadingState from "./SearchLoadingState"
 const { useToken } = theme
 
@@ -65,7 +65,7 @@ const Workflow = (props: { tabKey?: string }) => {
   const dispatch = useDispatch()
 
   const [isRestoreModalVisible, setIsRestoreModalVisible] = useState(false)
-  const [heliconeVisible, setHeliconeVisible] = useState(false)
+  const [langFuseVisible, setLangFuseVisible] = useState(false)
   const [currentOperation, setCurrentOperation] = useState('')
 
   const handleRenameTab = (key: string, newLabel: string) => {
@@ -82,12 +82,6 @@ const Workflow = (props: { tabKey?: string }) => {
 
   const [modelData, setModelData] = useState<ModelData>({})
 
-  // Initialize Helicone session tracking
-  useEffect(() => {
-    if (HeliconeService.isHeliconeConfigured()) {
-      HeliconeService.startSession();
-    }
-  }, []);
 
   const evaluate = async (query: string, searchResults: AcademicPaper[]) => {
     setRelevancyLoading(true)
@@ -364,15 +358,15 @@ const Workflow = (props: { tabKey?: string }) => {
               items={items}
             />
             
-            {/* Add Helicone button */}
-            {HeliconeService.isHeliconeConfigured() && (
+            {/* Add monitoring buttons */}
+            {ChatService.isLangFuseAvailable() && (
               <Button 
                 icon={<BarChartOutlined />}
-                onClick={() => setHeliconeVisible(true)}
-                type={heliconeVisible ? "primary" : "default"}
+                onClick={() => setLangFuseVisible(true)}
+                type={langFuseVisible ? "primary" : "default"}
                 size="small"
               >
-                API Monitor
+                AI Observatory
               </Button>
             )}
             
@@ -431,10 +425,10 @@ const Workflow = (props: { tabKey?: string }) => {
         </Col>
       </Row>
       
-      {/* Add the Helicone monitor component */}
-      <HeliconeMonitor
-        visible={heliconeVisible}
-        onClose={() => setHeliconeVisible(false)}
+      {/* Add the monitoring components */}
+      <LangFuseMonitor
+        visible={langFuseVisible}
+        onClose={() => setLangFuseVisible(false)}
         isProcessing={searchLoading || relevancyLoading || (steps[current]?.loading || false)}
         currentOperation={currentOperation}
       />

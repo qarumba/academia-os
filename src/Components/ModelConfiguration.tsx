@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Select, Input, Button, Card, Alert, Typography, Row, Col, Divider, App } from 'antd';
-import { SettingOutlined, KeyOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Form, Select, Input, Button, Card, Alert, Typography, Row, Col, Divider, App, Switch } from 'antd';
+import { SettingOutlined, KeyOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { setModelConfig, loadConfigFromStorage, selectIsModelConfigured } from './modelSlice';
 import { ChatService } from '../Services/ChatService';
@@ -14,9 +14,13 @@ interface ModelConfig {
   apiKey: string;
   openaiEmbeddingsKey?: string;
   email?: string;
-  heliconeKey?: string;
   adobePDFOCR_client_id?: string;
   adobePDFOCR_client_secret?: string;
+  // LangFuse self-hosted configuration
+  langfuseEnabled?: boolean;
+  langfusePublicKey?: string;
+  langfuseSecretKey?: string;
+  langfuseHost?: string;
 }
 
 interface ModelOption {
@@ -98,17 +102,18 @@ const ModelConfiguration: React.FC = () => {
       setSelectedProvider(config.provider);
       setHasEmbeddingsKey(!!config.openaiEmbeddingsKey);
       // Show advanced options if any advanced fields have values
-      if (config.email || config.heliconeKey || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret) {
+      if (config.email || config.adobePDFOCR_client_id || config.adobePDFOCR_client_secret || 
+          config.langfuseEnabled || config.langfusePublicKey || config.langfuseSecretKey || config.langfuseHost) {
         setShowAdvanced(true);
       }
     }
   }, [form]);
 
-  const handleProviderChange = (value: 'openai' | 'anthropic') => {
+  const handleProviderChange = useCallback((value: 'openai' | 'anthropic') => {
     setSelectedProvider(value);
     // Clear model selection when provider changes
     form.setFieldValue('model', undefined);
-  };
+  }, [form]);
 
   const handleSave = async (values: ModelConfig) => {
     setLoading(true);
@@ -307,26 +312,96 @@ const ModelConfiguration: React.FC = () => {
 
         {showAdvanced && (
           <>
+            <Divider orientation="left" plain>
+              <DatabaseOutlined /> LangFuse Self-Hosted Observatory
+            </Divider>
+
             <Form.Item
-              name="heliconeKey"
-              label="Helicone API Key"
+              name="langfuseEnabled"
+              label="Enable LangFuse Observability"
+              valuePropName="checked"
               extra={
                 <span>
-                  Use{' '}
+                  Enable{' '}
                   <Typography.Link
                     target="_blank"
-                    href="https://www.helicone.ai/"
+                    href="https://langfuse.com/"
                   >
-                    Helicone.ai
+                    LangFuse
                   </Typography.Link>{' '}
-                  to track your API usage and costs.
+                  for self-hosted AI model observability with privacy-preserving analytics.
                 </span>
               }
             >
-              <Input.Password
-                size="large"
-                placeholder="Helicone API Key (optional)"
-              />
+              <Switch />
+            </Form.Item>
+
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, curValues) => prevValues.langfuseEnabled !== curValues.langfuseEnabled}
+            >
+              {({ getFieldValue }) => {
+                const langfuseEnabled = getFieldValue('langfuseEnabled');
+                return langfuseEnabled ? (
+                  <>
+                    <Form.Item
+                      name="langfuseHost"
+                      label="LangFuse Host URL"
+                      extra="URL of your self-hosted LangFuse instance"
+                      rules={[
+                        { required: langfuseEnabled, message: 'Host URL is required when LangFuse is enabled' },
+                        { type: 'url', message: 'Please enter a valid URL' }
+                      ]}
+                    >
+                      <Input
+                        size="large"
+                        placeholder="http://localhost:3030"
+                      />
+                    </Form.Item>
+
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Form.Item
+                          name="langfusePublicKey"
+                          label="LangFuse Public Key"
+                          extra="Public key for your LangFuse project"
+                          rules={[
+                            { required: langfuseEnabled, message: 'Public key is required when LangFuse is enabled' }
+                          ]}
+                        >
+                          <Input
+                            size="large"
+                            placeholder="pk-lf-..."
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item
+                          name="langfuseSecretKey"
+                          label="LangFuse Secret Key"
+                          extra="Secret key for your LangFuse project"
+                          rules={[
+                            { required: langfuseEnabled, message: 'Secret key is required when LangFuse is enabled' }
+                          ]}
+                        >
+                          <Input.Password
+                            size="large"
+                            placeholder="sk-lf-..."
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Alert
+                      message="Privacy & Security"
+                      description="LangFuse runs on your own infrastructure, ensuring complete data privacy and compliance with academic research requirements. All AI model interactions are traced locally."
+                      type="info"
+                      showIcon
+                      style={{ marginBottom: 16 }}
+                    />
+                  </>
+                ) : null;
+              }}
             </Form.Item>
 
             <Row gutter={16}>
