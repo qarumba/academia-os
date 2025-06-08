@@ -1,10 +1,9 @@
 // Import the SemanticScholar library
 import type { PaginatedResults, Paper } from "semanticscholarjs"
-import { SemanticScholar } from "semanticscholarjs"
 
 export class SearchRepository {
   private static lastRequestTime = 0;
-  private static readonly REQUEST_DELAY = 1000; // 1 second between requests
+  private static readonly REQUEST_DELAY = 10000; // 10 seconds between requests
 
   private static async waitForRateLimit() {
     const now = Date.now();
@@ -27,24 +26,54 @@ export class SearchRepository {
     // Rate limiting to prevent 429 errors
     await this.waitForRateLimit();
 
-    const sch = new SemanticScholar()
     try {
-      const paginatedResults = await sch.search_paper(
-        encodeURIComponent(query.trim())
-      )
-      return paginatedResults
-    } catch (error: any) {
-      // Enhanced error handling
-      if (error?.response?.status === 429) {
-        console.warn('Semantic Scholar rate limit reached. Please wait before making another request.');
-        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
-      } else if (error?.code === 'ERR_NETWORK' || error?.message?.includes('CORS')) {
-        console.error('Network/CORS error with Semantic Scholar API. This is a known limitation when running in development mode.');
-        throw new Error('Network error: This feature requires a production environment or proxy server due to CORS restrictions.');
-      } else {
-        console.error('Semantic Scholar API Error:', error);
-        throw new Error(`Search failed: ${error?.message || 'Unknown error'}`);
+      // Use server proxy to avoid CORS issues
+      const params = new URLSearchParams({
+        query: query.trim(),
+        fields: 'abstract,authors,citationCount,corpusId,externalIds,fieldsOfStudy,influentialCitationCount,isOpenAccess,journal,openAccessPdf,paperId,publicationDate,publicationTypes,publicationVenue,referenceCount,s2FieldsOfStudy,title,url,venue,year',
+        offset: '0',
+        limit: '100'
+      });
+
+      const url = `http://localhost:3001/api/semantic-scholar/graph/v1/paper/search?${params.toString()}`;
+      console.log('🔍 SearchService: Making request to:', url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please wait 10+ seconds before searching again.');
+        }
+        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
       }
+
+      const data = await response.json();
+      
+      // Create a simple PaginatedResults-like object
+      return {
+        data: data.data || [],
+        total: data.total || 0,
+        offset: data.offset || 0,
+        next: data.next || null,
+        hasNextPage: () => !!data.next,
+        nextPage: async () => {
+          if (!data.next) return null;
+          // data.next is typically an offset number, not a full path
+          const nextParams = new URLSearchParams({
+            query: query.trim(),
+            fields: 'abstract,authors,citationCount,corpusId,externalIds,fieldsOfStudy,influentialCitationCount,isOpenAccess,journal,openAccessPdf,paperId,publicationDate,publicationTypes,publicationVenue,referenceCount,s2FieldsOfStudy,title,url,venue,year',
+            offset: data.next.toString(),
+            limit: '100'
+          });
+          const nextUrl = `http://localhost:3001/api/semantic-scholar/graph/v1/paper/search?${nextParams.toString()}`;
+          const nextResponse = await fetch(nextUrl);
+          return nextResponse.ok ? nextResponse.json() : null;
+        }
+      } as unknown as PaginatedResults<Paper>;
+      
+    } catch (error: any) {
+      console.error('Semantic Scholar API Error:', error);
+      throw new Error(`Search failed: ${error?.message || 'Unknown error'}`);
     }
   }
 }

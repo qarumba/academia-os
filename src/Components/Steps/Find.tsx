@@ -9,7 +9,7 @@ import {
   Tag,
   Tour,
   Typography,
-  message,
+  App,
 } from "antd"
 import { CheckCard } from "@ant-design/pro-components"
 import React, { useEffect, useRef, useState } from "react"
@@ -27,6 +27,7 @@ const StepFind = (props: {
   }) => void
   onLoadingChange?: (loading: boolean) => void
 }) => {
+  const { message } = App.useApp();
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [results, setResults] = useState<AcademicPaper[]>([])
@@ -46,7 +47,7 @@ const StepFind = (props: {
       // Stage 1: Searching Semantic Scholar
       setLoadingStage('searching')
       const searchResponse = await SearchRepository.searchPapers(query)
-      searchResults = searchResponse ? (await searchResponse.nextPage()) || [] : []
+      searchResults = searchResponse?.data || []
       
       // Stage 2: Processing results
       if (searchResults?.length > 0) {

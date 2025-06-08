@@ -24,6 +24,36 @@ app.get('/health', (req, res) => {
 
 
 // ==============================================
+// Semantic Scholar API Proxy (CORS fix)
+// ==============================================
+
+app.get('/api/semantic-scholar/*', async (req, res) => {
+  try {
+    const path = req.params[0];
+    const queryString = req.url.split('?')[1] || '';
+    const url = `https://api.semanticscholar.org/${path}${queryString ? `?${queryString}` : ''}`;
+    
+    console.log('📚 Proxying Semantic Scholar request to:', url);
+    console.log('📚 Original request path:', req.path);
+    console.log('📚 Extracted path:', path);
+    
+    const response = await fetch(url, {
+      method: req.method,
+      headers: {
+        'User-Agent': 'AcademiaOS/2.0',
+        'Accept': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('❌ Semantic Scholar proxy error:', error.message);
+    res.status(500).json({ error: 'Proxy request failed' });
+  }
+});
+
+// ==============================================
 // LangFuse API Endpoints (Self-Hosted)
 // ==============================================
 
