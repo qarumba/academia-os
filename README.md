@@ -27,7 +27,7 @@ Join Thomas Üllebecker's [Slack Community](https://join.slack.com/t/academiaos/
 * **Thematic Literature Analysis**: Navigate literature via Semantic Scholar with a clean and intuitive interface, and auto-code themes.
 * **Coding of Qualitative Data**: Let AI preliminarily code your interviews, social media posts or other qualitative literature, and export as .csv for refinement in your CAQDAS software.
 * **Proposed Theory Construction**: Output a proposed theoretical model from your qualitative data, as a Mermaid diagram, in just a few steps and apply your own human-in-the-loop critique to outputs.
-* **Monitor Inference with Helicone**: Updated async integration with HeliconeAI's open-source LLM observability platform for developers to monitor, debug, and improve production-ready applications.
+* **Monitor Inference with LangFuse**: <<IN DEVELOPMENT>>Updated async integration with LangFuse open-source LLM observability platform for developers to monitor, debug, and improve production-ready applications.
 
 ## 🔧 Getting Started 
 
