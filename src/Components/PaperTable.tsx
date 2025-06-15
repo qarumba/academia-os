@@ -19,7 +19,7 @@ import {
   PlusOutlined,
 } from "@ant-design/icons"
 import { useEffect, useState } from "react"
-import { OpenAIService } from "../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../Services/QualitativeAnalysisService"
 import { ModelService } from "../Services/ModelService"
 import { CustomColumn } from "./CustomColumn"
 import { AcademicPaper } from "../Types/AcademicPaper"
@@ -206,7 +206,7 @@ export const PaperTable = (props: {
                 try {
                   console.log(`📝 Processing paper ${processedCount + 1}/${papersToProcess.length}: "${paper.title?.substring(0, 50)}..."`)
                   
-                  newPaper[value] = await OpenAIService.getDetailAboutPaper(
+                  newPaper[value] = await QualitativeAnalysisService.getDetailAboutPaper(
                     newPaper,
                     value
                   )

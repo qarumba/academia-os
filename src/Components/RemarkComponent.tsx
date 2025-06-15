@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { AutoComplete, Input } from "antd"
-import { OpenAIService } from "../Services/OpenAIService"
+import { QualitativeAnalysisService } from "../Services/QualitativeAnalysisService"
 import { ModelService } from "../Services/ModelService"
 import { ModelData } from "../Types/ModelData"
 import { AcademicPaper } from "../Types/AcademicPaper"
@@ -38,7 +38,7 @@ export const RemarkComponent = (props: {
 
       setLoading(true)
       try {
-        const questions = await OpenAIService.findTentativeResearchQuestions(
+        const questions = await QualitativeAnalysisService.findTentativeResearchQuestions(
           props?.papers
         )
         setResearchQuestions(questions)

@@ -7,7 +7,7 @@ The services layer implements business logic for AI-powered qualitative research
 Core Services:
 - ChatService: Multi-provider AI chat model management
 - EmbeddingService: Vector embeddings and similarity search
-- OpenAIService: Gioia methodology implementation and qualitative analysis
+- QualitativeAnalysisService: Gioia methodology implementation and qualitative analysis
 - ModelService: Model configuration validation and management
 - LangFuseService: AI observability and cost tracking (self-hosted)
 - LangChainService: LangChain framework integration
@@ -69,7 +69,7 @@ Implementation Details:
 - Helicone integration for cost tracking
 - Provider-agnostic design with clear error messaging
 
-4. OPENAISERVICE - GIOIA METHODOLOGY IMPLEMENTATION
+4. QUALITATIVEANALYSISSERVICE - GIOIA METHODOLOGY IMPLEMENTATION
 
 Purpose: Complete qualitative analysis using Gioia methodology with LangChain v0.3
 
